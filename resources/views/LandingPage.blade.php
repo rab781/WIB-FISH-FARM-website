@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="styles.css">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @else
@@ -14,25 +13,85 @@
         @endif
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="//unpkg.com/alpinejs" defer></script>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
     <title>WIB Fish Farm</title>
+
+    <style>
+        /* Custom Animation Keyframes */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation Classes */
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-pulse {
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Staggered Animation Delays */
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+
+        /* Hover Effects */
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+
+        .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Video Background Zoom Effect */
+        .zoom-bg {
+            animation: zoomBg 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes zoomBg {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+    </style>
 </head>
-<body class="bg-white">
+<body class="bg-white" x-data="{ scrolled: false }" x-init="() => { AOS.init({duration: 800, easing: 'ease', once: false}); window.addEventListener('scroll', () => { scrolled = window.pageYOffset > 20 }) }">
     <!-- Navbar -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 transition-all duration-300" :class="{'shadow-lg': scrolled}">
         <div class="container mx-auto px-4 py-2">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between dir='rtl'">
 
                 <!-- Navigation Links - For Desktop -->
-                <nav class="hidden md:flex  space-x-6 gap-x-4 items-center">
+                <nav class="hidden md:flex  space-x-8 gap-x-2 items-center">
                     <div class="flex items-center">
                         <a href="/" class="flex items-center">
                             <img class="h-12" src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="WIB Fish Farm">
                         </a>
                     </div>
                     <a href="/produk" class="text-gray-700 hover:text-blue-600 font-medium">Produk</a>
-                    <a href="/edukasi-ikan" class="text-gray-700 hover:text-blue-600 font-medium">Edukasi Ikan</a>
                     <a href="/tentang-kami" class="text-gray-700 hover:text-blue-600 font-medium">Tentang Kami</a>
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 font-medium">
@@ -50,7 +109,7 @@
                 </nav>
 
                 <!-- Right Buttons -->
-                <div class="flex items-center space-x-8 gap-x-4">
+                <div class="flex items-center space-x-2 gap-x-4">
                     <a href="/cart" class="text-gray-700 hover:text-blue-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -62,7 +121,7 @@
                         </svg>
                     </a>
                     <a href="/daftar" class="border border-gray-300 px-4 py-1 rounded text-gray-700 hover:border-blue-600 hover:text-blue-600">Daftar</a>
-                    <a href="/masuk" class="bg-[#FDFDFC] text-black px-4 py-1 rounded hover:bg-gray-800 border-black-300">Masuk</a>
+                    <a href="/masuk" class="bg-black text-white px-4 py-1 rounded hover:border-blue-600 hover:text-blue-600 border-white-300 hover:bg-gray-300">Masuk</a>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -78,7 +137,6 @@
             <!-- Mobile Menu -->
             <div class="mobile-menu hidden md:hidden mt-4 pb-2">
                 <a href="/produk" class="block py-2 text-gray-700 hover:text-blue-600">Produk</a>
-                <a href="/edukasi-ikan" class="block py-2 text-gray-700 hover:text-blue-600">Edukasi Ikan</a>
                 <a href="/tentang-kami" class="block py-2 text-gray-700 hover:text-blue-600">Tentang Kami</a>
                 <a href="/layanan-kami" class="block py-2 text-gray-700 hover:text-blue-600">Layanan Kami</a>
             </div>
@@ -89,22 +147,25 @@
     <section class="relative h-screen overflow-hidden">
         <!-- Video Background -->
         <div class="absolute inset-0 z-0">
-            <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+            <video class="w-full h-full object-cover zoom-bg" autoplay muted loop playsinline>
                 <source src="{{ asset('videos/background.mp4') }}" type="video/mp4">
+                <!-- Fallback content for browsers that do not support video -->
                 Your browser does not support the video tag.
             </video>
             <!-- Overlay to improve text readability -->
-            <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+            <div class="absolute inset-0 bg-black opacity-50 z-10 mix-blend-multiply">
+                <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+            </div>
         </div>
 
         <!-- Content positioned above video -->
-        <div class="relative z-10 container mx-auto px-4 py-4 h-full flex items-center">
+        <div class="relative z-10 container mx-auto px-12 py-4 h-full flex items-center">
             <div class="max-w-xl text-white">
-                <h1 class="text-4xl font-bold mb-4">WIB FISH FARM</h1>
-                <p class="mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
-                <div class="flex space-x-4">
-                    <button class="bg-white text-black px-6 py-2 rounded hover:bg-gray-100 transition duration-300">Button</button>
-                    <button class="bg-transparent border border-white text-black px-6 py-2 rounded hover:bg-white/10 transition duration-300">Button</button>
+                <h1 class="text-4xl font-bold mb-4 opacity-0 fade-in-up">WIB FISH FARM</h1>
+                <p class="mb-6 opacity-0 fade-in-up delay-200">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
+                <div class="flex space-x-4 opacity-0 fade-in-up delay-400">
+                    <button class="bg-white text-black px-6 py-2 rounded hover:bg-gray-100 transition duration-300 hover-lift">Button</button>
+                    <button class="bg-transparent border border-white text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Button</button>
                 </div>
             </div>
         </div>
@@ -115,28 +176,28 @@
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row items-center">
                 <!-- Left Content -->
-                <div class="w-full md:w-1/2 mb-10 md:mb-0">
+                <div class="w-full md:w-1/2 mb-10 md:mb-0" data-aos="fade-right">
                     <h2 class="text-3xl font-bold text-black mb-4">WIB Fish Farm: Solusi Terbaik untuk Kebutuhan Ikan Hias Anda</h2>
                     <p class="text-gray-600">WIB Fish Farm adalah platform online yang memudahkan Anda dalam menemukan dan membeli ikan hias berkualitas. Dengan antarmuka yang user-friendly, kami menawarkan informasi lengkap tentang produk ikan.</p>
                 </div>
 
                 <!-- Right Image -->
-                <div class="w-full md:w-1/2 md:pl-10">
-                    <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="WIB Fish Farm">
+                <div class="w-full md:w-1/2 md:pl-10" data-aos="fade-left">
+                    <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="WIB Fish Farm" class="animate-float">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-black text-black">
+    <section class="py-16 bg-black text-white" data-aos="fade-up">
         <div class="container mx-auto px-6">
             <div class="max-w-xl">
                 <h2 class="text-3xl font-bold mb-4">Lakukan Pembelian Sekarang</h2>
                 <p class="mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
                 <div class="flex space-x-4">
-                    <a href="/daftar" class="bg-black text-black px-6 py-2 rounded hover:bg-gray-100 transition duration-300">Daftar</a>
-                    <a href="/masuk" class="bg-transparent border border-gray-300 text-black px-6 py-2 rounded hover:bg-white/10 transition duration-300">Masuk</a>
+                    <a href="/daftar" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
+                    <a href="/masuk" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
                 </div>
             </div>
         </div>
@@ -145,17 +206,17 @@
     <!-- Products Section -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-6">
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-8" data-aos="fade-up">
                 <div>
                     <h2 class="text-2xl font-bold">Products</h2>
                     <p class="text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                 </div>
-                <a href="#" class="border border-gray-300 px-4 py-2 rounded text-sm">View all</a>
+                <a href="#" class="border border-gray-300 px-4 py-2 rounded text-sm hover-lift">View all</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Product 1 -->
-                <div class="bg-gray-100 rounded-md overflow-hidden">
+                <div class="bg-gray-100 rounded-md overflow-hidden hover-lift" data-aos="fade-up" data-aos-delay="100">
                     <div class="h-48 bg-gray-200 flex items-center justify-center">
                         <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -172,7 +233,7 @@
                 </div>
 
                 <!-- Product 2 -->
-                <div class="bg-gray-100 rounded-md overflow-hidden">
+                <div class="bg-gray-100 rounded-md overflow-hidden hover-lift" data-aos="fade-up" data-aos-delay="200">
                     <div class="h-48 bg-gray-200 flex items-center justify-center">
                         <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -189,7 +250,7 @@
                 </div>
 
                 <!-- Product 3 -->
-                <div class="bg-gray-100 rounded-md overflow-hidden">
+                <div class="bg-gray-100 rounded-md overflow-hidden hover-lift" data-aos="fade-up" data-aos-delay="300">
                     <div class="h-48 bg-gray-200 flex items-center justify-center">
                         <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -206,7 +267,7 @@
                 </div>
 
                 <!-- Product 4 -->
-                <div class="bg-gray-100 rounded-md overflow-hidden">
+                <div class="bg-gray-100 rounded-md overflow-hidden hover-lift" data-aos="fade-up" data-aos-delay="400">
                     <div class="h-48 bg-gray-200 flex items-center justify-center">
                         <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -224,7 +285,7 @@
             </div>
 
             <!-- Pagination Dots -->
-            <div class="flex justify-center mt-8">
+            <div class="flex justify-center mt-8" data-aos="fade-up">
                 <span class="h-2 w-2 mx-1 bg-black rounded-full"></span>
                 <span class="h-2 w-2 mx-1 bg-gray-300 rounded-full"></span>
                 <span class="h-2 w-2 mx-1 bg-gray-300 rounded-full"></span>
@@ -234,7 +295,7 @@
             </div>
 
             <!-- Navigation Arrows -->
-            <div class="flex justify-end mt-4 space-x-2">
+            <div class="flex justify-end mt-4 space-x-2" data-aos="fade-up">
                 <button class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -250,16 +311,16 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-gray-100">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-12">
+            <div class="text-center mb-12" data-aos="fade-up">
                 <h2 class="text-2xl font-bold">Testimoni Pelanggan</h2>
                 <p class="text-gray-600">Kami sangat senang dengan layanan yang diberikan</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Testimonial 1 -->
-                <div class="border border-gray-200 rounded-md p-6">
+                <div class="border border-gray-200 rounded-md p-6 bg-white hover-lift" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex items-center mb-2">
                         <span class="text-yellow-400">★★★★★</span>
                     </div>
@@ -274,7 +335,7 @@
                 </div>
 
                 <!-- Testimonial 2 -->
-                <div class="border border-gray-200 rounded-md p-6">
+                <div class="border border-gray-200 rounded-md p-6 bg-white hover-lift" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex items-center mb-2">
                         <span class="text-yellow-400">★★★★★</span>
                     </div>
@@ -289,7 +350,7 @@
                 </div>
 
                 <!-- Testimonial 3 -->
-                <div class="border border-gray-200 rounded-md p-6">
+                <div class="border border-gray-200 rounded-md p-6 bg-white hover-lift" data-aos="fade-up" data-aos-delay="300">
                     <div class="flex items-center mb-2">
                         <span class="text-yellow-400">★★★★★</span>
                     </div>
@@ -305,7 +366,7 @@
             </div>
 
             <!-- Pagination Dots -->
-            <div class="flex justify-center mt-8">
+            <div class="flex justify-center mt-8" data-aos="fade-up">
                 <span class="h-2 w-2 mx-1 bg-black rounded-full"></span>
                 <span class="h-2 w-2 mx-1 bg-gray-300 rounded-full"></span>
                 <span class="h-2 w-2 mx-1 bg-gray-300 rounded-full"></span>
@@ -314,7 +375,7 @@
             </div>
 
             <!-- Navigation Arrows -->
-            <div class="flex justify-between mt-8">
+            <div class="flex justify-between mt-8" data-aos="fade-up">
                 <button class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -330,16 +391,16 @@
     </section>
 
     <!-- Contact Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-white">
         <div class="container mx-auto px-6">
-            <div class="mb-8">
+            <div class="mb-8" data-aos="fade-up">
                 <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Hubungi</h3>
                 <h2 class="text-3xl font-bold text-gray-900">Kontak Kami</h2>
                 <p class="mt-2 text-gray-600">Silakan hubungi kami untuk pertanyaan lebih lanjut mengenai produk kami yang anda minati.</p>
             </div>
 
             <div class="flex flex-col md:flex-row">
-                <div class="w-full md:w-1/3 mb-8 md:mb-0">
+                <div class="w-full md:w-1/3 mb-8 md:mb-0" data-aos="fade-right">
                     <div class="space-y-6">
                         <!-- Email -->
                         <div class="flex items-start">
@@ -383,7 +444,7 @@
                     </div>
                 </div>
 
-                <div class="w-full md:w-2/3">
+                <div class="w-full md:w-2/3" data-aos="fade-left">
                     <!-- Map Placeholder -->
                     <div class="w-full h-[300px] bg-gray-200 rounded-lg overflow-hidden">
                         <!-- You can embed Google Maps here -->
@@ -395,12 +456,12 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-12">
+    <footer class="bg-gray-900 text-white border-t border-gray-800 py-12">
         <div class="container mx-auto px-6">
             <div class="flex flex-wrap">
                 <div class="w-full md:w-1/4 mb-8 md:mb-0">
                     <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="Logo" class="h-10 mb-4">
-                    <p class="text-sm text-gray-600 mb-4">WIB Fish Farm adalah platform online khusus untuk memudahkan Anda dalam membeli ikan hias berkualitas tinggi.</p>
+                    <p class="text-sm text-gray-400 mb-4">WIB Fish Farm adalah platform online khusus untuk memudahkan Anda dalam membeli ikan hias berkualitas tinggi.</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-400 hover:text-gray-500">
                             <span class="sr-only">Facebook</span>
@@ -424,36 +485,36 @@
                 </div>
 
                 <div class="w-full md:w-1/4 mb-8 md:mb-0">
-                    <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Produk</h3>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Produk</h3>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Ikan Koi</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Ikan Mas</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Ikan Arwana</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Aksesoris</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Ikan Koi</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Ikan Mas</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Ikan Arwana</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Aksesoris</a></li>
                     </ul>
                 </div>
 
                 <div class="w-full md:w-1/4 mb-8 md:mb-0">
-                    <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Perusahaan</h3>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Perusahaan</h3>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Tentang Kami</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Karir</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Blog</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Tentang Kami</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Karir</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Blog</a></li>
                     </ul>
                 </div>
 
                 <div class="w-full md:w-1/4">
-                    <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Hubungi Kami</h3>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Hubungi Kami</h3>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Kontak</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">FAQ</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Layanan Pelanggan</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Kontak</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">FAQ</a></li>
+                        <li><a href="#" class="text-base text-gray-400 hover:text-gray-500">Layanan Pelanggan</a></li>
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-gray-200 pt-8 mt-8 text-center">
-                <p class="text-sm text-gray-500">&copy; 2023 WIB Fish Farm. All rights reserved.</p>
+            <div class="border-t border-gray-800 pt-8 mt-8 text-center">
+                <p class="text-sm text-gray-400">&copy; 2025 WIB Fish Farm. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -462,6 +523,16 @@
         // Mobile menu toggle
         document.querySelector('.mobile-menu-button').addEventListener('click', function() {
             document.querySelector('.mobile-menu').classList.toggle('hidden');
+        });
+
+        // Initialize AOS on load
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease',
+                once: false,
+                mirror: true
+            });
         });
     </script>
 </body>
