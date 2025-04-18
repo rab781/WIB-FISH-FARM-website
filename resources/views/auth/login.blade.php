@@ -4,6 +4,7 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <!-- Pastikan setiap form memiliki @csrf token -->
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
@@ -27,13 +28,13 @@
         <!-- Remember Me -->
         <div class="block mb-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
+                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500" name="remember">
                 <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-6">
-            <x-primary-button class="w-full py-3 flex justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+            <x-primary-button class="w-full py-3 flex justify-center bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-md">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
@@ -44,4 +45,13 @@
             </a>
         </div>
     </form>
+
+    <!-- Developer Notice - Remove in production -->
+    <div class="mt-6 text-xs p-3 bg-gray-100 rounded-md border border-gray-300">
+        <p class="font-semibold text-gray-700">Developer Note:</p>
+        <p class="text-gray-600 mt-1">To redirect users to the products page after login/registration, modify <code>HOME</code> constant in <code>app/Providers/RouteServiceProvider.php</code>:</p>
+        <pre class="mt-2 bg-gray-800 text-gray-200 p-2 rounded overflow-x-auto">
+    public const HOME = '/produk';  // Change from '/dashboard' to '/produk'
+        </pre>
+    </div>
 </x-guest-layout>

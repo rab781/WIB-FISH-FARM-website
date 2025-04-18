@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -31,7 +33,8 @@ class AuthenticatedSessionController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/');
+            // Changed from root path to products page
+            return redirect()->intended('/produk');
         }
 
         return back()->withErrors([
@@ -50,5 +53,13 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function index()
+    {
+        // Mengambil semua data dari tabel users
+        $users = DB::table('users')->get();
+        // Mengembalikan data ke view atau langsung menampilkan
+        return view('index', compact('users'));
     }
 }

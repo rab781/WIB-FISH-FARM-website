@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use Illuminate\Session\Middleware\AuthenticateSession;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,11 @@ Route::middleware('auth')->group(function () {
                 ->name('logout');
 });
 
+// Product routes
+Route::get('/produk', function () {
+    return view('Produk');
+})->name('products');
+
 // Test route to ensure views are working
 Route::get('/test-login', function () {
     return view('auth.login');
@@ -54,7 +60,26 @@ if (file_exists(__DIR__.'/auth.php')) {
     require __DIR__.'/auth.php';
 }
 
+// Add specific route to handle expired pages
+Route::get('/page-expired', function() {
+    return view('errors.419');
+})->name('page-expired');
+
+// Cart routes
+Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'addToCart'])->name('cart.add');
+Route::get('/cart', [App\Http\Controllers\CartController::class, 'viewCart'])->name('cart.view');
+Route::post('/cart/remove', [App\Http\Controllers\CartController::class, 'removeFromCart'])->name('cart.remove');
+Route::get('/cart/count', [App\Http\Controllers\CartController::class, 'getCartCount'])->name('cart.count');
+
 // fallback route
 Route::fallback(function () {
-    return view('404');
+    // Check if this is a CSRF token mismatch
+    if (request()->session()->has('errors') &&
+        request()->session()->get('errors')->has('csrf')) {
+        return redirect()->route('page-expired');
+    }
+
+    return view('errors.404');
 });
+
+Route::get('/test', AuthenticatedSessionController::class . '@index')->name('index');

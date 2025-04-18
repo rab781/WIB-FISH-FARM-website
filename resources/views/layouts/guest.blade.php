@@ -24,24 +24,24 @@
 
         <style>
             .logo-container {
-                background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
+                background: linear-gradient(135deg, #000000, #333333, #555555);
                 padding: 1.5rem 2.5rem;
                 border-radius: 1rem;
-                box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
                 transform: perspective(1000px) rotateX(5deg);
                 transition: all 0.3s ease;
             }
 
             .logo-container:hover {
                 transform: perspective(1000px) rotateX(0);
-                box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.6);
+                box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.6);
             }
 
             .logo-text {
                 font-family: 'Montserrat', sans-serif;
                 font-weight: 800;
                 font-size: 1.8rem;
-                background: linear-gradient(90deg, #f59e0b, #fbbf24, #fcd34d);
+                background: linear-gradient(90deg, #ed6700, #f97316, #fb923c);
                 -webkit-background-clip: text;
                 color: transparent;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
