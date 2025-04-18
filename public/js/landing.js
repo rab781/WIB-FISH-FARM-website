@@ -197,7 +197,7 @@ function appState() {
         init() {
             // Initialize AOS animation library
             AOS.init({
-                duration: 800,
+                duration: 8,
                 easing: 'ease',
                 once: false,
                 mirror: true
@@ -205,7 +205,7 @@ function appState() {
 
             // Add scroll event listener
             window.addEventListener('scroll', () => {
-                this.scrolled = window.pageYOffset > 20;
+                this.scrolled = window.pageYOffset > 10;
             });
 
             // Setup mobile menu toggle

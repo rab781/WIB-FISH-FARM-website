@@ -12,7 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <!-- Custom styles -->
     <link href="{{ asset('css/landing-animations.css') }}" rel="stylesheet">
-    
+
     <!-- Scripts -->
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
@@ -20,11 +20,12 @@
 
     <title>WIB Fish Farm</title>
 </head>
-<body class="bg-white" 
-      x-data="appState()" 
+<body class="bg-white"
+      x-data="appState()"
       x-init="init()">
 
     <!-- Auth Modal -->
+    @guest
     <div x-show="showAuthModal"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform scale-90"
@@ -38,12 +39,13 @@
             <h3 class="text-xl font-bold mb-4 text-gray-800">Akses Terbatas</h3>
             <p class="text-gray-600 mb-6" x-text="modalMessage"></p>
             <div class="flex flex-col space-y-3">
-                <a href="/masuk" class="bg-blue-600 text-white py-2 px-4 rounded-md text-center hover:bg-blue-700 transition">Masuk</a>
-                <a href="/daftar" class="border border-gray-300 py-2 px-4 rounded-md text-center hover:bg-gray-50 transition">Daftar</a>
+                <a href="{{ route('login') }}" class="bg-blue-600 text-white py-2 px-4 rounded-md text-center hover:bg-blue-700 transition">Masuk</a>
+                <a href="{{ route('register') }}" class="border border-gray-300 py-2 px-4 rounded-md text-center hover:bg-gray-50 transition">Daftar</a>
                 <button @click="showAuthModal = false" class="text-gray-500 hover:text-gray-800 text-sm mt-2">Tutup</button>
             </div>
         </div>
     </div>
+    @endguest
 
     <!-- Navbar -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 transition-all duration-300" :class="{'shadow-lg': scrolled}">
@@ -63,18 +65,68 @@
 
                 <!-- Right Buttons -->
                 <div class="flex items-center space-x-2 gap-x-4">
-                    <button @click="showAuthWithMessage('Untuk mengakses keranjang belanja, silakan masuk terlebih dahulu jika sudah memiliki akun, atau daftar jika belum memiliki akun.')" class="text-gray-700 hover:text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </button>
-                    <button @click="showAuthWithMessage('Untuk mengakses notifikasi, silakan masuk terlebih dahulu jika sudah memiliki akun, atau daftar jika belum memiliki akun.')" class="text-gray-700 hover:text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                    </button>
-                    <a href="/daftar" class="border border-gray-300 px-4 py-1 rounded text-gray-700 hover:border-blue-600 hover:text-blue-600">Daftar</a>
-                    <a href="/masuk" class="bg-black text-white px-4 py-1 rounded hover:border-blue-600 hover:text-blue-600 border-white-300 hover:bg-gray-300">Masuk</a>
+                    @auth
+                        <!-- Cart button for authenticated users -->
+                        <a href="#" class="text-gray-700 hover:text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </a>
+
+                        <!-- Notification button for authenticated users -->
+                        <a href="#" class="text-gray-700 hover:text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </a>
+
+                        <!-- Profile dropdown menu for authenticated users -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center focus:outline-none">
+                                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white overflow-hidden border-2 border-white">
+                                    @if(auth()->user()->profile_photo_path)
+                                        <img src="{{ asset('storage/' . auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
+                                    @else
+                                        <span class="text-sm font-medium">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                            </button>
+
+                            <!-- Dropdown menu -->
+                            <div x-show="open"
+                                @click.away="open = false"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        {{ __('Logout') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <!-- Buttons for guests -->
+                        <button @click="showAuthWithMessage('Untuk mengakses keranjang belanja, silakan masuk terlebih dahulu jika sudah memiliki akun, atau daftar jika belum memiliki akun.')" class="text-gray-700 hover:text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </button>
+                        <button @click="showAuthWithMessage('Untuk mengakses notifikasi, silakan masuk terlebih dahulu jika sudah memiliki akun, atau daftar jika belum memiliki akun.')" class="text-gray-700 hover:text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </button>
+                        <a href="{{ route('register') }}" class="border border-gray-300 px-4 py-1 rounded text-gray-700 hover:border-blue-600 hover:text-blue-600">Daftar</a>
+                        <a href="{{ route('login') }}" class="bg-black text-white px-4 py-1 rounded hover:border-blue-600 hover:text-blue-600 border-white-300 hover:bg-gray-300">Masuk</a>
+                    @endauth
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -116,8 +168,12 @@
                 <h1 class="text-4xl font-bold mb-4 opacity-0 fade-in-up">WIB FISH FARM</h1>
                 <p class="mb-6 opacity-0 fade-in-up delay-200">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
                 <div class="flex space-x-4 opacity-0 fade-in-up delay-400">
-                    <button class="bg-white text-black px-6 py-2 rounded hover:bg-gray-100 transition duration-300 hover-lift">Button</button>
-                    <button class="bg-transparent border border-white text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Button</button>
+                    @auth
+                        <a href="/dashboard" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
+                    @else
+                        <a href="{{ route('register') }}" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
+                        <a href="{{ route('login') }}" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -148,8 +204,12 @@
                 <h2 class="text-3xl font-bold mb-4">Lakukan Pembelian Sekarang</h2>
                 <p class="mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
                 <div class="flex space-x-4">
-                    <a href="/daftar" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
-                    <a href="/masuk" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
+                    @auth
+                        <a href="/dashboard" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
+                    @else
+                        <a href="{{ route('register') }}" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
+                        <a href="{{ route('login') }}" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -254,7 +314,7 @@
                 </div>
 
                 <!-- Navigation Arrows -->
-                <div class="flex justify-end mt-4 space-x-2" data-aos="fade-up">
+                <div class="flex justify-end mt-4 space-x-2">
                     <button @click="prevPage" :disabled="isAnimating" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
