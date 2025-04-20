@@ -4,11 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
-class IsAdmin
+class AdminMiddleware
 {
     /**
      * Handle an incoming request.
@@ -17,17 +16,16 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-
-        // Periksa apakah user sudah login dan memiliki status admin
+        // Cek apakah user login
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->route('login');
         }
-
+        
+        // Cek apakah user adalah admin
         if (!Auth::user()->is_admin) {
-            // Redirect ke halaman produk dengan pesan error
-            return redirect()->route('products')->with('error', 'Akses ditolak. Anda tidak memiliki hak akses admin.');
+            return redirect()->route('home')->with('error', 'Anda tidak memiliki akses ke halaman admin');
         }
-
+        
         return $next($request);
     }
 }

@@ -2,30 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
-     * Note: After updating RouteServiceProvider::HOME to '/produk', you must:
-     * 1. Clear Laravel's cache with: php artisan config:clear
-     * 2. Ensure authenticator controllers use the RouteServiceProvider::HOME constant
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // Panggil AdminUserSeeder untuk membuat admin default
+        // Jalankan seeder dalam urutan yang benar untuk menjaga integritas relasi
         $this->call([
-            AdminUserSeeder::class,
+            UserSeeder::class,          // 1. User harus dibuat terlebih dahulu
+            ProdukSeeder::class,        // 2. Produk
+            OngkirSeeder::class,        // 3. Ongkir
+            KeranjangSeeder::class,     // 4. Keranjang (membutuhkan User dan Produk)
+            PesananSeeder::class,       // 5. Pesanan (membutuhkan User dan Ongkir)
+            DetailPesananSeeder::class, // 6. Detail Pesanan (membutuhkan Pesanan dan Produk)
+            PembayaranSeeder::class,    // 7. Pembayaran (membutuhkan Pesanan)
+            UlasanSeeder::class,        // 8. Ulasan (membutuhkan User dan Produk)
         ]);
-
-        // If you need to seed product data, consider adding a ProductSeeder
-        // $this->call([
-        //     ProductSeeder::class,
-        // ]);
     }
 }

@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Session\Middleware\AuthenticateSession;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,9 +19,11 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 |
 */
 
-Route::get('/', function () {
-    return view('LandingPage');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
+Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detailProduk');
+
+Route::resource('/keranjang', KeranjangController::class)->middleware('auth');
 
 // Auth routes - make sure these exist and are properly defined
 Route::middleware('guest')->group(function () {
@@ -47,13 +52,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    // Tambahkan route admin lainnya di sini jika diperlukan
+    Route::resource('/produk', AdminProdukController::class);
+    Route::get('/produk/{id}/restore', [AdminProdukController::class, 'restore'])->name('admin.produk.restore');
+    Route::delete('/produk/{id}/forceDelete', [AdminProdukController::class, 'forceDelete'])->name('admin.produk.forceDelete');
 });
-
-// Product routes
-Route::get('/produk', function () {
-    return view('Produk');
-})->name('products');
 
 // Test route to ensure views are working
 Route::get('/test-login', function () {
@@ -65,9 +67,7 @@ Route::get('/test-register', function () {
 });
 
 // Safely include auth routes
-if (file_exists(__DIR__.'/auth.php')) {
-    require __DIR__.'/auth.php';
-}
+require __DIR__.'/auth.php';
 
 // Add specific route to handle expired pages
 Route::get('/page-expired', function() {
