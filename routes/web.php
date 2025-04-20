@@ -64,11 +64,6 @@ Route::get('/test-register', function () {
     return view('auth.register');
 });
 
-// Dashboard route (if applicable)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-
 // Safely include auth routes
 if (file_exists(__DIR__.'/auth.php')) {
     require __DIR__.'/auth.php';

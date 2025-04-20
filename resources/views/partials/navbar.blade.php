@@ -5,10 +5,11 @@
             <!-- Navigation Links - For Desktop -->
             <nav class="hidden md:flex space-x-8 gap-x-2 items-center">
                 <div class="flex items-center">
-                    <a href="/" class="flex items-center">
+                    <a href="{{ auth()->check() ? '/produk' : '/' }}" class="flex items-center">
                         <img class="h-12" src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="WIB Fish Farm">
                     </a>
                 </div>
+                <a href="/" class="text-gray-700 hover:text-orange-600 font-medium">Beranda</a>
                 <a href="/produk" class="text-gray-700 hover:text-orange-600 font-medium">Produk</a>
                 <a href="/tentang-kami" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
             </nav>
