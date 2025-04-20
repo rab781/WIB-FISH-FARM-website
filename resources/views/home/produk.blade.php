@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container ">
     <h1>Daftar Produk</h1>
     
     <div class="row">

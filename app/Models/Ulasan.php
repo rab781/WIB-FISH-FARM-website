@@ -20,6 +20,7 @@ class Ulasan extends Model
         'user_id',
         'id_Produk',
         'rating',
+        'komentar',
     ];
 
     // Relasi ke user

@@ -18,7 +18,7 @@
             <div class="flex items-center space-x-2 gap-x-4">
                 @auth
                     <!-- Cart button for authenticated users -->
-                    <a href="{{ route('cart.view') }}" class="text-gray-700 hover:text-orange-600 relative" x-data="{ cartCount: 0 }" x-init="
+                    <a href="{{ route('keranjang.index') }}" class="text-gray-700 hover:text-orange-600 relative" x-data="{ cartCount: 0 }" x-init="
                         fetch('{{ route('cart.count') }}')
                             .then(response => response.json())
                             .then(data => { cartCount = data.count })

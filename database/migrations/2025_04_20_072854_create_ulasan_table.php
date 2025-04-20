@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('id_Produk')->constrained('produk', 'id_Produk');
             $table->decimal('rating', 3, 1);
+            $table->text('komentar')->nullable();
             $table->timestamps();
         });
     }
