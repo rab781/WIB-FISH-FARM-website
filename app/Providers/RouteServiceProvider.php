@@ -19,5 +19,14 @@ class RouteServiceProvider extends ServiceProvider
      */
     public const HOME = '/produk'; // Changed from '/dashboard' to '/produk'
 
+    /**
+     * The path to admin dashboard route.
+     *
+     * Admin users are redirected here after authentication.
+     *
+     * @var string
+     */
+    public const ADMIN_HOME = '/admin/dashboard';
+
     // ...rest of the file remains unchanged...
 }

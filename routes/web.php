@@ -36,6 +36,20 @@ Route::middleware('auth')->group(function () {
                 ->name('logout');
 });
 
+// Admin routes protected with admin middleware
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', function () {
+        return redirect('admin/dashboard');
+    });
+
+    // Admin dashboard route
+    Route::get('dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+
+    // Tambahkan route admin lainnya di sini jika diperlukan
+});
+
 // Product routes
 Route::get('/produk', function () {
     return view('Produk');

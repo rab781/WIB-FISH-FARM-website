@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Panggil AdminUserSeeder untuk membuat admin default
+        $this->call([
+            AdminUserSeeder::class,
         ]);
 
         // If you need to seed product data, consider adding a ProductSeeder

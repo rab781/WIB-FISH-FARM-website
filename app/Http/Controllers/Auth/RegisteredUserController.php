@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Providers\RouteServiceProvider;
 
 class RegisteredUserController extends Controller
 {
@@ -35,16 +36,19 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Buat user sebagai customer (is_admin = false)
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'is_admin' => false, // Memastikan user yang registrasi selalu menjadi customer
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect('/');
+        // Redirect ke halaman produk sesuai dengan RouteServiceProvider::HOME
+        return redirect(RouteServiceProvider::HOME);
     }
 }

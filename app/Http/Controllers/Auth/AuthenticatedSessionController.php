@@ -33,8 +33,13 @@ class AuthenticatedSessionController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Changed from root path to products page
-            return redirect()->intended('/produk');
+            // Cek apakah user adalah admin
+            if (Auth::user()->is_admin) {
+                return redirect()->intended(RouteServiceProvider::ADMIN_HOME);
+            }
+
+            // Jika bukan admin, redirect ke halaman produk
+            return redirect()->intended(RouteServiceProvider::HOME);
         }
 
         return back()->withErrors([
