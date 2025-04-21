@@ -17,6 +17,11 @@ function productSlider() {
             return Math.ceil(this.products.length / this.pageSize);
         },
 
+        // Cek apakah ada lebih dari satu halaman produk
+        hasMultiplePages() {
+            return this.totalPages() > 1;
+        },
+
         // Produk yang terlihat di halaman saat ini
         visibleProducts() {
             const start = this.currentPage * this.pageSize;
@@ -180,8 +185,16 @@ function appState() {
 
         // Show authentication modal with message
         showAuthWithMessage(message) {
-            this.modalMessage = message;
-            this.showAuthModal = true;
+            const modal = document.getElementById('authGlobalModal');
+            if (modal && typeof Alpine !== 'undefined') {
+                const data = Alpine.$data(modal);
+                if (data) {
+                    if (message) {
+                        data.modalMessage = message;
+                    }
+                    data.showAuthModal = true;
+                }
+            }
         }
     };
 }

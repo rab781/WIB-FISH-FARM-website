@@ -52,7 +52,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    Route::resource('/produk', AdminProdukController::class);
+    // Admin produk routes
+    Route::resource('/produk', AdminProdukController::class)->names([
+        'index' => 'admin.produk.index',
+        'create' => 'admin.produk.create',
+        'store' => 'admin.produk.store',
+        'show' => 'admin.produk.show',
+        'edit' => 'admin.produk.edit',
+        'update' => 'admin.produk.update',
+        'destroy' => 'admin.produk.destroy',
+    ]);
+
     Route::get('/produk/{id}/restore', [AdminProdukController::class, 'restore'])->name('admin.produk.restore');
     Route::delete('/produk/{id}/forceDelete', [AdminProdukController::class, 'forceDelete'])->name('admin.produk.forceDelete');
 });
@@ -75,10 +85,17 @@ Route::get('/page-expired', function() {
 })->name('page-expired');
 
 // Cart routes
-Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'addToCart'])->name('cart.add');
-Route::get('/cart', [App\Http\Controllers\CartController::class, 'viewCart'])->name('cart.view');
-Route::post('/cart/remove', [App\Http\Controllers\CartController::class, 'removeFromCart'])->name('cart.remove');
-Route::get('/cart/count', [App\Http\Controllers\CartController::class, 'getCartCount'])->name('cart.count');
+Route::post('/cart/add', [App\Http\Controllers\KeranjangController::class, 'addToCart'])->name('cart.add');
+Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
+Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
+Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
+
+// Checkout Route
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', function () {
+        return view('checkout.index');
+    })->name('checkout');
+});
 
 // fallback route
 Route::fallback(function () {

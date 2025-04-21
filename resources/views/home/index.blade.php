@@ -3,25 +3,58 @@
 @section('content')
 <!-- Auth Modal -->
 @guest
-<div x-show="showAuthModal"
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0 transform scale-90"
-     x-transition:enter-end="opacity-100 transform scale-100"
-     x-transition:leave="transition ease-in duration-200"
-     x-transition:leave-start="opacity-100 transform scale-100"
-     x-transition:leave-end="opacity-0 transform scale-90"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-200/90 backdrop-filter backdrop-blur-md"
-     @click.self="showAuthModal = false">
-    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full backdrop-filter-none">
-        <h3 class="text-xl font-bold mb-4 text-gray-800">Akses Terbatas</h3>
-        <p class="text-gray-600 mb-6" x-text="modalMessage"></p>
-        <div class="flex flex-col space-y-3">
-            <a href="{{ route('login') }}" class="bg-orange-600 text-white py-2 px-4 rounded-md text-center hover:bg-orange-700 transition">Masuk</a>
-            <a href="{{ route('register') }}" class="border border-gray-300 py-2 px-4 rounded-md text-center hover:bg-gray-50 transition">Daftar</a>
-            <button @click="showAuthModal = false" class="text-gray-500 hover:text-gray-800 text-sm mt-2">Tutup</button>
+    <div x-data="{ showAuthModal: false, modalMessage: 'Untuk mengakses fitur ini, silakan masuk terlebih dahulu jika sudah memiliki akun, atau daftar jika belum memiliki akun.' }"
+        x-show="showAuthModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-200/90 backdrop-filter backdrop-blur-md"
+        @click.self="showAuthModal = false"
+        style="display: none;">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full backdrop-filter-none">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Akses Terbatas</h3>
+                <button @click="showAuthModal = false" class="text-gray-500 hover:text-gray-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-6" x-text="modalMessage"></p>
+            <div class="flex flex-col space-y-3">
+                <a href="{{ route('login') }}" class="bg-orange-600 text-white py-2 px-4 rounded-md text-center hover:bg-orange-700 transition flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Masuk
+                </a>
+                <a href="{{ route('register') }}" class="border border-gray-300 py-2 px-4 rounded-md text-center hover:bg-gray-50 transition flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    Daftar
+                </a>
+            </div>
         </div>
     </div>
-</div>
+
+    <script>
+        window.showLoginModal = function(message) {
+            if (typeof Alpine !== 'undefined') {
+                const modal = document.querySelector('[x-data*="showAuthModal"]');
+                if (modal) {
+                    const scope = Alpine.$data(modal);
+                    if (message) {
+                        scope.modalMessage = message;
+                    }
+                    scope.showAuthModal = true;
+                }
+            }
+        };
+    </script>
 @endguest
 
 <!-- Hero Section -->
@@ -108,6 +141,7 @@
             <div class="relative overflow-hidden">
                 <div
                     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    :class="{'slide-out-right': isAnimating && slideDirection === 'left', 'slide-out-left': isAnimating && slideDirection === 'right', 'slide-in-right': isAnimating && slideDirection === 'right', 'slide-in-left': isAnimating && slideDirection === 'left'}"
                     x-show="!isAnimating"
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0"
@@ -116,6 +150,11 @@
                         <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 hover-lift" data-aos="fade-up">
                             <div class="h-48 bg-gray-200 relative overflow-hidden">
                                 <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                                <div class="absolute top-2 right-2">
+                                    @if($p->popularity >= 4)
+                                    <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>
+                                    @endif
+                                </div>
                             </div>
                             <div class="p-4">
                                 <h3 class="font-medium text-gray-900 mb-1">{{ $p->nama_ikan }}</h3>
@@ -132,25 +171,14 @@
                 </div>
             </div>
 
-            <!-- Pagination Dots -->
-            <div class="flex justify-center mt-8" data-aos="fade-up">
-                <template x-for="(page, index) in totalPages()" :key="index">
-                    <button
-                        @click="goToPage(index)"
-                        :class="{'bg-black': currentPage === index, 'bg-gray-300': currentPage !== index}"
-                        class="h-2 w-2 mx-1 rounded-full transition-colors duration-200">
-                    </button>
-                </template>
-            </div>
-
             <!-- Navigation Arrows -->
             <div class="flex justify-end mt-4 space-x-2">
-                <button @click="prevPage" :disabled="isAnimating || currentPage === 0" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
+                <button @click="prevPage" :disabled="isAnimating || !hasMultiplePages()" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
-                <button @click="nextPage" :disabled="isAnimating || currentPage === totalPages() - 1" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
+                <button @click="nextPage" :disabled="isAnimating || !hasMultiplePages()" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
@@ -159,7 +187,6 @@
         </div>
     </div>
 </section>
-
 
 <!--Review section-->
 <section class="py-16 bg-gray-100">

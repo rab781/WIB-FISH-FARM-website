@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use App\Models\Ulasan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -44,6 +45,31 @@ class HomeController extends Controller
         // Menghitung rating rata-rata
         $avgRating = $ulasan->avg('rating');
 
-        return view('home.detail', compact('produk', 'ulasan', 'avgRating'));
+        // Inisialisasi variabel untuk user yang sudah login
+        $userHasPurchased = false;
+        $userHasReviewed = false;
+
+        // Cek apakah user sudah login
+        if (Auth::check()) {
+            $userId = Auth::id();
+
+            // Cek apakah user sudah membeli produk ini
+            $userHasPurchased = \App\Models\DetailPesanan::whereHas('pesanan', function($query) use ($userId) {
+                $query->where('user_id', $userId)->whereIn('status_pesanan', ['selesai', 'dikirim']);
+            })->where('id_Produk', $id)->exists();
+
+            // Cek apakah user sudah memberikan ulasan
+            $userHasReviewed = Ulasan::where('user_id', $userId)
+                                ->where('id_Produk', $id)
+                                ->exists();
+        }
+
+        // Produk terkait - produk dengan jenis yang sama
+        $relatedProducts = Produk::where('jenis_ikan', $produk->jenis_ikan)
+                            ->where('id_Produk', '!=', $id)
+                            ->take(4)
+                            ->get();
+
+        return view('home.detail', compact('produk', 'ulasan', 'avgRating', 'userHasPurchased', 'userHasReviewed', 'relatedProducts'));
     }
 }

@@ -18,15 +18,27 @@
             <div class="flex items-center space-x-2 gap-x-4">
                 @auth
                     <!-- Cart button for authenticated users -->
-                    <a href="{{ route('keranjang.index') }}" class="text-gray-700 hover:text-orange-600 relative" x-data="{ cartCount: 0 }" x-init="
-                        fetch('{{ route('cart.count') }}')
-                            .then(response => response.json())
-                            .then(data => { cartCount = data.count })
-                    ">
+                    <a href="{{ route('keranjang.index') }}" class="text-gray-700 hover:text-orange-600 relative"
+                       x-data="{ cartCount: 0 }"
+                       x-init="
+                            // Fetch initial cart count
+                            fetch('{{ route('cart.count') }}')
+                                .then(response => response.json())
+                                .then(data => { cartCount = data.count });
+
+                            // Set up event listener for cart updates
+                            window.addEventListener('cartUpdated', function() {
+                                fetch('{{ route('cart.count') }}')
+                                    .then(response => response.json())
+                                    .then(data => { cartCount = data.count });
+                            });
+                        ">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        <span x-show="cartCount > 0"
+                              x-text="cartCount"
+                              class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         </span>
                     </a>
 
@@ -103,3 +115,22 @@
         </div>
     </div>
 </header>
+
+<!-- Script untuk memperbarui badge keranjang saat produk ditambahkan -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dispatch event untuk memperbarui keranjang setelah operasi Ajax
+        function updateCartCount() {
+            window.dispatchEvent(new Event('cartUpdated'));
+        }
+
+        // Jika ada form dengan id addToCartForm, tambahkan event listener
+        const addToCartForms = document.querySelectorAll('form[action*="keranjang"]');
+        addToCartForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Setelah timeout singkat, update jumlah keranjang
+                setTimeout(updateCartCount, 500);
+            });
+        });
+    });
+</script>
