@@ -1,5 +1,9 @@
 @extends('layouts.customer')
 
+@php
+use Illuminate\Support\Str;
+@endphp
+
 @section('content')
 <div class="container mx-auto px-6 py-8">
     <h1 class="text-2xl font-bold text-gray-900 mb-6">Keranjang Belanja</h1>
@@ -40,7 +44,21 @@
             <div class="flex-1 p-4">
                 <div class="flex flex-col md:flex-row items-start">
                     <div class="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 mb-4 md:mb-0">
-                        <img src="{{ asset('storage/' . $item->produk->gambar) }}" alt="{{ $item->produk->nama_ikan }}" class="h-full w-full object-contain">
+                        @if($item->produk->gambar)
+                            @if(Str::startsWith($item->produk->gambar, 'uploads/'))
+                                <img src="{{ asset($item->produk->gambar) }}" alt="{{ $item->produk->nama_ikan }}" class="h-full w-full object-contain">
+                            @elseif(Str::startsWith($item->produk->gambar, 'storage/'))
+                                <img src="{{ asset($item->produk->gambar) }}" alt="{{ $item->produk->nama_ikan }}" class="h-full w-full object-contain">
+                            @else
+                                <img src="{{ asset('storage/' . $item->produk->gambar) }}" alt="{{ $item->produk->nama_ikan }}" class="h-full w-full object-contain">
+                            @endif
+                        @else
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        @endif
                     </div>
                     <div class="ml-0 md:ml-4">
                         <h3 class="text-base font-medium text-gray-900">{{ $item->produk->nama_ikan }}</h3>
@@ -98,34 +116,6 @@
         </div>
         @endforeach
 
-        <!-- Voucher section -->
-        <div class="p-4 border-b">
-            <div class="flex flex-col md:flex-row md:items-center">
-                <div class="flex-1">
-                    <form class="flex items-center">
-                        <div class="relative">
-                            <input type="text" placeholder="Tambahkan kode voucher toko" class="w-full md:w-64 pr-10 py-2 pl-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </div>
-                        <button type="button" class="ml-3 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            Gunakan
-                        </button>
-                    </form>
-                </div>
-                <div class="flex md:justify-end mt-4 md:mt-0">
-                    <button type="button" class="text-orange-600 hover:text-orange-700 flex items-center focus:outline-none">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        Hapus produk dari penjual
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- Summary section -->
         <div class="p-4">
@@ -175,6 +165,15 @@
             input.value = parseInt(input.value) - 1;
             // Auto submit the form after a short delay
             setTimeout(() => form.submit(), 500);
+        } else if (input.value == 1) {
+            // Show confirmation popup when trying to reduce quantity from 1
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?')) {
+                // Find and submit the delete form for this product
+                let deleteForm = button.closest('.flex.flex-col.md\\:flex-row').querySelector('form[action*="keranjang.destroy"]');
+                if (deleteForm) {
+                    deleteForm.submit();
+                }
+            }
         }
     }
 

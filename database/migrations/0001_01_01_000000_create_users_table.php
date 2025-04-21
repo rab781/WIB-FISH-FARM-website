@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_admin')->default(false); // Tambahkan field is_admin
             $table->rememberToken();
+            $table->string('foto')->nullable(); // Foto profil
             $table->timestamps();
         });
 

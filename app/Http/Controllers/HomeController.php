@@ -12,7 +12,10 @@ class HomeController extends Controller
     public function index()
     {
         // Mengambil produk-produk untuk ditampilkan di landing page
-        $produk = Produk::latest()->take(8)->get();
+        $produk = Produk::withCount('detailPesanan')
+                ->orderBy('detail_pesanan_count', 'desc')
+                ->take(8)
+                ->get();
 
         // Mengambil ulasan-ulasan terbaru untuk ditampilkan di landing page
         $ulasan = Ulasan::with(['user', 'produk'])
@@ -23,10 +26,33 @@ class HomeController extends Controller
         return view('home.index', compact('produk', 'ulasan'));
     }
 
-    public function produk()
+    public function produk(Request $request)
     {
+        // Inisialisasi query builder
+        $query = Produk::query();
+
+        // Filter berdasarkan parameter GET jika ada
+        if ($request->has('sort')) {
+            if ($request->sort === 'popularity') {
+                $query->withCount('detailPesanan')->orderBy('detail_pesanan_count', 'desc');
+            } elseif ($request->sort === 'price_low') {
+                $query->orderBy('harga', 'asc');
+            } elseif ($request->sort === 'price_high') {
+                $query->orderBy('harga', 'desc');
+            } else {
+                $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+
         // Mengambil semua produk untuk halaman produk
-        $produk = Produk::latest()->paginate(12);
+        $produk = $query->paginate(12)->withQueryString();
+
+        // Tambahkan data order_count untuk setiap produk
+        $produk->each(function ($item) {
+            $item->order_count = $item->detailPesanan()->count();
+        });
 
         return view('home.produk', compact('produk'));
     }

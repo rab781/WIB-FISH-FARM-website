@@ -56,8 +56,7 @@
         },
 
         filterProducts() {
-            this.showResults = document.querySelectorAll('.product-item.filtered').length > 0;
-
+            // First, apply filters to determine visible products
             document.querySelectorAll('.product-item').forEach(item => {
                 let nameMatch = true;
                 let typeMatch = true;
@@ -78,7 +77,7 @@
                 // Popularity filter
                 if (this.activeFilter === 'popular') {
                     const popularity = parseInt(item.getAttribute('data-popularity') || 0);
-                    popularityMatch = popularity >= 4;
+                    popularityMatch = popularity > 5;
                 }
 
                 // Apply filters
@@ -90,6 +89,38 @@
                     item.classList.add('hidden');
                 }
             });
+
+            // Now apply sorting to visible products if needed
+            if (this.priceSort !== 'default' || this.activeFilter === 'popular') {
+                // Get all visible products
+                const visibleProducts = Array.from(document.querySelectorAll('.product-item.filtered'));
+                const productsGrid = document.querySelector('.products-grid');
+
+                // Sort the products
+                visibleProducts.sort((a, b) => {
+                    if (this.activeFilter === 'popular' && this.priceSort === 'default') {
+                        // Sort by popularity (order count)
+                        const popularityA = parseInt(a.getAttribute('data-popularity') || 0);
+                        const popularityB = parseInt(b.getAttribute('data-popularity') || 0);
+                        return popularityB - popularityA; // Higher order count first
+                    } else if (this.priceSort !== 'default') {
+                        // Sort by price
+                        const priceA = parseFloat(a.getAttribute('data-price'));
+                        const priceB = parseFloat(b.getAttribute('data-price'));
+
+                        if (this.priceSort === 'low-to-high') {
+                            return priceA - priceB;
+                        } else {
+                            return priceB - priceA;
+                        }
+                    }
+                });
+
+                // Reattach the sorted products to the grid
+                visibleProducts.forEach(product => {
+                    productsGrid.appendChild(product);
+                });
+            }
 
             // Check if there are any visible products
             this.showResults = document.querySelectorAll('.product-item.filtered').length > 0;
@@ -164,7 +195,7 @@
                 data-name="{{ $p->nama_ikan }}"
                 data-price="{{ $p->harga }}"
                 data-type="{{ strtolower($p->jenis_ikan ?? 'lainnya') }}"
-                data-popularity="{{ $p->popularity ?? 0 }}">
+                data-popularity="{{ isset($p->detail_pesanan_count) ? $p->detail_pesanan_count : $p->order_count }}">
 
                 <!-- Clickable product image and header -->
                 <a href="{{ route('detailProduk', $p->id_Produk) }}" class="block">
@@ -174,7 +205,7 @@
                         @else
                             <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
                         @endif
-                        @if(isset($p->popularity) && $p->popularity >= 4)
+                        @if((isset($p->detail_pesanan_count) && $p->detail_pesanan_count > 5) || (isset($p->order_count) && $p->order_count > 5))
                             <div class="absolute top-2 right-2">
                                 <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>
                             </div>
@@ -185,7 +216,14 @@
                         <h3 class="font-medium text-gray-900 mb-1 hover:text-orange-600">{{ $p->nama_ikan }}</h3>
                         <div class="flex justify-between items-center mb-2">
                             <p class="text-gray-900 font-bold">Rp {{ number_format($p->harga, 0, ',', '.') }}</p>
-                            <p class="text-sm text-gray-600">Stok: {{ $p->stok }}</p>
+                            <div class="flex items-center">
+                                <p class="text-sm text-gray-600 mr-2">Stok: {{ $p->stok }}</p>
+                                @if(isset($p->detail_pesanan_count) && $p->detail_pesanan_count > 0)
+                                <span class="text-xs text-gray-500">({{ $p->detail_pesanan_count }} terjual)</span>
+                                @elseif(isset($p->order_count) && $p->order_count > 0)
+                                <span class="text-xs text-gray-500">({{ $p->order_count }} terjual)</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </a>

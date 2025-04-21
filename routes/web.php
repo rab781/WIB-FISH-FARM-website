@@ -35,6 +35,14 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
+// Alamat routes - for address setup after registration
+Route::middleware('auth')->group(function () {
+    Route::get('alamat-setup', [RegisteredUserController::class, 'alamatSetup'])
+        ->name('alamat.setup');
+    Route::post('alamat-store', [RegisteredUserController::class, 'alamatStore'])
+        ->name('alamat.store');
+});
+
 // Add logout route for authenticated users
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
@@ -90,12 +98,6 @@ Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])-
 Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
 Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
 
-// Checkout Route
-Route::middleware('auth')->group(function () {
-    Route::get('/checkout', function () {
-        return view('checkout.index');
-    })->name('checkout');
-});
 
 // fallback route
 Route::fallback(function () {

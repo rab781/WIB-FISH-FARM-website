@@ -43,4 +43,17 @@ class Produk extends Model
     {
         return $this->hasMany(Ulasan::class, 'id_Produk', 'id_Produk');
     }
+    
+    // Hitung popularitas berdasarkan jumlah pesanan
+    public function getOrderCountAttribute()
+    {
+        return $this->detailPesanan()->count();
+    }
+    
+    // Scope untuk mengurutkan produk berdasarkan jumlah pesanan
+    public function scopeOrderByPopularity($query, $direction = 'desc')
+    {
+        return $query->withCount('detailPesanan')
+                    ->orderBy('detail_pesanan_count', $direction);
+    }
 }

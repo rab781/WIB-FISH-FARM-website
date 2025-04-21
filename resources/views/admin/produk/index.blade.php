@@ -12,28 +12,6 @@
         </a>
     </div>
 
-    <!-- Filter and Search -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
-        <form action="{{ route('admin.produk.index') }}" method="GET" class="flex flex-wrap gap-4">
-            <div class="w-full md:w-auto flex-1">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div class="w-full md:w-auto">
-                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
-                    <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Dihapus</option>
-                </select>
-            </div>
-            <div>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Filter
-                </button>
-            </div>
-        </form>
-    </div>
-
     <!-- Product Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">

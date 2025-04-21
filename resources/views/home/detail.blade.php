@@ -295,35 +295,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Related Products -->
-    @if(isset($relatedProducts) && is_countable($relatedProducts) && count($relatedProducts) > 0)
-    <div class="mt-12 border-t border-gray-200 pt-8">
-        <h2 class="text-2xl font-bold mb-6">Produk Terkait</h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach($relatedProducts as $related)
-            <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                <a href="{{ route('detailProduk', $related->id_Produk) }}">
-                    <div class="h-48 bg-gray-200 relative overflow-hidden">
-                        <img src="{{ asset('storage/' . $related->gambar) }}" alt="{{ $related->nama_ikan }}" class="w-full h-full object-cover">
-                        @if(isset($related->popularity) && $related->popularity >= 4)
-                            <div class="absolute top-2 right-2">
-                                <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="p-4">
-                        <h3 class="font-medium text-gray-900 mb-1">{{ $related->nama_ikan }}</h3>
-                        <p class="text-gray-900 font-bold">Rp {{ number_format($related->harga, 0, ',', '.') }}</p>
-                    </div>
-                </a>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
 </div>
 
 <!-- Auth Modal for Guest Users -->

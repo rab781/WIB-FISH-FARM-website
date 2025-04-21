@@ -22,6 +22,11 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'provinsi_id',
+        'kabupaten_id',
+        'kecamatan_id',
+        'alamat_jalan',
+        'no_hp',
     ];
 
     /**
@@ -49,6 +54,24 @@ class User extends Authenticatable
     public function keranjang()
     {
         return $this->hasMany(Keranjang::class, 'user_id', 'id');
+    }
+
+    // Relasi ke kecamatan
+    public function kecamatan()
+    {
+        return $this->belongsTo(Kecamatan::class);
+    }
+
+    // Method untuk mendapatkan kabupaten dari kecamatan
+    public function getKabupaten()
+    {
+        return $this->kecamatan ? $this->kecamatan->kabupaten : null;
+    }
+
+    // Method untuk mendapatkan provinsi dari kecamatan
+    public function getProvinsi()
+    {
+        return $this->kecamatan && $this->kecamatan->kabupaten ? $this->kecamatan->kabupaten->provinsi : null;
     }
 
     // Relasi ke pesanan

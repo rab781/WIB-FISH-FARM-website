@@ -54,35 +54,35 @@
                 <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
                         <i class="fas fa-shopping-cart w-6"></i>
+                        <span>Laporan Penjualan</span>
+                    </div>
+                </a>
+
+                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                    <div class="flex items-center">
+                        <i class="fas fa-box w-6"></i>
                         <span>Pesanan</span>
                     </div>
                 </a>
 
                 <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
-                        <i class="fas fa- w-6"></i>
+                        <i class="fas fa-money-bill-wave w-6"></i>
                         <span>Catatan Keuangan</span>
                     </div>
                 </a>
 
                 <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
-                        <i class="fas fa-users w-6"></i>
+                        <i class="fas fa-star w-6"></i>
                         <span>Ulasan</span>
                     </div>
                 </a>
 
                 <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
-                        <i class="fas fa-chart-bar w-6"></i>
+                        <i class="fas fa-headset w-6"></i>
                         <span>Keluhan</span>
-                    </div>
-                </a>
-
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-cog w-6"></i>
-                        <span>Pengaturan</span>
                     </div>
                 </a>
 
@@ -158,7 +158,7 @@
                         </svg>
                     </span>
                 </div>
-                
+
                 <script>
                     // Auto-hide notification after 5 seconds
                     setTimeout(function() {

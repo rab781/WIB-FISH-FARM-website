@@ -185,6 +185,12 @@ class ProdukController extends Controller
     {
         $produk = Produk::withTrashed()->findOrFail($id);
 
+        // Check if the product has any related detail_pesanan records
+        if ($produk->detailPesanan()->count() > 0) {
+            return redirect()->route('admin.produk.index')
+                    ->with('error', 'Tidak dapat menghapus produk secara permanen karena terkait dengan pesanan. Gunakan soft delete saja.');
+        }
+
         // Hapus gambar jika ada
         if ($produk->gambar && file_exists(public_path($produk->gambar))) {
             unlink(public_path($produk->gambar));
