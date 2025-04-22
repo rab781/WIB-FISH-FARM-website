@@ -52,7 +52,30 @@
             this.priceSort = 'default';
             this.activeFilter = 'semua';
             this.searchQuery = '';
-            this.filterProducts();
+
+            // Reset ke tampilan default (ikan terakhir ditambahkan)
+            document.querySelectorAll('.product-item').forEach(item => {
+                item.classList.add('filtered');
+                item.classList.remove('hidden');
+            });
+
+            // Urutkan produk berdasarkan tanggal (descending)
+            const products = Array.from(document.querySelectorAll('.product-item'));
+            const productsGrid = document.querySelector('.products-grid');
+
+            // Sort by date added (id_Produk descending sebagai proxy untuk tanggal)
+            products.sort((a, b) => {
+                const idA = parseInt(a.getAttribute('data-id') || 0);
+                const idB = parseInt(b.getAttribute('data-id') || 0);
+                return idB - idA; // Larger ID (newer product) first
+            });
+
+            // Reattach sorted products
+            products.forEach(product => {
+                productsGrid.appendChild(product);
+            });
+
+            this.showResults = true;
         },
 
         filterProducts() {
@@ -74,14 +97,11 @@
                     typeMatch = type === this.fishType;
                 }
 
-                // Popularity filter
-                if (this.activeFilter === 'popular') {
-                    const popularity = parseInt(item.getAttribute('data-popularity') || 0);
-                    popularityMatch = popularity > 5;
-                }
+                // Popularity filter - reset to true by default
+                popularityMatch = true;
 
-                // Apply filters
-                if (nameMatch && typeMatch && popularityMatch) {
+                // Apply filters except popularity to show/hide products
+                if (nameMatch && typeMatch) {
                     item.classList.add('filtered');
                     item.classList.remove('hidden');
                 } else {
@@ -90,37 +110,38 @@
                 }
             });
 
-            // Now apply sorting to visible products if needed
-            if (this.priceSort !== 'default' || this.activeFilter === 'popular') {
-                // Get all visible products
-                const visibleProducts = Array.from(document.querySelectorAll('.product-item.filtered'));
-                const productsGrid = document.querySelector('.products-grid');
+            // Now apply sorting to visible products
+            const visibleProducts = Array.from(document.querySelectorAll('.product-item.filtered'));
+            const productsGrid = document.querySelector('.products-grid');
 
-                // Sort the products
+            // Sort the products based on selected filter
+            if (this.activeFilter === 'popular') {
+                // Sort by popularity (order count) - highest sales first
                 visibleProducts.sort((a, b) => {
-                    if (this.activeFilter === 'popular' && this.priceSort === 'default') {
-                        // Sort by popularity (order count)
-                        const popularityA = parseInt(a.getAttribute('data-popularity') || 0);
-                        const popularityB = parseInt(b.getAttribute('data-popularity') || 0);
-                        return popularityB - popularityA; // Higher order count first
-                    } else if (this.priceSort !== 'default') {
-                        // Sort by price
-                        const priceA = parseFloat(a.getAttribute('data-price'));
-                        const priceB = parseFloat(b.getAttribute('data-price'));
-
-                        if (this.priceSort === 'low-to-high') {
-                            return priceA - priceB;
-                        } else {
-                            return priceB - priceA;
-                        }
-                    }
+                    const popularityA = parseInt(a.getAttribute('data-popularity') || 0);
+                    const popularityB = parseInt(b.getAttribute('data-popularity') || 0);
+                    return popularityB - popularityA; // Higher order count first
                 });
-
-                // Reattach the sorted products to the grid
-                visibleProducts.forEach(product => {
-                    productsGrid.appendChild(product);
+            } else if (this.priceSort === 'low-to-high') {
+                // Sort by price low to high
+                visibleProducts.sort((a, b) => {
+                    const priceA = parseFloat(a.getAttribute('data-price'));
+                    const priceB = parseFloat(b.getAttribute('data-price'));
+                    return priceA - priceB;
+                });
+            } else if (this.priceSort === 'high-to-low') {
+                // Sort by price high to low
+                visibleProducts.sort((a, b) => {
+                    const priceA = parseFloat(a.getAttribute('data-price'));
+                    const priceB = parseFloat(b.getAttribute('data-price'));
+                    return priceB - priceA;
                 });
             }
+
+            // Reattach the sorted products to the grid
+            visibleProducts.forEach(product => {
+                productsGrid.appendChild(product);
+            });
 
             // Check if there are any visible products
             this.showResults = document.querySelectorAll('.product-item.filtered').length > 0;
@@ -151,10 +172,9 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Ikan</label>
                 <select x-model="fishType" @change="filterProducts()" class="w-full border border-gray-300 rounded-md px-3 py-2">
                     <option value="semua">Semua Jenis</option>
-                    <option value="koki">Ikan Koki</option>
-                    <option value="koi">Ikan Koi</option>
-                    <option value="cupang">Ikan Cupang</option>
-                    <option value="lainnya">Lainnya</option>
+                    @foreach($jenisIkan as $jenis)
+                    <option value="{{ strtolower($jenis) }}">{{ $jenis }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -170,9 +190,9 @@
 
             <!-- Popularity Filter -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Popularitas</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Produk Paling Laku</label>
                 <select x-model="activeFilter" @change="filterProducts()" class="w-full border border-gray-300 rounded-md px-3 py-2">
-                    <option value="semua">Semua</option>
+                    <option value="semua">Semua Produk</option>
                     <option value="popular">Paling Laku</option>
                 </select>
             </div>
@@ -195,7 +215,8 @@
                 data-name="{{ $p->nama_ikan }}"
                 data-price="{{ $p->harga }}"
                 data-type="{{ strtolower($p->jenis_ikan ?? 'lainnya') }}"
-                data-popularity="{{ isset($p->detail_pesanan_count) ? $p->detail_pesanan_count : $p->order_count }}">
+                data-popularity="{{ isset($p->detail_pesanan_count) ? $p->detail_pesanan_count : $p->order_count }}"
+                data-id="{{ $p->id_Produk }}">
 
                 <!-- Clickable product image and header -->
                 <a href="{{ route('detailProduk', $p->id_Produk) }}" class="block">

@@ -54,7 +54,16 @@ class HomeController extends Controller
             $item->order_count = $item->detailPesanan()->count();
         });
 
-        return view('home.produk', compact('produk'));
+        // Mengambil semua jenis ikan unik dari database
+        $jenisIkan = Produk::distinct('jenis_ikan')
+                    ->whereNotNull('jenis_ikan')
+                    ->pluck('jenis_ikan')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+
+        return view('home.produk', compact('produk', 'jenisIkan'));
     }
 
     public function detailProduk($id)

@@ -168,7 +168,7 @@ class KeranjangController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'jumlah' => 'required|integer|min:1',
+            'jumlah' => 'required|integer|min:1|max:999',
         ]);
 
         $keranjang = Keranjang::findOrFail($id);
@@ -183,7 +183,7 @@ class KeranjangController extends Controller
 
         // Cek stok
         if ($produk->stok < $request->jumlah) {
-            return redirect()->back()->with('error', 'Stok tidak mencukupi');
+            return redirect()->back()->with('error', 'Stok tidak mencukupi, stok tersedia: ' . $produk->stok);
         }
 
         // Update jumlah dan total harga
@@ -210,6 +210,30 @@ class KeranjangController extends Controller
         $keranjang->delete();
 
         return redirect()->route('keranjang.index')->with('success', 'Produk berhasil dihapus dari keranjang');
+    }
+
+    /**
+     * Remove multiple items from cart
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'selected_items' => 'required|array',
+            'selected_items.*' => 'exists:keranjang,id_keranjang',
+        ]);
+
+        // Delete only items that belong to the authenticated user
+        $deleted = Keranjang::whereIn('id_keranjang', $request->selected_items)
+            ->where('user_id', Auth::id())
+            ->delete();
+
+        if ($deleted > 0) {
+            return redirect()->route('keranjang.index')
+                ->with('success', $deleted . ' produk berhasil dihapus dari keranjang');
+        } else {
+            return redirect()->route('keranjang.index')
+                ->with('error', 'Tidak ada produk yang dihapus');
+        }
     }
 
     /**

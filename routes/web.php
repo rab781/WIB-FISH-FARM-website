@@ -35,13 +35,13 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
-// Alamat routes - for address setup after registration
-Route::middleware('auth')->group(function () {
-    Route::get('alamat-setup', [RegisteredUserController::class, 'alamatSetup'])
-        ->name('alamat.setup');
-    Route::post('alamat-store', [RegisteredUserController::class, 'alamatStore'])
-        ->name('alamat.store');
-});
+// // Alamat routes - for address setup after registration
+// Route::middleware('auth')->group(function () {
+//     Route::get('alamat-setup', [RegisteredUserController::class, 'alamatSetup'])
+//         ->name('alamat.setup');
+//     Route::post('alamat-store', [RegisteredUserController::class, 'alamatStore'])
+//         ->name('alamat.store');
+// });
 
 // Add logout route for authenticated users
 Route::middleware('auth')->group(function () {
@@ -96,8 +96,8 @@ Route::get('/page-expired', function() {
 Route::post('/cart/add', [App\Http\Controllers\KeranjangController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
 Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
+Route::post('/cart/bulk-delete', [App\Http\Controllers\KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
 Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
-
 
 // fallback route
 Route::fallback(function () {
