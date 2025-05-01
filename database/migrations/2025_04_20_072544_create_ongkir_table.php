@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ongkir', function (Blueprint $table) {
             $table->id('id_ongkir');
-            $table->string('nama_kota', 255);
+            $table->foreignId('kabupaten_id')->constrained('kabupaten');
             $table->decimal('berat', 10, 2);
             $table->decimal('harga', 10, 2);
             $table->timestamps();

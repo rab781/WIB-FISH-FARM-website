@@ -107,4 +107,38 @@ class HomeController extends Controller
 
         return view('home.detail', compact('produk', 'ulasan', 'avgRating', 'userHasPurchased', 'userHasReviewed', 'relatedProducts'));
     }
+
+    public function tentangKami()
+    {
+        // Data tim pengelola
+        $teamMembers = [
+            [
+                'name' => 'Bapak Gamma',
+                'role' => 'Pendiri & Peternak Utama',
+                'bio' => 'Memiliki pengalaman lebih dari 5 tahun dalam budidaya ikan hias koi dan koki.',
+                'image' => 'Images/team-1.jpg'
+            ],
+        ];
+
+        // Timeline perjalanan bisnis
+        $milestones = [
+            [
+                'year' => '2020',
+                'title' => 'Awal Mula',
+                'description' => 'WIB Fish Farm didirikan sebagai usaha kecil dengan kolam ikan sederhana di Jember.'
+            ],
+            [
+                'year' => '2021',
+                'title' => 'Pengembangan',
+                'description' => 'Memperluas kolam dan mulai menjual ikan koi dan koki secara lokal.'
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Pemasaran Online',
+                'description' => 'Meluncurkan website untuk memudahkan pelanggan dalam membeli ikan secara online.'
+            ],
+        ];
+
+        return view('home.tentang-kami', compact('teamMembers', 'milestones'));
+    }
 }

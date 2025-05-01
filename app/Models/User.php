@@ -27,6 +27,11 @@ class User extends Authenticatable
         'kecamatan_id',
         'alamat_jalan',
         'no_hp',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'avatar',
+        'foto',
     ];
 
     /**
@@ -84,5 +89,11 @@ class User extends Authenticatable
     public function ulasan()
     {
         return $this->hasMany(Ulasan::class, 'user_id', 'id');
+    }
+
+    // Relasi ke notifikasi
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id');
     }
 }

@@ -12,13 +12,13 @@
             </li>
             <li>
                 <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 011.414-1.414l4 4a1 1 010 1.414l-4 4a1 1 01-1.414 0z" clip-rule="evenodd"></path></svg>
                     <a href="{{ route('produk') }}" class="ml-1 text-gray-700 hover:text-orange-600 md:ml-2">Produk</a>
                 </div>
             </li>
             <li aria-current="page">
                 <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 011.414-1.414l4 4a1 1 010 1.414l-4 4a1 1 01-1.414 0z" clip-rule="evenodd"></path></svg>
                     <span class="ml-1 text-gray-500 md:ml-2">{{ $produk->nama_ikan }}</span>
                 </div>
             </li>
@@ -62,10 +62,16 @@
         <div class="md:w-1/2 px-4 mb-6 md:mb-0" data-aos="fade-right">
             <div class="bg-white rounded-lg overflow-hidden shadow-md p-4">
                 <div class="bg-gray-100 rounded-lg overflow-hidden h-96 relative">
-                    @if(Str::startsWith($produk->gambar, 'uploads/'))
-                        <img src="{{ asset($produk->gambar) }}" class="w-full h-full object-contain" alt="{{ $produk->nama_ikan }}">
+                    @if($produk->gambar)
+                        @if(Str::startsWith($produk->gambar, 'uploads/'))
+                            <img src="{{ asset($produk->gambar) }}" class="w-full h-full object-contain" alt="{{ $produk->nama_ikan }}">
+                        @else
+                            <img src="{{ asset('storage/' . $produk->gambar) }}" class="w-full h-full object-contain" alt="{{ $produk->nama_ikan }}">
+                        @endif
                     @else
-                        <img src="{{ asset('storage/' . $produk->gambar) }}" class="w-full h-full object-contain" alt="{{ $produk->nama_ikan }}">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <img src="{{ asset('Images/Default-fish.png') }}" class="w-2/3 h-2/3 object-contain opacity-70" alt="Default Fish Image">
+                        </div>
                     @endif
                     @if($produk->popularity >= 4)
                     <div class="absolute top-4 right-4">
@@ -111,7 +117,25 @@
                 </div>
                 <div class="w-1/2 mb-4">
                     <h3 class="text-sm text-gray-500">Stok</h3>
-                    <p class="font-medium text-gray-900">{{ $produk->stok }} tersedia</p>
+                    <p class="font-medium text-gray-900" id="stokDisplay">{{ $produk->stok }} tersedia</p>
+                </div>
+            </div>
+
+            <!-- Ukuran Ikan -->
+            <div class="border-t border-gray-200 py-4">
+                <h3 class="text-sm text-gray-500 mb-2">Ukuran</h3>
+                <div class="flex flex-wrap gap-2" id="sizeOptions">
+                    @foreach($produk->ukuran()->active()->inStock()->get() as $index => $size)
+                    <div class="relative">
+                        <input type="radio" id="size-{{ $size->id }}" name="selected_size" value="{{ $size->id }}"
+                               class="sr-only size-radio" data-stok="{{ $size->stok }}" data-harga="{{ $size->harga }}"
+                               {{ $index === 0 ? 'checked' : '' }}>
+                        <label for="size-{{ $size->id }}"
+                               class="size-label cursor-pointer inline-flex px-3 py-2 border-2 border-gray-300 rounded-md text-sm font-medium hover:border-orange-600 transition-colors {{ $index === 0 ? 'border-orange-600 bg-orange-50' : '' }}">
+                            {{ $size->ukuran }}
+                        </label>
+                    </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -468,6 +492,79 @@
                 .catch(error => {
                     console.error('Error:', error);
                     showAlert('error', 'Terjadi kesalahan. Silakan coba lagi.');
+                });
+            });
+        }
+    });
+
+    // Handle size selection and update price/stock display
+    document.addEventListener('DOMContentLoaded', function() {
+        // Size selection handler
+        const sizeRadios = document.querySelectorAll('.size-radio');
+        const sizeLabels = document.querySelectorAll('.size-label');
+        const priceDisplay = document.querySelector('.text-3xl.font-bold.text-gray-900.mb-6');
+        const stokDisplay = document.getElementById('stokDisplay');
+        const quantityInput = document.getElementById('quantity');
+        const form = document.getElementById('addToCartForm');
+
+        if (sizeRadios.length > 0) {
+            // Add a hidden input for the selected size
+            const sizeInput = document.createElement('input');
+            sizeInput.type = 'hidden';
+            sizeInput.name = 'size_id';
+            sizeInput.id = 'size_id';
+
+            // Get the value of the first (default) selected size
+            const defaultSize = document.querySelector('.size-radio:checked');
+            if (defaultSize) {
+                sizeInput.value = defaultSize.value;
+
+                // Update max quantity based on selected size stock
+                const selectedStok = defaultSize.dataset.stok;
+                quantityInput.max = selectedStok;
+                stokDisplay.textContent = selectedStok + ' tersedia';
+
+                // Update price display if the size has a different price
+                const selectedHarga = parseInt(defaultSize.dataset.harga);
+                if (selectedHarga) {
+                    priceDisplay.textContent = 'Rp ' + selectedHarga.toLocaleString('id-ID');
+                }
+            }
+
+            // Add the hidden input to the form
+            if (form) {
+                form.appendChild(sizeInput);
+            }
+
+            // Handle size selection changes
+            sizeRadios.forEach((radio, index) => {
+                radio.addEventListener('change', function() {
+                    // Update hidden input value
+                    sizeInput.value = this.value;
+
+                    // Update visual selection
+                    sizeLabels.forEach(label => {
+                        label.classList.remove('border-orange-600', 'bg-orange-50');
+                        label.classList.add('border-gray-300');
+                    });
+                    sizeLabels[index].classList.remove('border-gray-300');
+                    sizeLabels[index].classList.add('border-orange-600', 'bg-orange-50');
+
+                    // Update stock display and max quantity
+                    const selectedStok = this.dataset.stok;
+                    stokDisplay.textContent = selectedStok + ' tersedia';
+                    quantityInput.max = selectedStok;
+
+                    // Reset quantity to 1 if current quantity exceeds new max
+                    if (parseInt(quantityInput.value) > parseInt(selectedStok)) {
+                        quantityInput.value = 1;
+                    }
+
+                    // Update price display if the size has a different price
+                    const selectedHarga = parseInt(this.dataset.harga);
+                    if (selectedHarga) {
+                        priceDisplay.textContent = 'Rp ' + selectedHarga.toLocaleString('id-ID');
+                    }
                 });
             });
         }

@@ -17,7 +17,7 @@ class Ongkir extends Model
 
     // Atribut yang dapat diisi
     protected $fillable = [
-        'nama_kota',
+        'kabupaten_id',
         'berat',
         'harga',
     ];
@@ -26,5 +26,11 @@ class Ongkir extends Model
     public function pesanan()
     {
         return $this->hasMany(Pesanan::class, 'id_ongkir', 'id_ongkir');
+    }
+
+    // Relasi ke kabupaten
+    public function kabupaten()
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
     }
 }

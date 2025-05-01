@@ -1,29 +1,34 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use Illuminate\Session\Middleware\AuthenticateSession;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KeranjangController;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
 Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detailProduk');
+Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang-kami');
 
-Route::resource('/keranjang', KeranjangController::class)->middleware('auth');
+Route::middleware('auth')->group(function () {
+    // Keranjang view and CRUD operations
+    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+    Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+    Route::post('/keranjang/{id}/update', [KeranjangController::class, 'updateViaPost'])->name('keranjang.updatepost');
+    Route::post('/keranjang/{id}/delete', [KeranjangController::class, 'destroyViaPost'])->name('keranjang.destroy.post');
+    Route::post('/keranjang/bulk-delete', [KeranjangController::class, 'bulkDelete'])->name('keranjang.bulk-delete');
+
+    // Notification routes
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+});
 
 // Auth routes - make sure these exist and are properly defined
 Route::middleware('guest')->group(function () {
@@ -33,15 +38,13 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
-});
 
-// // Alamat routes - for address setup after registration
-// Route::middleware('auth')->group(function () {
-//     Route::get('alamat-setup', [RegisteredUserController::class, 'alamatSetup'])
-//         ->name('alamat.setup');
-//     Route::post('alamat-store', [RegisteredUserController::class, 'alamatStore'])
-//         ->name('alamat.store');
-// });
+    // Google OAuth Routes
+    Route::get('auth/google', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
+        ->name('auth.google');
+    Route::get('google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
+        ->name('auth.google.callback');
+});
 
 // Add logout route for authenticated users
 Route::middleware('auth')->group(function () {
@@ -93,11 +96,41 @@ Route::get('/page-expired', function() {
 })->name('page-expired');
 
 // Cart routes
-Route::post('/cart/add', [App\Http\Controllers\KeranjangController::class, 'addToCart'])->name('cart.add');
-Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
-Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
-Route::post('/cart/bulk-delete', [App\Http\Controllers\KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
-Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
+Route::post('/cart/add', [KeranjangController::class, 'addToCart'])->name('cart.add');
+Route::get('/cart', [KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
+Route::get('/cart/count', [KeranjangController::class, 'getCartCount'])->name('cart.count');
+Route::post('/cart/bulk-delete', [KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
+
+// Test route to generate sample notifications
+Route::get('/test-notifications', function() {
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
+    }
+
+    // Create a sample notification for the current user
+    \App\Http\Controllers\NotificationController::createNotification([
+        'user_id' => $user->id,
+        'type' => 'product',
+        'title' => 'Produk Baru Tersedia',
+        'message' => 'Produk baru telah ditambahkan ke katalog kami. Silakan cek untuk detail lebih lanjut.',
+        'data' => ['url' => route('produk')],
+        'for_admin' => $user->is_admin,
+    ]);
+
+    // Create an order notification
+    \App\Http\Controllers\NotificationController::createNotification([
+        'user_id' => $user->id,
+        'type' => 'order',
+        'title' => 'Status Pesanan Diperbarui',
+        'message' => 'Pesanan anda #123 telah diperbarui statusnya menjadi "Sedang Diproses".',
+        'data' => ['url' => route('home')],
+        'for_admin' => $user->is_admin,
+    ]);
+
+    return redirect()->back()->with('success', 'Notifikasi sampel telah dibuat, silakan cek ikon notifikasi.');
+});
 
 // fallback route
 Route::fallback(function () {

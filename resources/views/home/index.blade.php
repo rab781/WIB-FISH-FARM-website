@@ -76,10 +76,10 @@
     <div class="relative z-10 container mx-auto px-12 py-4 h-full flex items-center">
         <div class="max-w-xl text-white">
             <h1 class="text-4xl font-bold mb-4 opacity-0 fade-in-up">WIB FISH FARM</h1>
-            <p class="mb-6 opacity-0 fade-in-up delay-200">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
+            <p class="mb-6 opacity-0 fade-in-up delay-200">Temukan keindahan ikan hias berkualitas untuk akuarium dan kolam Anda. Kami menyediakan berbagai jenis ikan Koi dan Koki pilihan dengan pengiriman yang aman dan terjamin ke seluruh Indonesia.</p>
             <div class="flex space-x-4 opacity-0 fade-in-up delay-400">
                 @auth
-                    <a href="/dashboard" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
+                    <a href="/produk" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Belanja Sekarang</a>
                 @else
                     <a href="{{ route('register') }}" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
                     <a href="{{ route('login') }}" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
@@ -115,7 +115,7 @@
             <p class="mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
             <div class="flex space-x-4">
                 @auth
-                    <a href="/dashboard" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
+                    <a href="/produk" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
                 @else
                     <a href="{{ route('register') }}" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
                     <a href="{{ route('login') }}" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>
@@ -149,7 +149,15 @@
                     @foreach($produk as $p)
                         <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 hover-lift" data-aos="fade-up">
                             <div class="h-48 bg-gray-200 relative overflow-hidden">
-                                <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                                @if($p->gambar)
+                                    @if(Str::startsWith($p->gambar, 'uploads/'))
+                                        <img src="{{ asset($p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                                    @else
+                                        <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                                    @endif
+                                @else
+                                    <img src="{{ asset('Images/Default-fish.png') }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-contain opacity-80">
+                                @endif
                                 <div class="absolute top-2 right-2">
                                     @if($p->popularity >= 4)
                                     <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>

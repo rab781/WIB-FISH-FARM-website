@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationController;
 use App\Models\Produk;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -66,6 +68,21 @@ class ProdukController extends Controller
 
             if ($produk) {
                 Log::info('Product created successfully: ' . $request->nama_ikan);
+
+                // Send notification to all customers about new product
+                $customers = User::where('is_admin', false)->get();
+                foreach ($customers as $customer) {
+                    NotificationController::notifyCustomer($customer->id, [
+                        'type' => 'product',
+                        'title' => 'Produk Baru Ditambahkan',
+                        'message' => 'Produk baru "' . $produk->nama_ikan . '" telah ditambahkan.',
+                        'data' => [
+                            'product_id' => $produk->id_Produk,
+                            'url' => route('detailProduk', ['id' => $produk->id_Produk])
+                        ]
+                    ]);
+                }
+
                 return redirect()->route('admin.produk.index')
                         ->with('success', 'Produk berhasil ditambahkan');
             } else {
@@ -141,6 +158,21 @@ class ProdukController extends Controller
 
             if ($updated) {
                 Log::info('Product updated successfully: ' . $produk->nama_ikan);
+
+                // Send notification to all customers about updated product
+                $customers = User::where('is_admin', false)->get();
+                foreach ($customers as $customer) {
+                    NotificationController::notifyCustomer($customer->id, [
+                        'type' => 'product',
+                        'title' => 'Produk Diperbarui',
+                        'message' => 'Produk "' . $produk->nama_ikan . '" telah diperbarui.',
+                        'data' => [
+                            'product_id' => $produk->id_Produk,
+                            'url' => route('detailProduk', ['id' => $produk->id_Produk])
+                        ]
+                    ]);
+                }
+
                 return redirect()->route('admin.produk.index')
                         ->with('success', 'Produk berhasil diperbarui');
             } else {

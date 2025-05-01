@@ -32,8 +32,6 @@
                 <ul class="space-y-3">
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Koki</a></li>
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Koi</a></li>
-                    <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Arwana</a></li>
-                    <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Aksesoris</a></li>
                 </ul>
             </div>
 
