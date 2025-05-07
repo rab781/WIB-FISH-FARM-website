@@ -17,7 +17,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/'; // Changed from '/dashboard' to '/produk'
+    public const HOME = '/'; 
 
     /**
      * The path to admin dashboard route.

@@ -127,6 +127,16 @@ class ProdukController extends Controller
             'jenis_ikan' => 'required|string|max:255',
             'popularity' => 'nullable|integer|min:0|max:5',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ],
+        [
+            'nama_ikan.required' => 'Nama ikan harus diisi.',
+            'deskripsi.required' => 'Deskripsi harus diisi.',
+            'stok.required' => 'Stok harus diisi.',
+            'harga.required' => 'Harga harus diisi.',
+            'jenis_ikan.required' => 'Jenis ikan harus diisi.',
+            'gambar.image' => 'File yang diunggah harus berupa gambar.',
+            'gambar.mimes' => 'Gambar harus dalam format jpeg, png, jpg, atau gif.',
+            'gambar.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
         try {
