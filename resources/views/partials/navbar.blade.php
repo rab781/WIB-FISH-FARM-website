@@ -11,7 +11,7 @@
                 </div>
                 <a href="/" class="text-gray-700 hover:text-orange-600 font-medium">Beranda</a>
                 <a href="/produk" class="text-gray-700 hover:text-orange-600 font-medium">Produk</a>
-                <a href="/tentang-kami" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
+                <a href="{{ route('tentang-kami') }}" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
                 @auth
                     <a href="/pesanan" class="text-gray-700 hover:text-orange-600 font-medium">Pesanan Saya</a>
                 @endauth
@@ -46,7 +46,7 @@
                     </a>
 
                     <!-- Notification button for authenticated users -->
-                    @include('components.notification-dropdown')
+                    <x-customer.notification-dropdown />
 
                     <!-- Profile dropdown menu for authenticated users -->
                     <div class="relative" x-data="{ open: false }">
@@ -70,8 +70,7 @@
                             x-transition:leave-start="transform opacity-100 scale-100"
                             x-transition:leave-end="transform opacity-0 scale-95"
                             class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl z-10">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

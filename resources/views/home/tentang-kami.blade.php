@@ -1,249 +1,251 @@
 @extends('layouts.customer')
 
 @section('content')
-<!-- Hero Section -->
-<section class="relative py-20 bg-gradient-to-br from-orange-50 to-orange-100">
+<div class="bg-gradient-to-b from-gray-50 to-white py-20">
     <div class="container mx-auto px-6">
-        <div class="flex flex-col md:flex-row items-center">
-            <div class="md:w-1/2 mb-8 md:mb-0" data-aos="fade-right">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Tentang WIB Fish Farm</h1>
-                <p class="text-lg text-gray-700 mb-6">Membudidayakan ikan hias berkualitas dengan dedikasi dan passion sejak 2008.</p>
-                <p class="text-gray-600">
-                    WIB Fish Farm adalah pionir dalam budidaya ikan hias Koi dan Koki berkualitas di Jember, Jawa Timur. 
-                    Dengan komitmen untuk menyediakan ikan hias terbaik, kami menggabungkan tradisi dan inovasi modern 
-                    dalam setiap aspek budidaya kami.
-                </p>
-            </div>
-            <div class="md:w-1/2 flex justify-center" data-aos="fade-left">
+        <!-- Header Section with improved styling -->
+        <div class="mb-16 text-center" data-aos="fade-up">
+            <span class="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-2 inline-block">Siapa Kami</span>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Tentang WIB FISH FARM</h1>
+            <div class="w-24 h-1 bg-orange-500 mx-auto mb-6"></div>
+            <p class="text-gray-600 max-w-3xl mx-auto text-lg">Tempat penjualan ikan hias berkualitas dari Jember</p>
+        </div>
+
+        <!-- Main Content Section with added styling -->
+        <div class="flex flex-col lg:flex-row gap-12 mb-20">
+            <!-- Left Column: Image with added effects -->
+            <div class="w-full lg:w-1/2" data-aos="fade-right">
                 <div class="relative">
-                    <div class="absolute inset-0 bg-orange-400 rounded-lg transform rotate-3"></div>
-                    <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="WIB Fish Farm" class="relative rounded-lg w-80 h-80 object-contain bg-white shadow-lg">
+                    <div class="absolute -top-4 -left-4 w-24 h-24 bg-orange-100 rounded-full -z-10"></div>
+                    <img src="{{ asset('Images/kolam-ikan.jpg') }}" alt="Kolam Koi WIB Fish Farm" class="rounded-lg shadow-xl w-full h-auto object-cover relative z-10" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                    <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-100 rounded-full -z-10"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Description with improved typography -->
+            <div class="w-full lg:w-1/2" data-aos="fade-left">
+                <span class="text-orange-500 font-medium mb-2 inline-block">Tentang Kami</span>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">WIB FISH FARM</h2>
+                <p class="text-gray-700 mb-6 leading-relaxed text-lg">
+                    WIB FISH FARM merupakan tempat penjualan ikan hias koi dan koki di daerah Jember, tepatnya di Jalan Danau Toba, Kecamatan Sumbersari, Kabupaten Jember. Ada banyak koleksi ikan koi dan koki yang kami sediakan dengan variasinya. Ikan hias koki dan koi yang kami jual telah teruji kualitasnya.
+                </p>
+                <p class="text-gray-700 mb-8 leading-relaxed text-lg">
+                    Kami melakukan perawatan yang teratur sehingga tumbuh dengan sehat dan indah sehingga beberapa ikan yang tersedia di ikut sertakan dalam kontes.
+                </p>
+                <div class="flex space-x-4">
+                    <span class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg font-medium inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Kualitas Premium
+                    </span>
+                    <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Sejak 2015
+                    </span>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Visi & Misi Section -->
-<section class="py-16 bg-white">
-    <div class="container mx-auto px-6">
-        <div class="max-w-3xl mx-auto text-center mb-12" data-aos="fade-up">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Visi & Misi Kami</h2>
-            <div class="w-16 h-1 bg-orange-500 mx-auto mb-6"></div>
-        </div>
+        <!-- Why Choose Us Section with enhanced design -->
+        <div class="py-16 px-6 bg-gray-50 rounded-3xl mb-20" data-aos="fade-up">
+            <div class="text-center mb-12">
+                <span class="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-2 inline-block">Keunggulan Kami</span>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">MENGAPA KAMI?</h2>
+                <div class="w-16 h-1 bg-orange-500 mx-auto mb-4"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Kami bangga menyediakan ikan hias berkualitas dengan pelayanan terbaik untuk setiap pelanggan</p>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-gray-50 p-8 rounded-lg shadow-md transform transition duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-right">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div class="flex flex-col md:flex-row gap-6 items-start bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="bg-orange-100 p-4 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Visi</h3>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-900">Ikan dirawat dengan baik dan teratur</h3>
+                        <p class="text-gray-700">Setiap ikan mendapatkan perawatan optimal untuk memastikan kesehatan dan keindahan.</p>
+                    </div>
                 </div>
-                <p class="text-gray-600">
-                    Menjadi pusat budidaya ikan hias terkemuka di Indonesia yang dikenal akan kualitas, keberlanjutan, dan inovasi.
+
+                <div class="flex flex-col md:flex-row gap-6 items-start bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="bg-orange-100 p-4 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-900">Warna dan jenis yang tersedia beragam</h3>
+                        <p class="text-gray-700">Koleksi ikan dengan variasi warna dan jenis yang lengkap untuk pilihan Anda.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 items-start bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="bg-orange-100 p-4 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-900">Harga terjangkau dengan kualitas unggul</h3>
+                        <p class="text-gray-700">Menawarkan ikan berkualitas dengan harga yang kompetitif dan terjangkau.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 items-start bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="bg-orange-100 p-4 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-900">Pemesanan dapat dilakukan secara online</h3>
+                        <p class="text-gray-700">Kemudahan berbelanja dari mana saja dengan sistem pemesanan online yang praktis.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 items-start md:col-span-2 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="bg-orange-100 p-4 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-900">Pengiriman aman dengan garansi (※ Syarat dan Ketentuan Berlaku)</h3>
+                        <p class="text-gray-700">Kami menjamin keamanan ikan selama pengiriman dengan layanan pengiriman terpercaya.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Gallery with improved styling -->
+        <div class="mt-16" data-aos="fade-up">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <span class="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-2 inline-block">Koleksi Kami</span>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Koleksi Ikan Kami</h2>
+                <div class="w-16 h-1 bg-orange-500 mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Jelajahi berbagai jenis ikan koi dan koki berkualitas pilihan yang kami budidayakan dengan perawatan terbaik
                 </p>
             </div>
 
-            <div class="bg-gray-50 p-8 rounded-lg shadow-md transform transition duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-left">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                        </svg>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Koi Kohaku -->
+                <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="0">
+                    <div class="relative overflow-hidden h-64">
+                        <img src="{{ asset('Images/koi-1.jpg') }}" alt="Ikan Koi Kohaku" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                            <div class="p-4 w-full">
+                                <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Premium</span>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Misi</h3>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Koi Kohaku</h3>
+                        <p class="text-gray-600 mb-4">Koi Kohaku adalah ikan koi dengan pola berwarna merah dan putih yang menjadi ikon koi klasik Jepang.</p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Ukuran: 25-35 cm</span>
+                        </div>
+                    </div>
                 </div>
-                <ul class="text-gray-600 space-y-2">
-                    <li class="flex items-start">
-                        <svg class="w-4 h-4 text-orange-500 mt-1 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Mengembangkan teknik budidaya yang inovatif untuk menghasilkan ikan hias berkualitas tinggi.</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-4 h-4 text-orange-500 mt-1 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Mempraktikkan budidaya yang berkelanjutan dan ramah lingkungan.</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-4 h-4 text-orange-500 mt-1 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Memberikan edukasi tentang pemeliharaan ikan hias kepada konsumen.</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-4 h-4 text-orange-500 mt-1 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Menyediakan pelayanan terbaik untuk kepuasan pelanggan.</span>
-                    </li>
-                </ul>
+
+                <!-- Koi Showa -->
+                <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative overflow-hidden h-64">
+                        <img src="{{ asset('Images/koi-2.jpg') }}" alt="Ikan Koi Showa" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                            <div class="p-4 w-full">
+                                <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Best Seller</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Koi Showa</h3>
+                        <p class="text-gray-600 mb-4">Koi Showa memiliki kombinasi warna hitam, merah, dan putih yang menawan dengan pola yang kompleks.</p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Ukuran: 20-30 cm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Koki Oranda -->
+                <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative overflow-hidden h-64">
+                        <img src="{{ asset('Images/koki-1.jpg') }}" alt="Ikan Koki Oranda" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                            <div class="p-4 w-full">
+                                <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Populer</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Koki Oranda</h3>
+                        <p class="text-gray-600 mb-4">Ikan koki Oranda memiliki ciri khas berupa tonjolan di kepala yang menyerupai mahkota.</p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Ukuran: 15-20 cm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 text-center">
+                <a href="{{ url('/produk') }}" class="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium group">
+                    Lihat Semua Koleksi
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Team Section -->
-<section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-6">
-        <div class="max-w-3xl mx-auto text-center mb-12" data-aos="fade-up">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Tim Kami</h2>
-            <div class="w-16 h-1 bg-orange-500 mx-auto mb-6"></div>
-            <p class="text-gray-600">
-                Kenali orang-orang berbakat di balik kesuksesan WIB Fish Farm yang membawa passion 
-                dan dedikasi dalam budidaya ikan hias berkualitas.
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            @foreach($teamMembers as $member)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:-translate-y-2 hover:shadow-xl" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                <div class="h-56 bg-gray-200">
-                    <img src="{{ asset($member['image']) }}" alt="{{ $member['name'] }}" class="w-full h-full object-cover" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-gray-900 mb-1">{{ $member['name'] }}</h3>
-                    <p class="text-orange-600 font-medium mb-3">{{ $member['role'] }}</p>
-                    <p class="text-gray-600">{{ $member['bio'] }}</p>
-                </div>
+        <!-- CTA Section with better styling -->
+        <div class="mt-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-12 text-center overflow-hidden relative" data-aos="fade-up">
+            <div class="absolute inset-0 opacity-10">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="fish" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                            <path d="M40,10 C55,10 55,30 45,35 C55,40 55,60 40,60 C20,60 10,40 20,35 C10,30 20,10 40,10 Z" fill="currentColor"/>
+                        </pattern>
+                    </defs>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#fish)"/>
+                </svg>
             </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-<!-- Milestones Section -->
-<section class="py-16 bg-white">
-    <div class="container mx-auto px-6">
-        <div class="max-w-3xl mx-auto text-center mb-12" data-aos="fade-up">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Perjalanan Kami</h2>
-            <div class="w-16 h-1 bg-orange-500 mx-auto mb-6"></div>
-            <p class="text-gray-600">
-                Lima belas tahun perjalanan WIB Fish Farm dalam mengembangkan budidaya ikan hias berkualitas di Indonesia.
-            </p>
-        </div>
-
-        <div class="relative">
-            <!-- Timeline Line -->
-            <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-orange-200"></div>
-
-            <!-- Timeline Items -->
             <div class="relative z-10">
-                @foreach($milestones as $index => $milestone)
-                <div class="flex flex-col md:flex-row items-center mb-12" data-aos="{{ $index % 2 == 0 ? 'fade-right' : 'fade-left' }}">
-                    <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:pr-12 md:text-right' : 'md:pl-12 md:order-last' }}">
-                        <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $milestone['title'] }}</h3>
-                            <p class="text-gray-600">{{ $milestone['description'] }}</p>
-                        </div>
-                    </div>
-                    <div class="md:w-0 flex items-center justify-center my-4 md:my-0">
-                        <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                            {{ $milestone['year'] }}
-                        </div>
-                    </div>
-                    <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:pl-12 md:order-last' : 'md:pr-12 md:text-right' }}">
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="py-16 bg-gray-900 text-white">
-    <div class="container mx-auto px-6">
-        <div class="max-w-3xl mx-auto text-center mb-12" data-aos="fade-up">
-            <h2 class="text-3xl font-bold mb-4">Apa Kata Pelanggan Kami</h2>
-            <div class="w-16 h-1 bg-orange-500 mx-auto mb-6"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-gray-800 p-6 rounded-lg transform transition duration-300 hover:-translate-y-1 hover:shadow-xl" data-aos="fade-up" data-aos-delay="0">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white mr-4">
-                        <span class="text-lg font-bold">D</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold">Dewi Susanti</h3>
-                        <p class="text-gray-400 text-sm">Jakarta</p>
-                    </div>
-                </div>
-                <p class="text-gray-300 italic">"Saya sangat puas dengan koi yang saya beli. Ikannya sehat dan warna-warninya sangat cantik. Pengiriman cepat dan ikan tiba dalam keadaan prima. Terima kasih WIB Fish Farm!"</p>
-                <div class="mt-4 flex text-orange-400">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 p-6 rounded-lg transform transition duration-300 hover:-translate-y-1 hover:shadow-xl" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white mr-4">
-                        <span class="text-lg font-bold">B</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold">Budi Santoso</h3>
-                        <p class="text-gray-400 text-sm">Surabaya</p>
-                    </div>
-                </div>
-                <p class="text-gray-300 italic">"Ikan koki dari WIB Fish Farm memiliki bentuk dan kualitas yang sangat bagus. Sebagai kolektor, saya menghargai ketelitian mereka dalam memilih dan memelihara ikan. Layanan pelanggan juga sangat responsif."</p>
-                <div class="mt-4 flex text-orange-400">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 p-6 rounded-lg transform transition duration-300 hover:-translate-y-1 hover:shadow-xl" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white mr-4">
-                        <span class="text-lg font-bold">A</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold">Arief Wicaksono</h3>
-                        <p class="text-gray-400 text-sm">Bandung</p>
-                    </div>
-                </div>
-                <p class="text-gray-300 italic">"WIB Fish Farm tidak hanya menjual ikan, tapi juga memberikan edukasi tentang cara merawat ikan dengan baik. Hal ini sangat membantu bagi pemula seperti saya. Ikan-ikan yang saya beli tumbuh dengan baik!"</p>
-                <div class="mt-4 flex text-orange-400">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <h2 class="text-3xl font-bold text-white mb-4">Siap untuk memiliki ikan berkualitas?</h2>
+                <p class="text-white text-opacity-90 mb-8 max-w-2xl mx-auto">Jelajahi koleksi ikan hias berkualitas kami dan temukan ikan impian untuk akuarium atau kolam Anda.</p>
+                <div class="flex justify-center">
+                    <a href="{{ url('/produk') }}" class="bg-white hover:bg-orange-50 text-orange-600 font-semibold py-3 px-8 rounded-md transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        Lihat Koleksi Ikan
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
-<!-- CTA Section -->
-<section class="py-16 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-    <div class="container mx-auto px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-6" data-aos="fade-up">Bersiap Memulai Hobi Ikan Hias?</h2>
-            <p class="text-lg mb-8" data-aos="fade-up" data-aos-delay="100">
-                Jelajahi koleksi ikan koi dan koki berkualitas kami dan jadilah bagian dari komunitas pecinta ikan hias.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
-                <a href="{{ route('produk') }}" class="bg-white text-orange-600 hover:bg-gray-100 py-3 px-8 rounded-md font-medium transition transform hover:-translate-y-1">
-                    Lihat Produk Kami
-                </a>
-                <a href="#" class="border-2 border-white text-white hover:bg-white/20 py-3 px-8 rounded-md font-medium transition transform hover:-translate-y-1">
-                    Hubungi Kami
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
+@push('scripts')
+<script>
+    // Ensure AOS is initialized properly for this specific page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Reinitialize AOS for this page
+        setTimeout(function() {
+            if (typeof AOS !== 'undefined') {
+                AOS.refresh();
+            }
+        }, 100);
+    });
+</script>
+@endpush
 @endsection

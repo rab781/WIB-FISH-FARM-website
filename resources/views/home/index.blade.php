@@ -125,77 +125,6 @@
     </div>
 </section>
 
-<!-- Products Section -->
-<section class="py-16 bg-white">
-    <div class="container mx-auto px-6">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h2 class="text-2xl font-bold">Produk Unggulan</h2>
-                <p class="text-gray-600">Koleksi ikan hias berkualitas terbaik untuk Anda</p>
-            </div>
-            <a href="/produk" class="border border-gray-300 px-4 py-2 rounded text-sm hover-lift">Lihat Semua</a>
-        </div>
-
-        <div x-data="productSlider()" class="product-slider">
-            <!-- Product Grid -->
-            <div class="relative overflow-hidden">
-                <div
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-                    :class="{'slide-out-right': isAnimating && slideDirection === 'left', 'slide-out-left': isAnimating && slideDirection === 'right', 'slide-in-right': isAnimating && slideDirection === 'right', 'slide-in-left': isAnimating && slideDirection === 'left'}"
-                    x-show="!isAnimating"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100">
-                    @foreach($produk as $p)
-                        <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 hover-lift" data-aos="fade-up">
-                            <div class="h-48 bg-gray-200 relative overflow-hidden">
-                                @if($p->gambar)
-                                    @if(Str::startsWith($p->gambar, 'uploads/'))
-                                        <img src="{{ asset($p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
-                                    @else
-                                        <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
-                                    @endif
-                                @else
-                                    <img src="{{ asset('Images/Default-fish.png') }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-contain opacity-80">
-                                @endif
-                                <div class="absolute top-2 right-2">
-                                    @if($p->popularity >= 4)
-                                    <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <h3 class="font-medium text-gray-900 mb-1">{{ $p->nama_ikan }}</h3>
-                                <p class="text-gray-600 mb-2">{{ $p->deskripsi }}</p>
-                                <div class="flex justify-between items-center mb-2">
-                                    <p class="text-gray-900 font-bold">Rp {{ number_format($p->harga, 0, ',', '.') }}</p>
-                                </div>
-                                <a href="{{ route('detailProduk', $p->id_Produk) }}" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-md text-sm font-medium transition">
-                                    Lihat Detail
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Navigation Arrows -->
-            <div class="flex justify-end mt-4 space-x-2">
-                <button @click="prevPage" :disabled="isAnimating || !hasMultiplePages()" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-                <button @click="nextPage" :disabled="isAnimating || !hasMultiplePages()" class="h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!--Review section-->
 <section class="py-16 bg-gray-100">
     <div class="container mx-auto px-6">
@@ -220,8 +149,19 @@
 
                     <!-- User Info -->
                     <div class="flex items-center">
-                        <div class="h-12 w-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                            <img src="{{ $u->user->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $u->user->name }}" class="w-full h-full object-cover">
+                        <div class="h-12 w-12 rounded-full overflow-hidden flex-shrink-0">
+                            @if($u->user->avatar)
+                                <img src="{{ asset($u->user->avatar) }}" alt="{{ $u->user->name }}" class="w-full h-full object-cover">
+                            @else
+                                @php
+                                    $colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'];
+                                    $colorIndex = ord(strtoupper(substr($u->user->name, 0, 1))) % count($colors);
+                                    $initial = strtoupper(substr($u->user->name, 0, 1));
+                                @endphp
+                                <div class="{{ $colors[$colorIndex] }} w-full h-full flex items-center justify-center text-white font-bold text-xl">
+                                    {{ $initial }}
+                                </div>
+                            @endif
                         </div>
                         <div class="ml-4">
                             <p class="font-semibold text-gray-800">{{ $u->user->name }}</p>
@@ -229,12 +169,8 @@
                         </div>
                     </div>
 
-                    <!-- Decorative Element -->
-                    <div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-                        <svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.049 2.927C9.469 1.165 11.531 1.165 11.951 2.927l.7 2.9a1 1 0 00.95.69h3.011c1.518 0 2.144 1.94.92 2.88l-2.43 1.77a1 1 0 00-.364 1.118l.7 2.9c.42 1.762-1.44 3.22-2.92 2.28l-2.43-1.77a1 1 0 00-1.176 0l-2.43 1.77c-1.48.94-3.34-.518-2.92-2.28l.7-2.9a1 1 0 00-.364-1.118l-2.43-1.77c-1.224-.94-.598-2.88.92-2.88h3.011a1 1 0 00.95-.69l.7-2.9z" />
-                        </svg>
-                    </div>
+                    <!-- Date -->
+                    <p class="absolute bottom-4 right-4 text-xs text-gray-500">{{ \Carbon\Carbon::parse($u->created_at)->diffForHumans() }}</p>
                 </div>
             @endforeach
         </div>

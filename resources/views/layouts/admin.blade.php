@@ -109,8 +109,8 @@
                     </div>
 
                     <div class="flex items-center space-x-4">
-                        <!-- Notification Component -->
-                        @include('components.notification-dropdown')
+                        <!-- Admin Notification Component -->
+                        @include('components.admin-notification-dropdown')
 
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center space-x-1 text-gray-700 focus:outline-none">

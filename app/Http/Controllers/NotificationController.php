@@ -27,15 +27,30 @@ class NotificationController extends Controller
         $isAdmin = $user->is_admin ?? false;
 
         try {
+            // For API requests, check if specific admin/customer filter is provided
+            $forAdmin = $isAdmin;
+            if (request()->has('for_admin')) {
+                $forAdmin = request('for_admin') == 1;
+            }
+
             // Get notifications appropriate for the user type (admin or customer)
             $notifications = Notification::where('user_id', $user->id)
-                ->where('for_admin', $isAdmin)
+                ->where('for_admin', $forAdmin)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
             // Return JSON response for AJAX requests
             if (request()->wantsJson() || request()->has('format') && request('format') === 'json') {
-                $formattedNotifications = $notifications->items()->map(function($notification) {
+                // Pastikan $notifications adalah instance Paginator
+                if (method_exists($notifications, 'items')) {
+                    $notificationItems = $notifications->items();
+                } else {
+                    // Jika bukan Paginator, gunakan sebagai koleksi atau array
+                    $notificationItems = is_array($notifications) ? $notifications : $notifications->all();
+                }
+
+                // Konversi notifikasi ke format yang diinginkan
+                $formattedNotifications = collect($notificationItems)->map(function($notification) {
                     return [
                         'id' => $notification->id,
                         'type' => $notification->type,
@@ -51,13 +66,19 @@ class NotificationController extends Controller
                 return response()->json([
                     'notifications' => $formattedNotifications,
                     'unread_count' => Notification::where('user_id', $user->id)
-                        ->where('for_admin', $isAdmin)
+                        ->where('for_admin', $forAdmin)
                         ->where('is_read', false)
                         ->count(),
                 ]);
             }
 
-            return view('notifications.index', compact('notifications'));
+            // Use different views for admin and customer
+            if ($isAdmin) {
+                $title = 'Notifikasi Admin';
+                return view('admin.notifications.index', compact('notifications', 'title'));
+            } else {
+                return view('customer.notifications.index', compact('notifications'));
+            }
         } catch (\Exception $e) {
             Log::error('Error loading notifications: ' . $e->getMessage());
 
@@ -100,7 +121,13 @@ class NotificationController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            return redirect()->back()->with('success', 'Notifikasi telah ditandai sebagai dibaca');
+            // Redirect based on user type
+            $isAdmin = Auth::user()->is_admin ?? false;
+            if ($isAdmin) {
+                return redirect()->route('admin.notifications.index')->with('success', 'Notifikasi telah ditandai sebagai dibaca');
+            } else {
+                return redirect()->route('notifications.index')->with('success', 'Notifikasi telah ditandai sebagai dibaca');
+            }
         } catch (\Exception $e) {
             Log::error('Error marking notification as read: ' . $e->getMessage());
 
@@ -137,7 +164,13 @@ class NotificationController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
+            // Redirect based on user type
+            $isAdmin = Auth::user()->is_admin ?? false;
+            if ($isAdmin) {
+                return redirect()->route('admin.notifications.index')->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
+            } else {
+                return redirect()->route('notifications.index')->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
+            }
         } catch (\Exception $e) {
             Log::error('Error marking all notifications as read: ' . $e->getMessage());
 
@@ -163,8 +196,14 @@ class NotificationController extends Controller
             $user = Auth::user();
             $isAdmin = $user->is_admin ?? false;
 
+            // For API requests, check if specific admin/customer filter is provided
+            $forAdmin = $isAdmin;
+            if (request()->has('for_admin')) {
+                $forAdmin = request('for_admin') == 1;
+            }
+
             $count = Notification::where('user_id', $user->id)
-                ->where('for_admin', $isAdmin)
+                ->where('for_admin', $forAdmin)
                 ->where('is_read', false)
                 ->count();
 

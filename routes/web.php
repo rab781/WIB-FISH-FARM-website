@@ -23,6 +23,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/keranjang/{id}/delete', [KeranjangController::class, 'destroyViaPost'])->name('keranjang.destroy.post');
     Route::post('/keranjang/bulk-delete', [KeranjangController::class, 'bulkDelete'])->name('keranjang.bulk-delete');
 
+    // Profile routes
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/kabupaten', [App\Http\Controllers\ProfileController::class, 'getKabupaten'])->name('profile.kabupaten');
+    Route::get('/profile/kecamatan', [App\Http\Controllers\ProfileController::class, 'getKecamatan'])->name('profile.kecamatan');
+
     // Notification routes
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
@@ -62,6 +69,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
+    // Admin profile routes
+    Route::get('profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('admin.profile.show');
+    Route::get('profile/edit', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::put('profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profile.update');
+
+    // Admin notification routes
+    Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
 
     // Admin produk routes
     Route::resource('/produk', AdminProdukController::class)->names([
