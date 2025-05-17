@@ -32,15 +32,13 @@
                 <ul class="space-y-3">
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Koki</a></li>
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Koi</a></li>
-                    <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Ikan Arwana</a></li>
-                    <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Aksesoris</a></li>
                 </ul>
             </div>
 
             <div class="w-full md:w-1/4 mb-8 md:mb-0">
                 <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Perusahaan</h3>
                 <ul class="space-y-3">
-                    <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Tentang Kami</a></li>
+                    <li><a href="{{ route('tentang-kami') }}" class="text-base text-gray-400 hover:text-gray-300">Tentang Kami</a></li>
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Karir</a></li>
                     <li><a href="#" class="text-base text-gray-400 hover:text-gray-300">Blog</a></li>
                 </ul>

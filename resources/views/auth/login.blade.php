@@ -68,13 +68,4 @@
             </a>
         </div>
     </form>
-
-    <!-- Developer Notice - Remove in production -->
-    <div class="mt-6 text-xs p-3 bg-gray-100 rounded-md border border-gray-300">
-        <p class="font-semibold text-gray-700">Developer Note:</p>
-        <p class="text-gray-600 mt-1">To redirect users to the products page after login/registration, modify <code>HOME</code> constant in <code>app/Providers/RouteServiceProvider.php</code>:</p>
-        <pre class="mt-2 bg-gray-800 text-gray-200 p-2 rounded overflow-x-auto">
-    public const HOME = '/produk';  // Change from '/dashboard' to '/produk'
-        </pre>
-    </div>
 </x-guest-layout>

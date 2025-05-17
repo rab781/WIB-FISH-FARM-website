@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
@@ -42,6 +43,14 @@
                             </svg>
                             Dashboard
                         </a>
+
+                        <a href="{{ route('admin.profile.show') }}" class="flex items-center px-4 py-2 text-gray-300 rounded-lg hover:bg-yellow-600 hover:text-white">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Profil
+                        </a>
+
                         <a href="/admin/products" class="flex items-center px-4 py-2 text-gray-300 rounded-lg hover:bg-yellow-600 hover:text-white">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -101,11 +110,15 @@
                 </button>
 
                 <div class="flex items-center">
-                    <h1 class="text-xl font-semibold">Dashboard</h1>
+                    <h1 class="text-xl font-semibold">{{ $title ?? 'Dashboard' }}</h1>
                 </div>
 
-                <!-- User dropdown -->
-                <div class="relative" x-data="{ open: false }">
+                <div class="flex items-center space-x-4">
+                    <!-- Admin Notification dropdown -->
+                    <x-admin.notification-dropdown />
+
+                    <!-- User dropdown -->
+                    <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center focus:outline-none">
                         <div class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center text-white overflow-hidden">
                             @if(auth()->user()->profile_photo_path)
@@ -127,8 +140,8 @@
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl z-10">
-                        <a href="/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Site</a>
-                        <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                        <a href="/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Lihat Website</a>
+                        <a href="{{ route('admin.profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil Admin</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

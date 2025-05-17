@@ -6,7 +6,7 @@
 // Product slider functionality
 function productSlider() {
     return {
-        products: productData, // Data produk dari backend
+        products: productData || [], // Data produk dari backend with fallback
         currentPage: 0,
         pageSize: 4, // Jumlah produk per halaman
         slideDirection: 'right',
@@ -14,7 +14,7 @@ function productSlider() {
 
         // Hitung total halaman
         totalPages() {
-            return Math.ceil(this.products.length / this.pageSize);
+            return Math.ceil(this.products.length / this.pageSize) || 1;
         },
 
         // Cek apakah ada lebih dari satu halaman produk
@@ -34,14 +34,17 @@ function productSlider() {
             this.isAnimating = true;
             this.slideDirection = 'right';
 
-            setTimeout(() => {
-                if (this.currentPage < this.totalPages() - 1) {
-                    this.currentPage++;
-                } else {
-                    this.currentPage = 0;
-                }
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (this.currentPage < this.totalPages() - 1) {
+                        this.currentPage++;
+                    } else {
+                        this.currentPage = 0;
+                    }
+                    this.isAnimating = false;
+                }, 400);
+            });
         },
 
         // Navigasi ke halaman sebelumnya
@@ -50,14 +53,17 @@ function productSlider() {
             this.isAnimating = true;
             this.slideDirection = 'left';
 
-            setTimeout(() => {
-                if (this.currentPage > 0) {
-                    this.currentPage--;
-                } else {
-                    this.currentPage = this.totalPages() - 1;
-                }
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (this.currentPage > 0) {
+                        this.currentPage--;
+                    } else {
+                        this.currentPage = this.totalPages() - 1;
+                    }
+                    this.isAnimating = false;
+                }, 400);
+            });
         },
 
         // Navigasi ke halaman tertentu
@@ -66,10 +72,13 @@ function productSlider() {
             this.isAnimating = true;
             this.slideDirection = page > this.currentPage ? 'right' : 'left';
 
-            setTimeout(() => {
-                this.currentPage = page;
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    this.currentPage = page;
+                    this.isAnimating = false;
+                }, 400);
+            });
         }
     };
 }
@@ -77,7 +86,7 @@ function productSlider() {
 // Testimonial slider functionality
 function testimonialSlider() {
     return {
-        testimonials: testimonialData,
+        testimonials: testimonialData || [],
         currentPage: 0,
         pageSize: 3,
         slideDirection: 'right',
@@ -85,7 +94,7 @@ function testimonialSlider() {
 
         // Calculate total pages
         totalPages() {
-            return Math.ceil(this.testimonials.length / this.pageSize);
+            return Math.ceil(this.testimonials.length / this.pageSize) || 1;
         },
 
         // Navigate to next page
@@ -94,14 +103,17 @@ function testimonialSlider() {
             this.isAnimating = true;
             this.slideDirection = 'right';
 
-            setTimeout(() => {
-                if (this.currentPage < this.totalPages() - 1) {
-                    this.currentPage++;
-                } else {
-                    this.currentPage = 0;
-                }
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (this.currentPage < this.totalPages() - 1) {
+                        this.currentPage++;
+                    } else {
+                        this.currentPage = 0;
+                    }
+                    this.isAnimating = false;
+                }, 400);
+            });
         },
 
         // Navigate to previous page
@@ -110,14 +122,17 @@ function testimonialSlider() {
             this.isAnimating = true;
             this.slideDirection = 'left';
 
-            setTimeout(() => {
-                if (this.currentPage > 0) {
-                    this.currentPage--;
-                } else {
-                    this.currentPage = this.totalPages() - 1;
-                }
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (this.currentPage > 0) {
+                        this.currentPage--;
+                    } else {
+                        this.currentPage = this.totalPages() - 1;
+                    }
+                    this.isAnimating = false;
+                }, 400);
+            });
         },
 
         // Jump to specific page
@@ -126,10 +141,13 @@ function testimonialSlider() {
             this.isAnimating = true;
             this.slideDirection = page > this.currentPage ? 'right' : 'left';
 
-            setTimeout(() => {
-                this.currentPage = page;
-                this.isAnimating = false;
-            }, 400);
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    this.currentPage = page;
+                    this.isAnimating = false;
+                }, 400);
+            });
         },
 
         // Get visible testimonials for current page
@@ -161,26 +179,66 @@ function appState() {
         scrolled: false,
         showAuthModal: false,
         modalMessage: '',
+        observerInitialized: false,
 
         // Initialize
         init() {
-            // Initialize AOS animation library
+            // Initialize AOS animation library with optimized settings
             AOS.init({
                 duration: 800,
-                easing: 'ease',
-                once: false,
-                mirror: true
+                easing: 'ease-out',
+                once: true, // Changed to true for better performance
+                mirror: false, // Changed to false for better performance
+                disable: window.innerWidth < 768 ? true : false // Disable on mobile for better performance
             });
 
-            // Add scroll event listener
+            // Add passive scroll event listener
             window.addEventListener('scroll', () => {
                 this.scrolled = window.pageYOffset > 10;
-            });
+            }, { passive: true });
 
             // Setup mobile menu toggle
-            document.querySelector('.mobile-menu-button')?.addEventListener('click', function() {
-                document.querySelector('.mobile-menu').classList.toggle('hidden');
-            });
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileMenu = document.querySelector('.mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Initialize lazy loading for images that don't have loading="lazy"
+            this.initLazyLoading();
+        },
+
+        // Initialize lazy loading for images
+        initLazyLoading() {
+            if ('IntersectionObserver' in window && !this.observerInitialized) {
+                this.observerInitialized = true;
+
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            const src = img.getAttribute('data-src');
+
+                            if (src) {
+                                img.src = src;
+                                img.removeAttribute('data-src');
+                            }
+
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: '0px 0px 50px 0px'
+                });
+
+                // Get all images that need lazy loading
+                document.querySelectorAll('img[data-src]').forEach(img => {
+                    imageObserver.observe(img);
+                });
+            }
         },
 
         // Show authentication modal with message
@@ -199,7 +257,14 @@ function appState() {
     };
 }
 
-// Initialize when DOM content is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Any additional initialization can go here
-});
+// Initialize when DOM content is loaded - using requestIdleCallback if available
+if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+        // Any additional initialization can go here
+    });
+} else {
+    // Fallback for browsers that don't support requestIdleCallback
+    setTimeout(() => {
+        // Any additional initialization can go here
+    }, 200);
+}

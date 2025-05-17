@@ -11,27 +11,45 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- External stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-
-    <!-- Custom styles -->
-    <link href="{{ asset('css/landing-animations.css') }}" rel="stylesheet">
-
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" type="image/x-icon">
 
-    <!-- Scripts -->
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- External stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="{{ asset('css/landing-animations.css') }}" as="style">
+    <link href="{{ asset('css/landing-animations.css') }}" rel="stylesheet">
+
+    <!-- Load AOS CSS directly to prevent FOUC -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+    <!-- Title -->
+    <title>{{ $title ?? 'WIB Fish Farm - Katalog' }}</title>
+
+    <!-- Scripts - Deferred to improve page load speed -->
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script src="{{ asset('js/landing.js') }}"></script>
+    <script src="{{ asset('js/landing.js') }}" defer></script>
     <script>
         // Menyediakan data produk dari database ke JavaScript
         const productData = @json($produk ?? []);
         const testimonialData = @json(isset($ulasan) ? $ulasan : []);
-    </script>
 
-    <title>{{ $title ?? 'WIB Fish Farm - Katalog' }}</title>
+        // Initialize AOS immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-out',
+                once: true,
+                mirror: false,
+                disable: window.innerWidth < 768 ? true : false
+            });
+        });
+    </script>
 
     @stack('styles')
 </head>
@@ -102,6 +120,7 @@
     </script>
     @endguest
 
+    <!-- Lazy-load the footer content -->
     @include('partials.footer')
 
     @stack('scripts')

@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'is_admin' => false,
         ]);
-        
+
         // Tambahkan pengguna lain jika diperlukan
     }
 }

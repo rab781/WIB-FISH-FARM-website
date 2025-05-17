@@ -221,10 +221,14 @@
                 <!-- Clickable product image and header -->
                 <a href="{{ route('detailProduk', $p->id_Produk) }}" class="block">
                     <div class="h-48 bg-gray-200 relative overflow-hidden">
-                        @if(Str::startsWith($p->gambar, 'uploads/'))
-                            <img src="{{ asset($p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                        @if($p->gambar)
+                            @if(Str::startsWith($p->gambar, 'uploads/'))
+                                <img src="{{ asset($p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                            @else
+                                <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                            @endif
                         @else
-                            <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                            <img src="{{ asset('Images/Default-fish.png') }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-contain opacity-80">
                         @endif
                         @if((isset($p->detail_pesanan_count) && $p->detail_pesanan_count > 5) || (isset($p->order_count) && $p->order_count > 5))
                             <div class="absolute top-2 right-2">
@@ -274,7 +278,8 @@
     <!-- Empty state when no products match filters -->
     <div
         class="text-center py-12 bg-white rounded-lg shadow-sm"
-        x-show="!showResults"
+        x-data="{ get showResultsValue() { return document.querySelectorAll('.product-item.filtered:not(.hidden)').length > 0 } }"
+        x-show="!showResultsValue"
     >
         <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>

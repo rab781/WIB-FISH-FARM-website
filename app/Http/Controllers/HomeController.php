@@ -20,7 +20,7 @@ class HomeController extends Controller
         // Mengambil ulasan-ulasan terbaru untuk ditampilkan di landing page
         $ulasan = Ulasan::with(['user', 'produk'])
                     ->latest()
-                    ->take(4)
+                    ->take(3)
                     ->get();
 
         return view('home.index', compact('produk', 'ulasan'));
@@ -106,5 +106,10 @@ class HomeController extends Controller
                             ->get();
 
         return view('home.detail', compact('produk', 'ulasan', 'avgRating', 'userHasPurchased', 'userHasReviewed', 'relatedProducts'));
+    }
+
+    function tentangKami()
+    {
+        return view('home.tentang-kami');
     }
 }

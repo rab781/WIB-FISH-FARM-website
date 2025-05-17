@@ -1,29 +1,41 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use Illuminate\Session\Middleware\AuthenticateSession;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KeranjangController;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
 Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detailProduk');
+Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang-kami');
 
-Route::resource('/keranjang', KeranjangController::class)->middleware('auth');
+Route::middleware('auth')->group(function () {
+    // Keranjang view and CRUD operations
+    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+    Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
+    Route::post('/keranjang/{id}/update', [KeranjangController::class, 'updateViaPost'])->name('keranjang.updatepost');
+    Route::post('/keranjang/{id}/delete', [KeranjangController::class, 'destroyViaPost'])->name('keranjang.destroy.post');
+    Route::post('/keranjang/bulk-delete', [KeranjangController::class, 'bulkDelete'])->name('keranjang.bulk-delete');
+
+    // Profile routes
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/kabupaten', [App\Http\Controllers\ProfileController::class, 'getKabupaten'])->name('profile.kabupaten');
+    Route::get('/profile/kecamatan', [App\Http\Controllers\ProfileController::class, 'getKecamatan'])->name('profile.kecamatan');
+
+    // Notification routes
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+});
 
 // Auth routes - make sure these exist and are properly defined
 Route::middleware('guest')->group(function () {
@@ -33,12 +45,6 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
-
-    // Google OAuth Routes
-    Route::get('auth/google', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
-        ->name('auth.google');
-    Route::get('google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
-        ->name('auth.google.callback');
 });
 
 // // Alamat routes - for address setup after registration
@@ -65,6 +71,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
+    // Admin profile routes
+    Route::get('profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('admin.profile.show');
+    Route::get('profile/edit', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::put('profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profile.update');
+
+    // Admin notification routes
+    Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
 
     // Admin produk routes
     Route::resource('/produk', AdminProdukController::class)->names([
@@ -103,7 +117,6 @@ Route::post('/cart/add', [App\Http\Controllers\KeranjangController::class, 'addT
 Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
 Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
 Route::post('/cart/bulk-delete', [App\Http\Controllers\KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
-Route::post('/keranjang/{id}', [App\Http\Controllers\KeranjangController::class, 'updateViaPost'])->name('keranjang.updatepost')->middleware('auth');
 Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
 
 // fallback route

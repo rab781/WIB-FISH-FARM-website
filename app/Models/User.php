@@ -55,28 +55,59 @@ class User extends Authenticatable
         'is_admin' => 'boolean',
     ];
 
-    // Relasi ke keranjang
-    public function keranjang()
+    // Relationships
+    /**
+     * Get the provinsi associated with the user.
+     */
+    public function provinsi()
     {
-        return $this->hasMany(Keranjang::class, 'user_id', 'id');
+        return $this->belongsTo(Provinsi::class);
     }
 
-    // Relasi ke kecamatan
+    /**
+     * Get the kabupaten associated with the user.
+     */
+    public function kabupaten()
+    {
+        return $this->belongsTo(Kabupaten::class);
+    }
+
+    /**
+     * Get the kecamatan associated with the user.
+     */
     public function kecamatan()
     {
         return $this->belongsTo(Kecamatan::class);
     }
 
-    // Method untuk mendapatkan kabupaten dari kecamatan
-    public function getKabupaten()
-    {
-        return $this->kecamatan ? $this->kecamatan->kabupaten : null;
-    }
-
-    // Method untuk mendapatkan provinsi dari kecamatan
+    /**
+     * Get the provinsi object via relationship
+     */
     public function getProvinsi()
     {
-        return $this->kecamatan && $this->kecamatan->kabupaten ? $this->kecamatan->kabupaten->provinsi : null;
+        return $this->provinsi ?? null;
+    }
+
+    /**
+     * Get the kabupaten name via relationship
+     */
+    public function getKabupaten()
+    {
+        return $this->kabupaten ?? null;
+    }
+
+    /**
+     * Get the kecamatan name via relationship
+     */
+    public function getKecamatan()
+    {
+        return $this->kecamatan ?? null;
+    }
+
+    // Relasi ke keranjang
+    public function keranjang()
+    {
+        return $this->hasMany(Keranjang::class, 'user_id', 'id');
     }
 
     // Relasi ke pesanan
@@ -90,4 +121,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ulasan::class, 'user_id', 'id');
     }
+
+    // Relasi ke notifikasi
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id');
+    }
+
 }
