@@ -26,4 +26,12 @@ class Kabupaten extends Model
     {
         return $this->hasMany(Kecamatan::class);
     }
+
+    /**
+     * Get all ongkir for this kabupaten
+     */
+    public function ongkir(): HasMany
+    {
+        return $this->hasMany(Ongkir::class);
+    }
 }

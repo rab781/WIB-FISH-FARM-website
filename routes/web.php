@@ -33,6 +33,12 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Google OAuth Routes
+    Route::get('auth/google', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
+        ->name('auth.google');
+    Route::get('google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
+        ->name('auth.google.callback');
 });
 
 // // Alamat routes - for address setup after registration
@@ -97,6 +103,7 @@ Route::post('/cart/add', [App\Http\Controllers\KeranjangController::class, 'addT
 Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])->name('cart.view')->middleware('auth');
 Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
 Route::post('/cart/bulk-delete', [App\Http\Controllers\KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
+Route::post('/keranjang/{id}', [App\Http\Controllers\KeranjangController::class, 'updateViaPost'])->name('keranjang.updatepost')->middleware('auth');
 Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
 
 // fallback route

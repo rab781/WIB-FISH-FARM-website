@@ -27,6 +27,11 @@ class User extends Authenticatable
         'kecamatan_id',
         'alamat_jalan',
         'no_hp',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'avatar',
+        'foto',
     ];
 
     /**

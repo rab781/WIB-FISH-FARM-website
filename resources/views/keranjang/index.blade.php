@@ -77,24 +77,21 @@ use Illuminate\Support\Str;
 
                 <!-- Quantity control -->
                 <div class="w-full md:w-32 p-4 flex items-center justify-center">
-                    <form action="{{ route('keranjang.update', $item->id_keranjang) }}" method="POST" class="quantity-form flex items-center">
-                        @csrf
-                        @method('PUT')
-                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-l border border-gray-300" onclick="decrementCartItem(this)">
+                    <div class="flex items-center">
+                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-l border border-gray-300" onclick="handleQuantityChange({{ $item->id_keranjang }}, 'decrease')">
                             <span class="sr-only">Decrease quantity</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                         </button>
-                        <input type="number" name="jumlah" value="{{ $item->jumlah }}" min="1" max="999" class="w-16 h-8 border-t border-b border-gray-300 text-center focus:outline-none focus:ring-1 focus:ring-orange-500">
-                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-r border border-gray-300" onclick="incrementCartItem(this)">
+                        <input type="number" id="quantity-{{ $item->id_keranjang }}" value="{{ $item->jumlah }}" min="1" max="999" class="w-16 h-8 border-t border-b border-gray-300 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" readonly>
+                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-r border border-gray-300" onclick="handleQuantityChange({{ $item->id_keranjang }}, 'increase')">
                             <span class="sr-only">Increase quantity</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                         </button>
-                        <button type="submit" class="hidden update-quantity-btn">Update</button>
-                    </form>
+                    </div>
                 </div>
 
                 <!-- Total price column -->
@@ -154,38 +151,60 @@ use Illuminate\Support\Str;
 </div>
 
 <script>
-    function incrementCartItem(button) {
-        let form = button.closest('form');
-        let input = form.querySelector('input[type=number]');
-        if (input.value < parseInt(input.max) || !input.max) {
-            input.value = parseInt(input.value) + 1;
-            // Auto submit the form after a short delay
-            setTimeout(() => form.submit(), 500);
-        }
-    }
+    function handleQuantityChange(cartItemId, action) {
+        const quantityInput = document.getElementById(`quantity-${cartItemId}`);
+        let currentQuantity = parseInt(quantityInput.value);
 
-    function decrementCartItem(button) {
-        let form = button.closest('form');
-        let input = form.querySelector('input[type=number]');
-        if (input.value > 1) {
-            input.value = parseInt(input.value) - 1;
-            // Auto submit the form after a short delay
-            setTimeout(() => form.submit(), 500);
+        if (action === 'increase') {
+            if (currentQuantity < parseInt(quantityInput.max) || !quantityInput.max) {
+                currentQuantity += 1;
+            }
+        } else if (action === 'decrease') {
+            if (currentQuantity > 1) {
+                currentQuantity -= 1;
+            } else {
+                if (confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?')) {
+                    const itemContainer = quantityInput.closest('.flex.flex-col.md\\:flex-row');
+                    const deleteForm = itemContainer.querySelector('.delete-form');
+                    if (deleteForm) {
+                        const submitButton = document.createElement('button');
+                        submitButton.type = 'submit';
+                        submitButton.style.display = 'none';
+                        deleteForm.appendChild(submitButton);
+                        submitButton.click();
+                        deleteForm.removeChild(submitButton);
+                    }
+                }
+                return;
+            }
         }
-    }
 
-    // Dispatch cart updated event whenever a form is submitted
-    document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('.quantity-form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function() {
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('cartUpdated'));
-                }, 500);
-            });
+        quantityInput.value = currentQuantity;
+
+        const formData = new FormData();
+        formData.append('jumlah', currentQuantity);
+
+        fetch(`/keranjang/${cartItemId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Terjadi kesalahan saat memperbarui kuantitas');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
+    }
 
-        // Select all checkbox functionality
+    document.addEventListener('DOMContentLoaded', function() {
         const selectAllCheckbox = document.getElementById('selectAll');
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function() {
@@ -195,7 +214,6 @@ use Illuminate\Support\Str;
             });
         }
 
-        // Delete confirmation for single item
         const deleteBtns = document.querySelectorAll('.delete-btn');
         deleteBtns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -205,14 +223,14 @@ use Illuminate\Support\Str;
             });
         });
 
-        // Delete selected items functionality
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
         if (deleteSelectedBtn) {
             deleteSelectedBtn.addEventListener('click', function() {
                 const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
                 if (selectedItems.length > 0) {
                     if (confirm('Apakah Anda yakin ingin menghapus ' + selectedItems.length + ' produk yang terpilih dari keranjang?')) {
-                        document.getElementById('bulkDeleteForm').submit();
+                        const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+                        bulkDeleteForm.submit();
                     }
                 } else {
                     alert('Tidak ada produk yang dipilih untuk dihapus.');
