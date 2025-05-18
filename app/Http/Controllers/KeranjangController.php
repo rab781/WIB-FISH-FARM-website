@@ -205,7 +205,7 @@ class KeranjangController extends Controller
 
         // Cek stok
         if ($produk->stok < $request->jumlah) {
-            return redirect()->back()->with('error', 'Stok tidak mencukupi, stok tersedia: ' . $produk->stok);
+            return redirect()->back()->with('error', 'jumlah produk melebihi stok yang ada :' . $produk->stok);
         }
 
         // Update jumlah dan total harga
@@ -355,6 +355,35 @@ class KeranjangController extends Controller
             return redirect()->route('keranjang.index')
                 ->with('error', 'Tidak ada produk yang dihapus');
         }
+    }
+
+    public function updateViaPost(Request $request, string $id)
+    {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1|max:999',
+        ]);
+
+        $keranjang = Keranjang::findOrFail($id);
+
+        // Cek kepemilikan
+        if ($keranjang->user_id != Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
+        }
+
+        // Ambil data produk
+        $produk = Produk::findOrFail($keranjang->id_Produk);
+
+        // Cek stok
+        if ($produk->stok < $request->jumlah) {
+            return response()->json(['success' => false, 'message' => 'Stok tidak mencukupi, stok tersedia: ' . $produk->stok], 400);
+        }
+
+        // Update jumlah dan total harga
+        $keranjang->jumlah = $request->jumlah;
+        $keranjang->total_harga = $request->jumlah * $produk->harga;
+        $keranjang->save();
+
+        return response()->json(['success' => true, 'message' => 'Keranjang berhasil diperbarui']);
     }
 
     /**

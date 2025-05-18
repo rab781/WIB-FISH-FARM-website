@@ -30,9 +30,9 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ],
         [
-            'email.required' => 'Email is required.',
-            'email.email' => 'Email must be a valid email address.',
-            'password.required' => 'Password is required.',
+            'email.required' => 'Data tidak boleh kosong',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Data tidak boleh kosong',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
@@ -47,9 +47,11 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(RouteServiceProvider::HOME);
         }
 
+        // Jika email dan password sudah diisi tapi salah
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Data yang diinputkan salah',
         ])->onlyInput('email');
+
     }
 
     /**

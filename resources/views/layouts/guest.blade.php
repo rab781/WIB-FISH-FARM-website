@@ -17,10 +17,6 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <!-- Debug Info -->
-        <script>
-            console.log('Guest layout loaded successfully');
-        </script>
 
         <style>
             .logo-container {
@@ -59,32 +55,17 @@
         </style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <!-- Debug Info -->
-        <div style="position: fixed; top: 0; left: 0; background: #ff0; color: #000; padding: 5px; z-index: 9999;">
-            Layout loaded: {{ request()->route()->getName() ?? 'Unknown route' }}
+        <!-- Background dengan efek blur -->
+        <div class="fixed inset-0 bg-cover bg-center bg-no-repeat"
+             style="background-image: url('{{ asset('Images/kolam-ikan.jpg') }}'); z-index: -2;">
         </div>
 
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/" class="block no-underline">
-                    <div class="logo-container text-center">
-                        <div class="flex items-center justify-center mb-2">
-                            <i class="fas fa-fish text-white text-2xl mr-2"></i>
-                            <h1 class="logo-text">WIB FISH FARM</h1>
-                        </div>
-                        <div class="logo-tagline">Premium Aquaculture</div>
-                    </div>
-                </a>
-            </div>
+        <!-- Lapisan blur di atas background -->
+        <div class="fixed inset-0 backdrop-blur-md bg-black/30" style="z-index: -1;"></div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                <!-- Debug Info -->
-                @if(empty(trim($slot)))
-                    <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
-                        Warning: The content slot is empty. This might be why nothing is displaying.
-                    </div>
-                @endif
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 relative">
 
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-xl overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>

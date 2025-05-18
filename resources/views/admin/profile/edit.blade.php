@@ -42,16 +42,6 @@
                         </div>
                         @endif
                     </div>
-                    <div>
-                        <input type="file" name="foto" id="foto" class="hidden" accept="image/*" onchange="showPreview(this)">
-                        <label for="foto" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 cursor-pointer text-sm font-medium">
-                            Ganti Foto
-                        </label>
-                        <p class="mt-1 text-xs text-gray-500">JPG, PNG, atau GIF. Maksimal 2MB.</p>
-                        @error('foto')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
             </div>
 

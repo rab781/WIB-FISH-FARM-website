@@ -4,7 +4,7 @@
 <div class="bg-white py-8">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Profile Header with Background -->
-        <div class="relative bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg overflow-hidden shadow-lg mb-6">
+        <div class="relative bg-gradient-to-r from-orange-500 to-red-600 rounded-lg overflow-hidden shadow-lg mb-6">
             <div class="absolute inset-0 bg-pattern opacity-10"></div>
             <div class="relative px-6 py-8 md:px-8 flex flex-col md:flex-row items-center">
                 <!-- Profile Image -->
@@ -23,10 +23,10 @@
                 <!-- Profile Info -->
                 <div class="text-center md:text-left">
                     <h1 class="text-2xl font-bold text-white">{{ $user->name }}</h1>
-                    <div class="text-blue-100 mt-1">{{ $user->email }}</div>
-                    <div class="text-blue-100 mt-1">{{ $user->no_hp }}</div>
+                    <div class="text-orange-100 mt-1">{{ $user->email }}</div>
+                    <div class="text-orange-100 mt-1">{{ $user->no_hp }}</div>
                     <div class="mt-4">
-                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-blue-50 transition-colors shadow-sm">
+                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-white text-orange-600 rounded-md hover:bg-orange-50 transition-colors shadow-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>

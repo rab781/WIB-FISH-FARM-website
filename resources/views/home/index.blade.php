@@ -112,10 +112,12 @@
     <div class="container mx-auto px-6">
         <div class="max-w-xl">
             <h2 class="text-3xl font-bold mb-4">Lakukan Pembelian Sekarang</h2>
-            <p class="mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
+            <p class="mb-6">
+                Bergabunglah dengan ribuan pelanggan yang telah mempercayai kami untuk memenuhi kebutuhan ikan hias mereka. Temukan berbagai jenis ikan Koi dan Koki berkualitas tinggi yang siap menghiasi akuarium atau kolam Anda.
+            </p>
             <div class="flex space-x-4">
                 @auth
-                    <a href="/produk" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Dashboard</a>
+                    <a href="/produk" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Lihat Produk</a>
                 @else
                     <a href="{{ route('register') }}" class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition duration-300 hover-lift">Daftar</a>
                     <a href="{{ route('login') }}" class="bg-transparent border border-gray-300 text-white px-6 py-2 rounded hover:bg-white/10 transition duration-300 hover-lift">Masuk</a>

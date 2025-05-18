@@ -8,7 +8,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
-
+use App\Http\Controllers\Auth\GoogleController;
+use Laravel\Socialite\Two\GoogleProvider;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
@@ -46,14 +47,6 @@ Route::middleware('guest')->group(function () {
         ->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
-
-// // Alamat routes - for address setup after registration
-// Route::middleware('auth')->group(function () {
-//     Route::get('alamat-setup', [RegisteredUserController::class, 'alamatSetup'])
-//         ->name('alamat.setup');
-//     Route::post('alamat-store', [RegisteredUserController::class, 'alamatStore'])
-//         ->name('alamat.store');
-// });
 
 // Add logout route for authenticated users
 Route::middleware('auth')->group(function () {
@@ -131,3 +124,7 @@ Route::fallback(function () {
 });
 
 Route::get('/test', AuthenticatedSessionController::class . '@index')->name('index');
+
+// Auth Google routes
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']) ->name('auth.google.callback');

@@ -53,6 +53,18 @@ class ProfileController extends Controller
             'no_hp' => 'required|string|max:20',
             'foto' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'sometimes|nullable|min:8|confirmed',
+        ],
+        [
+            'name.required' => 'Nama tidak boleh kosong',
+            'email.required' => 'Email tidak boleh kosong',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'no_hp.required' => 'Nomor HP tidak boleh kosong',
+            'foto.image' => 'File harus berupa gambar',
+            'foto.mimes' => 'Format gambar tidak valid (hanya jpeg, png, jpg, gif)',
+            'foto.max' => 'Ukuran gambar terlalu besar (maksimal 2MB)',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
         $user->name = $request->name;

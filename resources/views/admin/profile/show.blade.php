@@ -25,8 +25,8 @@
             <div class="flex flex-col md:flex-row items-center">
                 <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
                     <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
-                        @if($user->foto)
-                            <img src="{{ asset('storage/uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        @if($user->foto && file_exists(public_path('uploads/users/'.$user->foto)))
+                            <img src="{{ asset('uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
                                 <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">

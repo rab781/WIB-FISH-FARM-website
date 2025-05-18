@@ -36,12 +36,12 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ],
         [
-            'name.required' => 'Nama lengkap harus diisi.',
-            'email.required' => 'Email harus diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
-            'password.required' => 'Password harus diisi.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'name.required' => 'Data tidak boleh kosong',
+            'email.required' => 'Data tidak boleh kosong',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Pengguna sudah terdaftar',
+            'password.required' => 'Data tidak boleh kosong',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
         // Buat user sebagai customer (is_admin = false)
