@@ -22,10 +22,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // API routes untuk dropdown alamat
-Route::get('/kabupaten/{provinsi_id}', function ($provinsi_id) {
-    return Kabupaten::where('provinsi_id', $provinsi_id)->get();
+Route::get('/kabupaten/{provinsi_id}', function ($provinsiId) {
+    $kabupaten = \App\Models\Kabupaten::where('id_provinsi', $provinsiId)
+        ->orderBy('nama_kabupaten')
+        ->get(['id_kabupaten', 'nama_kabupaten']);
+
+    return response()->json($kabupaten);
 });
 
-Route::get('/kecamatan/{kabupaten_id}', function ($kabupaten_id) {
-    return Kecamatan::where('kabupaten_id', $kabupaten_id)->get();
+Route::get('/kecamatan/{kabupaten_id}', function ($kabupatenId) {
+    $kecamatan = \App\Models\Kecamatan::where('id_kabupaten', $kabupatenId)
+        ->orderBy('nama_kecamatan')
+        ->get(['id_kecamatan', 'nama_kecamatan']);
+
+    return response()->json($kecamatan);
 });

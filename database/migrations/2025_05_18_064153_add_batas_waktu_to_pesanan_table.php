@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ongkir', function (Blueprint $table) {
-            $table->id('id_ongkir');
-            $table->foreignId('kabupaten_id')->constrained('kabupaten');
-            $table->decimal('berat', 10, 2);
-            $table->decimal('harga', 10, 2);
-            $table->timestamps();
+        Schema::table('pesanan', function (Blueprint $table) {
+            $table->timestamp('batas_waktu')->nullable()->after('updated_at');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ongkir');
+        Schema::table('pesanan', function (Blueprint $table) {
+            $table->dropColumn('batas_waktu');
+        });
     }
 };

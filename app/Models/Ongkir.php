@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Ongkir extends Model
 {
@@ -18,19 +19,15 @@ class Ongkir extends Model
     // Atribut yang dapat diisi
     protected $fillable = [
         'kabupaten_id',
-        'berat',
-        'harga',
+        'biaya',
+        'keterangan',
     ];
 
-    // Relasi ke pesanan
-    public function pesanan()
+    /**
+     * Relasi dengan kabupaten
+     */
+    public function kabupaten(): BelongsTo
     {
-        return $this->hasMany(Pesanan::class, 'id_ongkir', 'id_ongkir');
-    }
-
-    // Relasi ke kabupaten
-    public function kabupaten()
-    {
-        return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'id');
     }
 }

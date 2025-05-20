@@ -9,6 +9,18 @@ class Pesanan extends Model
 {
     use HasFactory;
 
+    // Atribut dates untuk konversi otomatis ke Carbon
+    protected $dates = ['created_at', 'updated_at', 'batas_waktu'];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'batas_waktu' => 'datetime',
+    ];
+
     // Nama tabel yang digunakan
     protected $table = 'pesanan';
 
@@ -21,6 +33,9 @@ class Pesanan extends Model
         'id_ongkir',
         'total_harga',
         'status_pesanan',
+        'alamat_pengiriman',
+        'metode_pembayaran',
+        'batas_waktu',
     ];
 
     // Relasi ke user

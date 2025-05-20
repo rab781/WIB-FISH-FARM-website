@@ -20,8 +20,10 @@ class DetailPesanan extends Model
     protected $fillable = [
         'id_pesanan',
         'id_Produk',
-        'jumlah',
-        'total_harga',
+        'ukuran_id',
+        'kuantitas',
+        'harga',
+        'subtotal',
     ];
 
     // Relasi ke pesanan

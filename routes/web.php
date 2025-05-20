@@ -24,6 +24,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/keranjang/{id}/delete', [KeranjangController::class, 'destroyViaPost'])->name('keranjang.destroy.post');
     Route::post('/keranjang/bulk-delete', [KeranjangController::class, 'bulkDelete'])->name('keranjang.bulk-delete');
 
+    // Pesanan routes
+    Route::post('/checkout/process', [App\Http\Controllers\PesananController::class, 'processCheckout'])->name('checkout.process');
+    Route::post('/checkout', [App\Http\Controllers\PesananController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout', [App\Http\Controllers\PesananController::class, 'checkout'])->name('checkout');
+    Route::get('/alamat/tambah', [App\Http\Controllers\PesananController::class, 'tambahAlamat'])->name('alamat.tambah');
+    Route::post('/alamat/simpan', [App\Http\Controllers\PesananController::class, 'simpanAlamat'])->name('alamat.simpan');
+    Route::get('/checkout/get-ongkir/{kabupaten_id}', [App\Http\Controllers\PesananController::class, 'getOngkir'])->name('checkout.ongkir');
+
+    // Pesanan management
+    Route::get('/pesanan', [App\Http\Controllers\PesananController::class, 'index'])->name('pesanan.index');
+    Route::get('/pesanan/{id}', [App\Http\Controllers\PesananController::class, 'show'])->name('pesanan.show');
+    Route::post('/pesanan/{id}/payment', [App\Http\Controllers\PesananController::class, 'submitPayment'])->name('pesanan.payment');
+    Route::post('/pesanan/{id}/konfirmasi', [App\Http\Controllers\PesananController::class, 'konfirmasiPesanan'])->name('pesanan.konfirmasi');
+
     // Profile routes
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
@@ -36,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
     Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+
+    // Order routes
 });
 
 // Auth routes - make sure these exist and are properly defined
@@ -72,6 +88,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // Admin notification routes
     Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
+
+    // Admin pesanan routes
+    Route::get('pesanan', [App\Http\Controllers\Admin\PesananController::class, 'index'])->name('admin.pesanan.index');
+    Route::get('pesanan/{id}', [App\Http\Controllers\Admin\PesananController::class, 'show'])->name('admin.pesanan.show');
+    Route::post('pesanan/{id}/update-status', [App\Http\Controllers\Admin\PesananController::class, 'updateStatus'])->name('admin.pesanan.updateStatus');
+    Route::post('pesanan/{id}/force-expire', [App\Http\Controllers\Admin\PesananController::class, 'forceExpireOrder'])->name('admin.pesanan.forceExpire');
 
     // Admin produk routes
     Route::resource('/produk', AdminProdukController::class)->names([

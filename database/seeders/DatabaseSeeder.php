@@ -18,12 +18,13 @@ class DatabaseSeeder extends Seeder
             KecamatanSeeder::class,     // 3. Kecamatan (membutuhkan Kabupaten)
             UserSeeder::class,          // 4. User
             ProdukSeeder::class,        // 5. Produk
-            OngkirSeeder::class,        // 6. Ongkir
-            KeranjangSeeder::class,     // 7. Keranjang (membutuhkan User dan Produk)
-            PesananSeeder::class,       // 8. Pesanan (membutuhkan User dan Ongkir)
-            DetailPesananSeeder::class, // 9. Detail Pesanan (membutuhkan Pesanan dan Produk)
-            PembayaranSeeder::class,    // 10. Pembayaran (membutuhkan Pesanan)
-            UlasanSeeder::class,        // 11. Ulasan (membutuhkan User dan Produk)
+            LokasiSeeder::class,        // 6. Lokasi (membutuhkan Provinsi dan Kabupaten)
+            OngkirSeeder::class,        // 7. Ongkir
+            KeranjangSeeder::class,     // 8. Keranjang (membutuhkan User dan Produk)
+            PesananSeeder::class,       // 9. Pesanan (membutuhkan User dan Ongkir)
+            DetailPesananSeeder::class, // 10. Detail Pesanan (membutuhkan Pesanan dan Produk)
+            PembayaranSeeder::class,    // 11. Pembayaran (membutuhkan Pesanan)
+            UlasanSeeder::class,        // 12. Ulasan (membutuhkan User dan Produk)
         ]);
     }
 }

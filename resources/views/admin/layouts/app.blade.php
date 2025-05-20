@@ -58,7 +58,7 @@
                     </div>
                 </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                <a href="{{ route('admin.pesanan.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
                         <i class="fas fa-box w-6"></i>
                         <span>Pesanan</span>

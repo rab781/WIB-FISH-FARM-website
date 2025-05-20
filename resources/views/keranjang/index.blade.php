@@ -134,9 +134,9 @@
                         Hapus Produk Terpilih
                     </button>
 
-                    <a href="#" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <button type="button" id="lanjutPembayaranBtn" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Lanjut ke Pembayaran
-                    </a>
+                    </button>
                 </div>
             </div>
         </form>
@@ -227,6 +227,56 @@
                 }
             });
         }
+
+        // Enable/disable 'Lanjut ke Pembayaran' button
+        const lanjutBtn = document.getElementById('lanjutPembayaranBtn');
+        const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+
+        function updateLanjutBtn() {
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            lanjutBtn.disabled = !anyChecked;
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateLanjutBtn);
+        });
+
+        // Handle checkout button click
+        lanjutBtn.addEventListener('click', function() {
+            const selectedItems = Array.from(document.querySelectorAll('.cart-item-checkbox:checked')).map(cb => cb.value);
+
+            if (selectedItems.length === 0) {
+                alert('Silakan pilih minimal satu produk untuk melanjutkan ke pembayaran.');
+                return;
+            }
+
+            // Create a form dynamically to submit selected items
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('checkout') }}';
+
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            form.appendChild(csrfToken);
+
+            // Add selected items
+            selectedItems.forEach(itemId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_items[]';
+                input.value = itemId;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        // Inisialisasi saat load
+        updateLanjutBtn();
     });
 </script>
 @endsection

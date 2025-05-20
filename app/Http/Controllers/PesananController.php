@@ -80,8 +80,8 @@ class PesananController extends Controller
             // Create order details
             foreach ($keranjangItems as $item) {
                 DetailPesanan::create([
-                    'pesanan_id' => $pesanan->id,
-                    'produk_id' => $item->produk_id,
+                    'id_pesanan' => $pesanan->id_pesanan,
+                    'id_Produk' => $item->produk_id,
                     'kuantitas' => $item->kuantitas,
                     'harga' => $item->produk->harga,
                     'subtotal' => $item->produk->harga * $item->kuantitas,
@@ -100,10 +100,10 @@ class PesananController extends Controller
             NotificationController::notifyAdmins([
                 'type' => 'order',
                 'title' => 'Pesanan Baru',
-                'message' => 'Pesanan baru #' . $pesanan->id . ' telah dibuat dan menunggu konfirmasi pembayaran.',
+                'message' => 'Pesanan baru #' . $pesanan->id_pesanan . ' telah dibuat dan menunggu konfirmasi pembayaran.',
                 'data' => [
-                    'order_id' => $pesanan->id,
-                    'url' => route('admin.pesanan.show', $pesanan->id)
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
                 ]
             ]);
 
@@ -111,16 +111,16 @@ class PesananController extends Controller
             NotificationController::notifyCustomer(Auth::id(), [
                 'type' => 'order',
                 'title' => 'Pesanan Berhasil Dibuat',
-                'message' => 'Pesanan #' . $pesanan->id . ' telah berhasil dibuat. Silakan lakukan pembayaran.',
+                'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah berhasil dibuat. Silakan lakukan pembayaran.',
                 'data' => [
-                    'order_id' => $pesanan->id,
-                    'url' => route('pesanan.show', $pesanan->id)
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('pesanan.show', $pesanan->id_pesanan)
                 ]
             ]);
 
             DB::commit();
 
-            return redirect()->route('pesanan.show', $pesanan->id)
+            return redirect()->route('pesanan.show', $pesanan->id_pesanan)
                 ->with('success', 'Pesanan berhasil dibuat. Silakan lakukan pembayaran.');
 
         } catch (\Exception $e) {
@@ -137,7 +137,7 @@ class PesananController extends Controller
     public function show(string $id)
     {
         $pesanan = Pesanan::with(['detailPesanan.produk', 'user'])
-            ->where('id', $id)
+            ->where('id_pesanan', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
@@ -184,11 +184,11 @@ class PesananController extends Controller
             NotificationController::notifyCustomer($pesanan->user_id, [
                 'type' => 'order',
                 'title' => 'Status Pesanan Diperbarui',
-                'message' => 'Status pesanan #' . $pesanan->id . ' telah diperbarui menjadi ' .
+                'message' => 'Status pesanan #' . $pesanan->id_pesanan . ' telah diperbarui menjadi ' .
                             ($statusTranslations[$newStatus] ?? $newStatus),
                 'data' => [
-                    'order_id' => $pesanan->id,
-                    'url' => route('pesanan.show', $pesanan->id),
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('pesanan.show', $pesanan->id_pesanan),
                     'old_status' => $oldStatus,
                     'new_status' => $newStatus
                 ]
@@ -218,6 +218,45 @@ class PesananController extends Controller
     }
 
     /**
+     * Konfirmasi pesanan telah diterima
+     */
+    public function konfirmasiPesanan(string $id)
+    {
+        try {
+            $pesanan = Pesanan::where('id_pesanan', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            if ($pesanan->status_pesanan != 'Dikirim') {
+                return redirect()->back()
+                    ->with('error', 'Pesanan hanya dapat dikonfirmasi jika statusnya Dikirim.');
+            }
+
+            // Update status pesanan menjadi selesai
+            $pesanan->status_pesanan = 'Selesai';
+            $pesanan->save();
+
+            // Notify admin about order completion
+            NotificationController::notifyAdmins([
+                'type' => 'order',
+                'title' => 'Pesanan Selesai',
+                'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah dikonfirmasi selesai oleh pelanggan.',
+                'data' => [
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
+                ]
+            ]);
+
+            return redirect()->route('pesanan.show', $pesanan->id_pesanan)
+                ->with('success', 'Pesanan berhasil dikonfirmasi. Terima kasih telah berbelanja!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mengonfirmasi pesanan: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Submit payment proof
      */
     public function submitPayment(Request $request, string $id)
@@ -227,11 +266,11 @@ class PesananController extends Controller
         ]);
 
         try {
-            $pesanan = Pesanan::where('id', $id)
+            $pesanan = Pesanan::where('id_pesanan', $id)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
 
-            if ($pesanan->status != 'menunggu_pembayaran') {
+            if ($pesanan->status_pesanan != 'Menunggu Pembayaran') {
                 return redirect()->back()
                     ->with('error', 'Tidak dapat mengunggah bukti pembayaran karena status pesanan tidak valid.');
             }
@@ -249,10 +288,10 @@ class PesananController extends Controller
             NotificationController::notifyAdmins([
                 'type' => 'order',
                 'title' => 'Bukti Pembayaran Baru',
-                'message' => 'Pelanggan telah mengunggah bukti pembayaran untuk pesanan #' . $pesanan->id,
+                'message' => 'Pelanggan telah mengunggah bukti pembayaran untuk pesanan #' . $pesanan->id_pesanan,
                 'data' => [
-                    'order_id' => $pesanan->id,
-                    'url' => route('admin.pesanan.show', $pesanan->id)
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
                 ]
             ]);
 
@@ -262,6 +301,283 @@ class PesananController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Gagal mengunggah bukti pembayaran: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Halaman checkout pesanan (lanjutan dari keranjang)
+     */
+    public function checkout(Request $request)
+    {
+        // Validasi input dari selected_items
+        $request->validate([
+            'selected_items' => 'required|array',
+            'selected_items.*' => 'exists:keranjang,id_keranjang',
+        ]);
+
+        $user = Auth::user();
+
+        // Mengambil item keranjang yang dipilih saja
+        $keranjang = Keranjang::whereIn('id_keranjang', $request->selected_items)
+                    ->where('user_id', Auth::id())
+                    ->with('produk', 'ukuran')
+                    ->get();
+
+        // Cek jika keranjang kosong
+        if ($keranjang->isEmpty()) {
+            return redirect()->route('keranjang.index')
+                ->with('error', 'Tidak ada produk yang dipilih. Silakan pilih produk terlebih dahulu.');
+        }
+
+        // Menghitung subtotal dan total
+        $subtotal = $keranjang->sum('total_harga');
+        $ongkir = 0; // Default ongkir, nanti diupdate via AJAX
+        $total = $subtotal + $ongkir;
+
+        // Cek apakah user sudah memiliki alamat lengkap
+        $alamatLengkap = null;
+        if ($user->provinsi_id && $user->kabupaten_id && $user->kecamatan_id && $user->alamat_jalan) {
+            // Ambil data lengkap provinsi, kabupaten, dan kecamatan dengan eager loading
+            $userWithRelations = User::with(['provinsi', 'kabupaten', 'kecamatan'])
+                ->where('id', $user->id)
+                ->first();
+
+            $alamatLengkap = [
+                'provinsi' => $userWithRelations->provinsi->nama_provinsi,
+                'kabupaten' => $userWithRelations->kabupaten->nama_kabupaten,
+                'kecamatan' => $userWithRelations->kecamatan->nama_kecamatan,
+                'jalan' => $user->alamat_jalan,
+                'kabupaten_id' => $user->kabupaten_id, // Untuk perhitungan ongkir
+            ];
+        }
+
+        // Ambil daftar metode pembayaran
+        $metodePembayaran = [
+            'transfer_bank' => 'Transfer Bank',
+            'qris' => 'QRIS',
+        ];
+
+        return view('pesanan.checkout', compact('keranjang', 'alamatLengkap', 'subtotal', 'ongkir', 'total', 'metodePembayaran'));
+    }
+
+    /**
+     * Halaman tambah alamat untuk checkout
+     */
+    public function tambahAlamat()
+    {
+        $user = Auth::user();
+
+        // Ambil data provinsi untuk dropdown
+        $provinsi = \App\Models\Provinsi::orderBy('nama_provinsi')->get();
+
+        return view('pesanan.tambah_alamat', compact('user', 'provinsi'));
+    }
+
+    /**
+     * Proses simpan alamat untuk checkout
+     */
+    public function simpanAlamat(Request $request)
+    {
+        $request->validate([
+            'provinsi_id' => 'required|exists:provinsi,id',
+            'kabupaten_id' => 'required|exists:kabupaten,id',
+            'kecamatan_id' => 'required|exists:kecamatan,id',
+            'alamat_jalan' => 'required|string|max:255',
+            'selected_items' => 'required|array',
+            'selected_items.*' => 'exists:keranjang,id_keranjang',
+        ]);
+
+        // Update data alamat user
+        User::where('id', Auth::id())->update([
+            'provinsi_id' => $request->provinsi_id,
+            'kabupaten_id' => $request->kabupaten_id,
+            'kecamatan_id' => $request->kecamatan_id,
+            'alamat_jalan' => $request->alamat_jalan
+        ]);
+
+        // Redirect ke halaman checkout dengan meneruskan selected_items
+        return redirect()->route('checkout', ['selected_items' => $request->selected_items])
+            ->with('success', 'Alamat berhasil disimpan');
+    }
+
+    /**
+     * Get ongkir berdasarkan kabupaten
+     */
+    public function getOngkir($kabupatanId)
+    {
+        // Ambil data ongkir berdasarkan kabupaten_id
+        $ongkir = \App\Models\Ongkir::where('kabupaten_id', $kabupatanId)->first();
+
+        // Ambil items yang dipilih untuk dihitung total jumlah
+        $selectedItems = request('selected_items', []);
+        $totalJumlah = 0;
+
+        if (!empty($selectedItems)) {
+            $keranjangItems = Keranjang::whereIn('id_keranjang', $selectedItems)
+                            ->where('user_id', Auth::id())
+                            ->get();
+
+            foreach ($keranjangItems as $item) {
+                $totalJumlah += $item->jumlah;
+            }
+        }
+
+        // Hitung biaya ongkir
+        $biayaOngkir = 0;
+        if ($ongkir) {
+            $biayaOngkir = $ongkir->biaya;
+
+            // Jika jumlah ikan lebih dari 3, tambahkan 2000
+            // dan tambahkan 2000 lagi untuk setiap kelipatan 3
+            if ($totalJumlah > 3) {
+                $tambahan = ceil(($totalJumlah - 3) / 3) * 2000;
+                $biayaOngkir += $tambahan;
+            }
+        } else {
+            // Default ongkir jika tidak ditemukan
+            $biayaOngkir = 50000;
+        }
+
+        return response()->json([
+            'success' => true,
+            'ongkir' => $biayaOngkir,
+            'jumlah_total' => $totalJumlah
+        ]);
+    }
+
+    /**
+     * Process checkout to create order
+     */
+    public function processCheckout(Request $request)
+    {
+        $request->validate([
+            'selected_items' => 'required|array',
+            'selected_items.*' => 'exists:keranjang,id_keranjang',
+            'metode_pembayaran' => 'required|string|in:transfer_bank,qris',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Get selected cart items
+            $keranjangItems = Keranjang::whereIn('id_keranjang', $request->selected_items)
+                            ->where('user_id', Auth::id())
+                            ->with('produk', 'ukuran')
+                            ->get();
+
+            if ($keranjangItems->isEmpty()) {
+                return redirect()->route('keranjang.index')
+                    ->with('error', 'Tidak ada produk yang dipilih. Silakan pilih produk terlebih dahulu.');
+            }
+
+            // Get user's address
+            $user = Auth::user();
+            if (!$user->alamat_jalan || !$user->kabupaten_id) {
+                return redirect()->route('alamat.tambah', ['selected_items' => $request->selected_items])
+                    ->with('error', 'Harap lengkapi alamat pengiriman terlebih dahulu.');
+            }
+
+            // Get user's address with relations
+            $userWithRelations = User::with(['provinsi', 'kabupaten', 'kecamatan'])
+                ->where('id', Auth::id())
+                ->first();
+
+            // Construct complete address
+            $alamatPengiriman = $userWithRelations->alamat_jalan . ', ' .
+                                $userWithRelations->kecamatan->nama_kecamatan . ', ' .
+                                $userWithRelations->kabupaten->nama_kabupaten . ', ' .
+                                $userWithRelations->provinsi->nama_provinsi;
+
+            // Calculate subtotal
+            $subtotal = $keranjangItems->sum('total_harga');
+
+            // Calculate total quantity
+            $totalJumlah = $keranjangItems->sum('jumlah');
+
+            // Get shipping cost
+            $ongkir = \App\Models\Ongkir::where('kabupaten_id', $user->kabupaten_id)->first();
+            $ongkirBiaya = $ongkir ? $ongkir->biaya : 50000; // Default if not found
+
+            // Jika jumlah ikan lebih dari 3, tambahkan biaya tambahan
+            if ($totalJumlah > 3) {
+                $tambahan = ceil(($totalJumlah - 3) / 3) * 2000;
+                $ongkirBiaya += $tambahan;
+            }
+
+            // Calculate total
+            $total = $subtotal + $ongkirBiaya;
+
+            // Create order dengan batas waktu 1 jam
+            $pesanan = Pesanan::create([
+                'user_id' => Auth::id(),
+                'id_ongkir' => $ongkir ? $ongkir->id_ongkir : 1, // Use the ongkir id or a default value
+                'total_harga' => $total,
+                'status_pesanan' => 'Menunggu Pembayaran', // Ubah status menjadi Menunggu Pembayaran
+                'alamat_pengiriman' => $alamatPengiriman,
+                'metode_pembayaran' => $request->metode_pembayaran,
+                'batas_waktu' => now()->addHour(), // Tambahkan batas waktu 1 jam dari sekarang
+            ]);                // Create order details
+            foreach ($keranjangItems as $item) {
+                DetailPesanan::create([
+                    'id_pesanan' => $pesanan->id_pesanan,
+                    'id_Produk' => $item->id_Produk,
+                    'ukuran_id' => $item->ukuran_id,
+                    'kuantitas' => $item->jumlah,
+                    'harga' => $item->ukuran && $item->ukuran->harga ? $item->ukuran->harga : $item->produk->harga,
+                    'subtotal' => $item->total_harga,
+                ]);
+
+                // Update stock
+                if ($item->ukuran_id) {
+                    // Update ukuran stock
+                    $ukuran = \App\Models\ProdukUkuran::find($item->ukuran_id);
+                    $ukuran->stok -= $item->jumlah;
+                    $ukuran->save();
+                } else {
+                    // Update product stock
+                    $produk = Produk::find($item->id_Produk);
+                    $produk->stok -= $item->jumlah;
+                    $produk->save();
+                }
+            }
+
+            // Delete selected cart items
+            Keranjang::whereIn('id_keranjang', $request->selected_items)
+                    ->where('user_id', Auth::id())
+                    ->delete();
+
+            // Notify admin about new order
+            NotificationController::notifyAdmins([
+                'type' => 'order',
+                'title' => 'Pesanan Baru',
+                'message' => 'Pesanan baru #' . $pesanan->id_pesanan . ' telah dibuat dan menunggu konfirmasi pembayaran.',
+                'data' => [
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
+                ]
+            ]);
+
+            // Notify customer about their order
+            NotificationController::notifyCustomer(Auth::id(), [
+                'type' => 'order',
+                'title' => 'Pesanan Berhasil Dibuat',
+                'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah berhasil dibuat. Silakan lakukan pembayaran.',
+                'data' => [
+                    'order_id' => $pesanan->id_pesanan,
+                    'url' => route('pesanan.show', $pesanan->id_pesanan)
+                ]
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('pesanan.show', $pesanan->id_pesanan)
+                ->with('success', 'Pesanan berhasil dibuat. Silakan lakukan pembayaran.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal membuat pesanan: ' . $e->getMessage())
+                ->withInput();
         }
     }
 }
