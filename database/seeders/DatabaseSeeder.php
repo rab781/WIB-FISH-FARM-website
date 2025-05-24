@@ -13,18 +13,17 @@ class DatabaseSeeder extends Seeder
     {
         // Jalankan seeder dalam urutan yang benar untuk menjaga integritas relasi
         $this->call([
-            ProvinsiSeeder::class,      // 1. Provinsi harus dibuat terlebih dahulu
-            KabupatenSeeder::class,     // 2. Kabupaten (membutuhkan Provinsi)
-            KecamatanSeeder::class,     // 3. Kecamatan (membutuhkan Kabupaten)
-            UserSeeder::class,          // 4. User
-            ProdukSeeder::class,        // 5. Produk
-            LokasiSeeder::class,        // 6. Lokasi (membutuhkan Provinsi dan Kabupaten)
-            OngkirSeeder::class,        // 7. Ongkir
-            KeranjangSeeder::class,     // 8. Keranjang (membutuhkan User dan Produk)
-            PesananSeeder::class,       // 9. Pesanan (membutuhkan User dan Ongkir)
-            DetailPesananSeeder::class, // 10. Detail Pesanan (membutuhkan Pesanan dan Produk)
-            PembayaranSeeder::class,    // 11. Pembayaran (membutuhkan Pesanan)
-            UlasanSeeder::class,        // 12. Ulasan (membutuhkan User dan Produk)
+            // Provinsi, Kabupaten, dan Kecamatan sudah tidak digunakan
+            // karena digantikan oleh tabel Alamat yang mengambil data dari RajaOngkir API
+            UserSeeder::class,          // 1. User
+            ProdukSeeder::class,        // 2. Produk
+            LokasiSeeder::class,        // 3. Lokasi (kini menggunakan Alamat dari RajaOngkir)
+            OngkirSeeder::class,        // 4. Ongkir (menggunakan Alamat)
+            KeranjangSeeder::class,     // 5. Keranjang (membutuhkan User dan Produk)
+            PesananSeeder::class,       // 6. Pesanan (membutuhkan User dan Ongkir)
+            DetailPesananSeeder::class, // 7. Detail Pesanan (membutuhkan Pesanan dan Produk)
+            PembayaranSeeder::class,    // 8. Pembayaran (membutuhkan Pesanan)
+            UlasanSeeder::class,        // 9. Ulasan (membutuhkan User dan Produk)
         ]);
     }
 }

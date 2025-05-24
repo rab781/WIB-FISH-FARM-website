@@ -79,57 +79,47 @@
                 <!-- Address Information -->
                 <div class="p-6 border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-800 mb-5">Informasi Alamat</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Provinsi -->
-                        <div>
-                            <label for="provinsi_id" class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                            <select id="provinsi_id" name="provinsi_id" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('provinsi_id') border-red-300 @enderror">
-                                <option value="">-- Pilih Provinsi --</option>
-                                @foreach($provinsi as $prov)
-                                <option value="{{ $prov->id }}" {{ old('provinsi_id', $user->provinsi_id) == $prov->id ? 'selected' : '' }}>{{ $prov->nama_provinsi }}</option>
-                                @endforeach
-                            </select>
-                            @error('provinsi_id')
-                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
 
-                        <!-- Kabupaten -->
-                        <div>
-                            <label for="kabupaten_id" class="block text-sm font-medium text-gray-700 mb-1">Kabupaten / Kota</label>
-                            <select id="kabupaten_id" name="kabupaten_id" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('kabupaten_id') border-red-300 @enderror" disabled>
-                                <option value="">-- Pilih Kabupaten / Kota --</option>
-                                @foreach($kabupaten as $kab)
-                                <option value="{{ $kab->id }}" {{ old('kabupaten_id', $user->kabupaten_id) == $kab->id ? 'selected' : '' }}>{{ $kab->nama_kabupaten }}</option>
-                                @endforeach
-                            </select>
-                            @error('kabupaten_id')
-                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                            @enderror
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Current Address -->
+                        @if ($user->alamat_id && $alamat)
+                        <div class="bg-gray-50 p-4 rounded-md mb-4">
+                            <h4 class="font-medium text-gray-700 mb-2">Alamat Saat Ini:</h4>
+                            <p>{{ $user->alamat_jalan }}, {{ $alamat->kecamatan }}, {{ $alamat->kabupaten }}, {{ $alamat->provinsi }} {{ $alamat->kode_pos }}</p>
                         </div>
+                        @endif
 
-                        <!-- Kecamatan -->
-                        <div>
-                            <label for="kecamatan_id" class="block text-sm font-medium text-gray-700 mb-1">Kecamatan</label>
-                            <select id="kecamatan_id" name="kecamatan_id" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('kecamatan_id') border-red-300 @enderror" disabled>
-                                <option value="">-- Pilih Kecamatan --</option>
-                                @foreach($kecamatan as $kec)
-                                <option value="{{ $kec->id }}" {{ old('kecamatan_id', $user->kecamatan_id) == $kec->id ? 'selected' : '' }}>{{ $kec->nama_kecamatan }}</option>
-                                @endforeach
-                            </select>
-                            @error('kecamatan_id')
+                        <!-- Cari & Pilih Alamat dengan Autocomplete -->
+                        <div class="address-search-container">
+                            <label for="alamat_search" class="block text-sm font-medium text-gray-700 mb-1">Cari & Pilih Alamat</label>
+                            <input type="text" id="alamat_search" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('alamat_id') border-red-300 @enderror"
+                                placeholder="Ketik untuk mencari (cth: Jakarta, Bandung, Surabaya)">
+                            <input type="hidden" id="alamat_id" name="alamat_id" value="{{ $user->alamat_id ?? '' }}">
+
+                            <!-- Dropdown hasil pencarian -->
+                            <div id="address-dropdown" class="address-dropdown"></div>
+
+                            <!-- Tampilan alamat yang terpilih -->
+                            <div class="selected-address" style="{{ $user->alamat_id && $alamat ? '' : 'display:none' }}">
+                                <span id="selected-address-display">{{ $user->alamat_id && $alamat ? $alamat->kecamatan . ', ' . $alamat->kabupaten . ', ' . $alamat->provinsi . ' ' . $alamat->kode_pos : '' }}</span>
+                                <span id="clear-address" class="clear-address" title="Hapus alamat">×</span>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Ketik minimal 3 karakter untuk mencari alamat</p>
+                            @error('alamat_id')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <!-- Alamat Jalan -->
-                        <div class="md:col-span-2">
+                        <div>
                             <label for="alamat_jalan" class="block text-sm font-medium text-gray-700 mb-1">Alamat Jalan</label>
                             <textarea name="alamat_jalan" id="alamat_jalan" rows="3" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('alamat_jalan') border-red-300 @enderror">{{ old('alamat_jalan', $user->alamat_jalan) }}</textarea>
                             @error('alamat_jalan')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        
                     </div>
                 </div>
 
@@ -170,11 +160,55 @@
 </div>
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('css/address-autocomplete.css') }}">
 <style>
     .preview-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    /* Shipping calculator styling */
+    #shipping-loading {
+        display: flex;
+        align-items: center;
+    }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+    }
+
+    .alert-warning {
+        background-color: #fff7ed;
+        color: #c2410c;
+        border-left: 4px solid #fb923c;
+    }
+
+    /* Table styles */
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    th, td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+    }
+
+    th {
+        font-weight: 500;
+        background-color: #f9fafb;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9fafb;
+    }
+
+    tr:hover {
+        background-color: #f3f4f6;
     }
 </style>
 @endpush
@@ -191,122 +225,8 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
-
-    // Handle dynamic changing of kabupaten and kecamatan dropdowns
-    document.addEventListener('DOMContentLoaded', function() {
-        const provinsiSelect = document.getElementById('provinsi_id');
-        const kabupatenSelect = document.getElementById('kabupaten_id');
-        const kecamatanSelect = document.getElementById('kecamatan_id');
-
-        // Fungsi untuk toggle disabled state kabupaten
-        function toggleKabupatenState() {
-            const provinsiId = provinsiSelect.value;
-            if (provinsiId) {
-                kabupatenSelect.disabled = false;
-            } else {
-                kabupatenSelect.disabled = true;
-                kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten / Kota --</option>';
-                kecamatanSelect.disabled = true;
-                kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-            }
-        }
-
-        // Fungsi untuk toggle disabled state kecamatan
-        function toggleKecamatanState() {
-            const kabupatenId = kabupatenSelect.value;
-            if (kabupatenId) {
-                kecamatanSelect.disabled = false;
-            } else {
-                kecamatanSelect.disabled = true;
-                kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-            }
-        }
-
-        // Initial state setup
-        toggleKabupatenState();
-        toggleKecamatanState();
-
-        if (provinsiSelect) {
-            provinsiSelect.addEventListener('change', function() {
-                const provinsiId = this.value;
-                if (!provinsiId) {
-                    kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten / Kota --</option>';
-                    kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-                    toggleKabupatenState();
-                    toggleKecamatanState();
-                    return;
-                }
-
-                // Fetch kabupaten
-                fetch(`/profile/kabupaten?provinsi_id=${provinsiId}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten / Kota --</option>';
-
-                    data.forEach(function(item) {
-                        kabupatenSelect.innerHTML += `<option value="${item.id}">${item.nama_kabupaten}</option>`;
-                    });
-
-                    // Enable kabupaten after data loaded
-                    toggleKabupatenState();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Gagal memuat data kabupaten. Silakan coba lagi.');
-                });
-            });
-        }
-
-        if (kabupatenSelect) {
-            kabupatenSelect.addEventListener('change', function() {
-                const kabupatenId = this.value;
-                if (!kabupatenId) {
-                    kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-                    toggleKecamatanState();
-                    return;
-                }
-
-                // Fetch kecamatan
-                fetch(`/profile/kecamatan?kabupaten_id=${kabupatenId}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-
-                    data.forEach(function(item) {
-                        kecamatanSelect.innerHTML += `<option value="${item.id}">${item.nama_kecamatan}</option>`;
-                    });
-
-                    // Enable kecamatan after data loaded
-                    toggleKecamatanState();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Gagal memuat data kecamatan. Silakan coba lagi.');
-                });
-            });
-        }
-    });
 </script>
+<script src="{{ asset('js/address-autocomplete-fixed.js') }}"></script>
 @endpush
 
 @endsection

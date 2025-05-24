@@ -22,9 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
-        'provinsi_id',
-        'kabupaten_id',
-        'kecamatan_id',
+        'alamat_id',
         'alamat_jalan',
         'no_hp',
         'google_id',
@@ -57,51 +55,19 @@ class User extends Authenticatable
 
     // Relationships
     /**
-     * Get the provinsi associated with the user.
+     * Get the alamat associated with the user.
      */
-    public function provinsi()
+    public function alamat()
     {
-        return $this->belongsTo(Provinsi::class);
+        return $this->belongsTo(Alamat::class);
     }
 
     /**
-     * Get the kabupaten associated with the user.
+     * Get the full address information
      */
-    public function kabupaten()
+    public function getAlamat()
     {
-        return $this->belongsTo(Kabupaten::class);
-    }
-
-    /**
-     * Get the kecamatan associated with the user.
-     */
-    public function kecamatan()
-    {
-        return $this->belongsTo(Kecamatan::class);
-    }
-
-    /**
-     * Get the provinsi object via relationship
-     */
-    public function getProvinsi()
-    {
-        return $this->provinsi ?? null;
-    }
-
-    /**
-     * Get the kabupaten name via relationship
-     */
-    public function getKabupaten()
-    {
-        return $this->kabupaten ?? null;
-    }
-
-    /**
-     * Get the kecamatan name via relationship
-     */
-    public function getKecamatan()
-    {
-        return $this->kecamatan ?? null;
+        return $this->alamat ?? null;
     }
 
     // Relasi ke keranjang

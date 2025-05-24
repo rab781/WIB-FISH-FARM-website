@@ -1,15 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use Laravel\Socialite\Two\GoogleProvider;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
-use App\Http\Controllers\Auth\GoogleController;
-use Laravel\Socialite\Two\GoogleProvider;
+use App\Http\Controllers\RajaOngkirController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
@@ -17,6 +19,9 @@ Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detai
 Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang-kami');
 
 Route::middleware('auth')->group(function () {
+    // Alamat storage route
+    Route::post('/alamat', [RegisteredUserController::class, 'storeAlamat'])->name('alamat.store');
+
     // Keranjang view and CRUD operations
     Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
     Route::post('/keranjang', [KeranjangController::class, 'store'])->name('keranjang.store');
@@ -42,8 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::get('/profile/kabupaten', [App\Http\Controllers\ProfileController::class, 'getKabupaten'])->name('profile.kabupaten');
-    Route::get('/profile/kecamatan', [App\Http\Controllers\ProfileController::class, 'getKecamatan'])->name('profile.kecamatan');
+    Route::get('/profile/search-alamat', [App\Http\Controllers\ProfileController::class, 'searchAlamat'])->name('profile.search-alamat');
 
     // Notification routes
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
@@ -147,6 +151,31 @@ Route::fallback(function () {
 
 Route::get('/test', AuthenticatedSessionController::class . '@index')->name('index');
 
+// Diagnostic routes
+Route::get('/diagnosa-api', function () {
+    return view('diagnosa-api');
+})->name('diagnosa-api');
+
+// RajaOngkir API test routes
+Route::get('/test-rajaongkir-api', [RajaOngkirController::class, 'testApiStatus'])->name('test-rajaongkir-api');
+Route::get('/test-komerce', [RajaOngkirController::class, 'testKomerce'])->name('test-komerce');
+Route::get('/test-standard', [RajaOngkirController::class, 'testStandard'])->name('test-standard');
+Route::post('/cek-tracking', [RajaOngkirController::class, 'cekTrackingStatus'])->name('cek-tracking');
+
 // Auth Google routes
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']) ->name('auth.google.callback');
+
+// Test routes for debugging
+Route::get('/test/raja-ongkir-bon', [App\Http\Controllers\TestApiController::class, 'testRajaOngkirWithBon']);
+
+// Advanced diagnostic routes for RajaOngkir API
+Route::get('/test/api/raja-ongkir-search', [App\Http\Controllers\TestController::class, 'testRajaOngkirSearch'])->name('test.raja-ongkir-search');
+Route::get('/test/api/response', [App\Http\Controllers\TestController::class, 'testApiResponse'])->name('test.api-response');
+Route::get('/test/debug', [App\Http\Controllers\TestController::class, 'debugAddressSearch'])->name('test.debug');
+Route::get('/test/enhanced-search', [App\Http\Controllers\TestController::class, 'enhancedSearch'])->name('test.enhanced-search');
+                                      
+// Test route for rate limiter
+Route::get('/test/rate-limiter', function () {
+    return view('test.rate_limiter_test');
+})->name('test.rate-limiter');

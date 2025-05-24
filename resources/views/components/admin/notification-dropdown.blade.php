@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <div class="border-t border-yellow-100 mt-2 pt-2 pb-2 px-4 text-center">
+        <div class="border-t border-white-100 mt-2 pt-2 pb-2 px-4 text-center">
             <a href="{{ route('admin.notifications.index') }}" class="text-yellow-600 hover:text-yellow-800 font-medium">
                 Lihat Semua Notifikasi
             </a>

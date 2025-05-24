@@ -12,34 +12,21 @@
             <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
         </div>
 
-        <!-- Provinsi -->
+        <!-- Cari Alamat (RajaOngkir) -->
         <div class="mb-4">
-            <x-input-label for="provinsi_id" :value="__('Provinsi')" class="text-gray-700 font-semibold" />
-            <select id="provinsi_id" name="provinsi_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" required>
-                <option value="">Pilih Provinsi</option>
-                @foreach($provinsi as $p)
-                    <option value="{{ $p->id }}">{{ $p->nama_provinsi }}</option>
-                @endforeach
-            </select>
-            <x-input-error :messages="$errors->get('provinsi_id')" class="mt-2" />
+            <x-input-label for="alamat_search" :value="__('Cari Alamat')" class="text-gray-700 font-semibold" />
+            <x-text-input id="alamat_search" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                type="text" name="alamat_search" :value="old('alamat_search')" placeholder="Masukkan nama kota/kabupaten" />
+            <small class="text-gray-500">Ketik untuk mencari alamat dari RajaOngkir</small>
         </div>
 
-        <!-- Kabupaten -->
+        <!-- Hasil Pencarian -->
         <div class="mb-4">
-            <x-input-label for="kabupaten_id" :value="__('Kabupaten')" class="text-gray-700 font-semibold" />
-            <select id="kabupaten_id" name="kabupaten_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" required disabled>
-                <option value="">Pilih Kabupaten</option>
+            <x-input-label for="alamat_id" :value="__('Pilih Alamat')" class="text-gray-700 font-semibold" />
+            <select id="alamat_id" name="alamat_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" required>
+                <option value="">Pilih alamat dari hasil pencarian</option>
             </select>
-            <x-input-error :messages="$errors->get('kabupaten_id')" class="mt-2" />
-        </div>
-
-        <!-- Kecamatan -->
-        <div class="mb-4">
-            <x-input-label for="kecamatan_id" :value="__('Kecamatan')" class="text-gray-700 font-semibold" />
-            <select id="kecamatan_id" name="kecamatan_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500" required disabled>
-                <option value="">Pilih Kecamatan</option>
-            </select>
-            <x-input-error :messages="$errors->get('kecamatan_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('alamat_id')" class="mt-2" />
         </div>
 
         <!-- Alamat (Jalan) -->
@@ -49,89 +36,70 @@
             <x-input-error :messages="$errors->get('alamat_jalan')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-6">
-            <x-primary-button class="w-full py-3 flex justify-center bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-md">
-                {{ __('Simpan Data') }}
-            </x-primary-button>
+        <div class="flex justify-between items-center mt-8">
+            <a href="{{ route('login') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                {{ __('Kembali ke Halaman Login') }}
+            </a>
+
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded">
+                {{ __('Simpan Alamat') }}
+            </button>
         </div>
     </form>
 
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Event listener untuk perubahan provinsi
-            document.getElementById('provinsi_id').addEventListener('change', function() {
-                const provinsiId = this.value;
-                const kabupatenDropdown = document.getElementById('kabupaten_id');
-                const kecamatanDropdown = document.getElementById('kecamatan_id');
+            // Raja Ongkir API integration
+            const searchInput = document.getElementById('alamat_search');
+            const alamatSelect = document.getElementById('alamat_id');
 
-                // Reset dan disable dropdown kabupaten dan kecamatan
-                kabupatenDropdown.innerHTML = '<option value="">Pilih Kabupaten</option>';
-                kecamatanDropdown.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                kabupatenDropdown.disabled = !provinsiId;
-                kecamatanDropdown.disabled = true;
+            let searchTimeout;
 
-                if (provinsiId) {
-                    // Fetch kabupaten data dengan URL yang benar
-                    fetch(`/api/kabupaten/${provinsiId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
+            searchInput.addEventListener('keyup', function() {
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(function() {
+                    const searchTerm = searchInput.value;
+
+                    if (searchTerm.length < 3) return;
+
+                    // Clear current options except the first one
+                    while (alamatSelect.options.length > 1) {
+                        alamatSelect.remove(1);
+                    }
+
+                    // Add loading option
+                    const loadingOption = new Option('Loading...', '');
+                    alamatSelect.add(loadingOption);
+
+                    fetch(`/api/alamat/search?term=${searchTerm}`)
+                        .then(response => response.json())
                         .then(data => {
-                            if (data && data.length > 0) {
-                                data.forEach(kabupaten => {
-                                    const option = document.createElement('option');
-                                    option.value = kabupaten.id;
-                                    option.textContent = kabupaten.nama_kabupaten;
-                                    kabupatenDropdown.appendChild(option);
+                            // Remove loading option
+                            alamatSelect.remove(alamatSelect.options.length - 1);
+
+                            // Add options from API response
+                            if (data.data && data.data.length > 0) {
+                                data.data.forEach(item => {
+                                    const formattedAddress = `${item.subdistrict}, ${item.type} ${item.city}, ${item.province} ${item.postal_code}`;
+                                    const option = new Option(formattedAddress, item.id);
+                                    alamatSelect.add(option);
                                 });
                             } else {
-                                console.log('Tidak ada data kabupaten ditemukan');
+                                const noResultOption = new Option('Tidak ada hasil ditemukan', '');
+                                noResultOption.disabled = true;
+                                alamatSelect.add(noResultOption);
                             }
                         })
                         .catch(error => {
-                            console.error('Error fetching kabupaten:', error);
+                            console.error('Error fetching alamat:', error);
+                            alamatSelect.remove(alamatSelect.options.length - 1);
+                            const errorOption = new Option('Error: Gagal memuat data', '');
+                            errorOption.disabled = true;
+                            alamatSelect.add(errorOption);
                         });
-                }
-            });
-
-            // Event listener untuk perubahan kabupaten
-            document.getElementById('kabupaten_id').addEventListener('change', function() {
-                const kabupatenId = this.value;
-                const kecamatanDropdown = document.getElementById('kecamatan_id');
-
-                // Reset dropdown kecamatan
-                kecamatanDropdown.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                kecamatanDropdown.disabled = !kabupatenId;
-
-                if (kabupatenId) {
-                    // Fetch kecamatan data dengan URL yang benar
-                    fetch(`/api/kecamatan/${kabupatenId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data && data.length > 0) {
-                                data.forEach(kecamatan => {
-                                    const option = document.createElement('option');
-                                    option.value = kecamatan.id;
-                                    option.textContent = kecamatan.nama_kecamatan;
-                                    kecamatanDropdown.appendChild(option);
-                                });
-                            } else {
-                                console.log('Tidak ada data kecamatan ditemukan');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching kecamatan:', error);
-                        });
-                }
+                }, 500);
             });
         });
     </script>

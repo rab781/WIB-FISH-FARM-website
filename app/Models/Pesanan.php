@@ -36,6 +36,12 @@ class Pesanan extends Model
         'alamat_pengiriman',
         'metode_pembayaran',
         'batas_waktu',
+        'alamat_id',
+        'kurir',
+        'kurir_service',
+        'ongkir_biaya',
+        'berat_total',
+        'jumlah_box',
     ];
 
     // Relasi ke user
@@ -48,6 +54,12 @@ class Pesanan extends Model
     public function ongkir()
     {
         return $this->belongsTo(Ongkir::class, 'id_ongkir', 'id_ongkir');
+    }
+
+    // Relasi ke alamat
+    public function alamat()
+    {
+        return $this->belongsTo(Alamat::class, 'alamat_id', 'id');
     }
 
     // Relasi ke detail pesanan

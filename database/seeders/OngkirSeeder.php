@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Kabupaten;
+use App\Models\Alamat;
 use App\Models\Ongkir;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +20,7 @@ class OngkirSeeder extends Seeder
         // Tampilkan pesan
         $this->command->info('Memulai pengisian data ongkir...');
 
-        // Data kabupaten dengan tarif tetap berdasarkan gambar
+        // Data kabupaten dengan tarif tetap
         $kabupatens = [
             // Kolom kiri
             'PASURUAN' => 25000,
@@ -83,58 +83,38 @@ class OngkirSeeder extends Seeder
         $successCount = 0;
         $failedCount = 0;
 
-        // Untuk setiap kabupaten dalam data, temukan ID kabupaten yang sesuai
+        // Untuk setiap kabupaten dalam data, temukan alamat yang sesuai
         foreach ($kabupatens as $namaKabupaten => $biaya) {
             try {
-                // Cari kabupaten berdasarkan nama (dengan pencarian yang lebih fleksibel)
-                $kabupaten = Kabupaten::where('nama_kabupaten', 'LIKE', "%$namaKabupaten%")
-                                    ->orWhere('nama_kabupaten', 'LIKE', "%".strtolower($namaKabupaten)."%")
-                                    ->first();
+                // Cari alamat berdasarkan kabupaten (dengan pencarian yang lebih fleksibel)
+                $alamat = Alamat::where('kabupaten', 'LIKE', "%$namaKabupaten%")
+                                ->orWhere('kabupaten', 'LIKE', "%".strtolower($namaKabupaten)."%")
+                                ->first();
 
-                if ($kabupaten) {
-                    // Buat data ongkir jika kabupaten ditemukan
+                if ($alamat) {
+                    // Buat data ongkir jika alamat ditemukan
                     Ongkir::create([
-                        'kabupaten_id' => $kabupaten->id,
+                        'alamat_id' => $alamat->id,
                         'biaya' => $biaya,
-                        'keterangan' => "Ongkir untuk {$kabupaten->nama_kabupaten} (Rp 2.500/kg, minimal 10kg)"
+                        'keterangan' => "Ongkir untuk {$alamat->kabupaten}, {$alamat->provinsi} (Rp 2.500/kg, minimal 10kg)"
                     ]);
 
-                    $this->command->info("Ongkir untuk {$kabupaten->nama_kabupaten} berhasil dibuat: Rp " . number_format($biaya, 0, ',', '.'));
                     $successCount++;
+                    $this->command->info("✓ Berhasil membuat ongkir untuk {$alamat->kabupaten}");
                 } else {
-                    // Log kabupaten yang tidak ditemukan
-                    $this->command->warn("Kabupaten '$namaKabupaten' tidak ditemukan dalam database.");
                     $failedCount++;
+                    $this->command->warn("⚠ Tidak menemukan alamat dengan kabupaten: $namaKabupaten");
                 }
             } catch (\Exception $e) {
-                $this->command->error("Error saat membuat ongkir untuk $namaKabupaten: " . $e->getMessage());
-                Log::error("Error di OngkirSeeder: " . $e->getMessage());
                 $failedCount++;
+                $this->command->error("✗ Error saat membuat ongkir untuk $namaKabupaten: {$e->getMessage()}");
+                Log::error("Error saat membuat ongkir untuk $namaKabupaten: {$e->getMessage()}");
             }
         }
 
-        // Default ongkir untuk kabupaten yang tidak ada dalam daftar
-        $this->command->info("Membuat ongkir default untuk kabupaten lainnya...");
-
-        // Cari semua kabupaten yang belum memiliki ongkir
-        $kabupatensWithoutOngkir = Kabupaten::whereNotIn('id', function ($query) {
-            $query->select('kabupaten_id')->from('ongkir');
-        })->get();
-
-        foreach ($kabupatensWithoutOngkir as $kabupaten) {
-            try {
-                Ongkir::create([
-                    'kabupaten_id' => $kabupaten->id,
-                    'biaya' => 50000, // Biaya default lebih tinggi
-                    'keterangan' => "Ongkir default untuk {$kabupaten->nama_kabupaten}"
-                ]);
-                $successCount++;
-            } catch (\Exception $e) {
-                $this->command->error("Error saat membuat ongkir default untuk {$kabupaten->nama_kabupaten}: " . $e->getMessage());
-                $failedCount++;
-            }
-        }
-
-        $this->command->info("Pengisian data ongkir selesai. Berhasil: $successCount, Gagal: $failedCount");
+        // Tampilkan informasi tentang hasil seeding
+        $this->command->info("Selesai mengisi data ongkir:");
+        $this->command->info("- Berhasil: $successCount entri");
+        $this->command->info("- Gagal: $failedCount entri");
     }
 }

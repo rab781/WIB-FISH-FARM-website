@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Provinsi;
-use App\Models\Kabupaten;
-use App\Models\Kecamatan;
+use App\Models\Alamat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\RajaOngkirController;
+use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
@@ -20,10 +20,11 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        $user = Auth::user();
+        $user = User::with('alamat')->find(Auth::id());
         $title = 'Profil Saya';
+        $foto = $user->foto;
 
-        return view('customer.profile.show', compact('user', 'title'));
+        return view('customer.profile.show', compact('user', 'title', 'foto'));
     }
 
     /**
@@ -36,11 +37,13 @@ class ProfileController extends Controller
         $user = Auth::user();
         $title = 'Edit Profil';
 
-        $provinsi = Provinsi::all();
-        $kabupaten = $user->kabupaten_id ? Kabupaten::where('provinsi_id', $user->provinsi_id)->get() : collect();
-        $kecamatan = $user->kecamatan_id ? Kecamatan::where('kabupaten_id', $user->kabupaten_id)->get() : collect();
+        // Load alamat details if exists
+        $alamat = null;
+        if ($user->alamat_id) {
+            $alamat = Alamat::find($user->alamat_id);
+        }
 
-        return view('customer.profile.edit', compact('user', 'title', 'provinsi', 'kabupaten', 'kecamatan'));
+        return view('customer.profile.edit', compact('user', 'title', 'alamat'));
     }
 
     /**
@@ -51,15 +54,13 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
+        $user = User::find(Auth::id());
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'no_hp' => 'required|string|max:20',
-            'provinsi_id' => 'sometimes|nullable|exists:provinsi,id',
-            'kabupaten_id' => 'sometimes|nullable|exists:kabupaten,id',
-            'kecamatan_id' => 'sometimes|nullable|exists:kecamatan,id',
+            'alamat_id' => 'sometimes|nullable|exists:alamat,id',
             'alamat_jalan' => 'sometimes|nullable|string',
             'foto' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'sometimes|nullable|min:8|confirmed',
@@ -70,14 +71,8 @@ class ProfileController extends Controller
         $user->no_hp = $request->no_hp;
 
         // Update location data if provided
-        if ($request->provinsi_id) {
-            $user->provinsi_id = $request->provinsi_id;
-        }
-        if ($request->kabupaten_id) {
-            $user->kabupaten_id = $request->kabupaten_id;
-        }
-        if ($request->kecamatan_id) {
-            $user->kecamatan_id = $request->kecamatan_id;
+        if ($request->alamat_id) {
+            $user->alamat_id = $request->alamat_id;
         }
         if ($request->alamat_jalan) {
             $user->alamat_jalan = $request->alamat_jalan;
@@ -106,35 +101,29 @@ class ProfileController extends Controller
             $user->foto = $fileName;
         }
 
+        // Save all changes to the database
+        $user->save();
+
         return redirect()->route('profile.show')
             ->with('success', 'Profil berhasil diperbarui!');
     }
 
     /**
-     * Get kabupaten based on provinsi_id
+     * Search for addresses using RajaOngkir API
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getKabupaten(Request $request)
+    public function searchAlamat(Request $request)
     {
-        $provinsiId = $request->provinsi_id;
-        $kabupaten = Kabupaten::where('provinsi_id', $provinsiId)->get();
+        Log::info('ProfileController@searchAlamat called with term: ' . $request->term);
 
-        return response()->json($kabupaten);
-    }
+        // Use RajaOngkirController to search locations
+        $controller = new RajaOngkirController();
+        $result = $controller->searchLocation($request);
 
-    /**
-     * Get kecamatan based on kabupaten_id
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getKecamatan(Request $request)
-    {
-        $kabupatenId = $request->kabupaten_id;
-        $kecamatan = Kecamatan::where('kabupaten_id', $kabupatenId)->get();
+        Log::info('ProfileController@searchAlamat returning result: ' . $result->getContent());
 
-        return response()->json($kecamatan);
+        return $result;
     }
 }

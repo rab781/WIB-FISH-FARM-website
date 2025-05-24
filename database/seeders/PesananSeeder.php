@@ -33,7 +33,7 @@ class PesananSeeder extends Seeder
             'user_id' => 4, // Dedi
             'id_ongkir' => 3, // Surabaya
             'total_harga' => 245000, // 225000 (produk) + 20000 (ongkir)
-            'status_pesanan' => 'proses',
+            'status_pesanan' => 'Diproses',
         ]);
 
         // Pesanan lain untuk user Budi (ID: 2)
@@ -41,7 +41,7 @@ class PesananSeeder extends Seeder
             'user_id' => 2, // Budi
             'id_ongkir' => 5, // Semarang
             'total_harga' => 91000, // 75000 (produk) + 16000 (ongkir)
-            'status_pesanan' => 'Batal',
+            'status_pesanan' => 'Dibatalkan',
         ]);
     }
 }

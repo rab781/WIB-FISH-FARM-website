@@ -57,4 +57,35 @@ class RegisteredUserController extends Controller
         // Tidak login otomatis, arahkan ke halaman login dengan pesan sukses
         return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login dengan akun Anda.');
     }
+
+    /**
+     * Handle the address setup after registration
+     */
+    public function storeAlamat(Request $request)
+    {
+        $request->validate([
+            'no_hp' => 'required|string|max:15',
+            'alamat_id' => 'required|exists:alamat,id',
+            'alamat_jalan' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Get the currently authenticated user's ID
+            $userId = Auth::id();
+
+            // Find and update the user using the User model
+            User::where('id', $userId)->update([
+                'no_hp' => $request->no_hp,
+                'alamat_id' => $request->alamat_id,
+                'alamat_jalan' => $request->alamat_jalan
+            ]);
+
+            return redirect()->route('home')
+                ->with('success', 'Alamat berhasil disimpan. Selamat datang di IKAN!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menyimpan alamat: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 }

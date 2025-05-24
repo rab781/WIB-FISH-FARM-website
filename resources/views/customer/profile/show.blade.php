@@ -77,24 +77,29 @@
             </div>
 
             <div class="p-6 bg-white">
-                @if($user->kecamatan)
+                @if($user->alamat_id && $user->alamat)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                         <div>
                             <div class="text-sm text-gray-500 mb-1">Provinsi</div>
-                            <div class="font-medium">{{ $user->getProvinsi()->nama_provinsi ?? 'Belum diisi' }}</div>
+                            <div class="font-medium">{{ $user->alamat->provinsi }}</div>
                         </div>
 
                         <div>
                             <div class="text-sm text-gray-500 mb-1">Kabupaten/Kota</div>
-                            <div class="font-medium">{{ $user->getKabupaten()->nama_kabupaten ?? 'Belum diisi' }}</div>
+                            <div class="font-medium">{{ $user->alamat->tipe }} {{ $user->alamat->kabupaten }}</div>
                         </div>
 
                         <div>
                             <div class="text-sm text-gray-500 mb-1">Kecamatan</div>
-                            <div class="font-medium">{{ $user->kecamatan->nama ?? 'Belum diisi' }}</div>
+                            <div class="font-medium">{{ $user->alamat->kecamatan }}</div>
                         </div>
 
                         <div>
+                            <div class="text-sm text-gray-500 mb-1">Kode Pos</div>
+                            <div class="font-medium">{{ $user->alamat->kode_pos }}</div>
+                        </div>
+
+                        <div class="md:col-span-2">
                             <div class="text-sm text-gray-500 mb-1">Alamat Jalan</div>
                             <div class="font-medium">{{ $user->alamat_jalan ?: 'Belum diisi' }}</div>
                         </div>
@@ -108,7 +113,7 @@
                         <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada alamat</h3>
                         <p class="mt-1 text-sm text-gray-500">Tambahkan alamat untuk memudahkan proses pengiriman.</p>
                         <div class="mt-6">
-                            <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                            <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none">
                                 <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>

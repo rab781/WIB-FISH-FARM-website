@@ -32,6 +32,12 @@
                 <p class="text-gray-700 mb-8 leading-relaxed text-lg">
                     Kami melakukan perawatan yang teratur sehingga tumbuh dengan sehat dan indah sehingga beberapa ikan yang tersedia di ikut sertakan dalam kontes.
                 </p>
+                <p class="text-gray-700 mb-6 leading-relaxed text-lg">
+                    Kami juga menyediakan layanan pemesanan ikan secara online untuk memudahkan Anda dalam berbelanja. Dengan pengalaman kami dalam budidaya ikan hias, kami siap memberikan pelayanan terbaik untuk Anda.
+                </p>
+                <p class="text-gray-700 mb-6 leading-relaxed text-lg">
+                    Kami berkomitmen untuk memberikan ikan hias berkualitas dengan harga yang terjangkau. Dengan pengalaman kami dalam budidaya ikan hias, kami siap memberikan pelayanan terbaik untuk Anda.
+                </p>
                 <div class="flex space-x-4">
                     <span class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg font-medium inline-flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,7 +49,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                        Sejak 2015
+                        Sejak 2020
                     </span>
                 </div>
             </div>

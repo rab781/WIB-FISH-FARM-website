@@ -1,3 +1,5 @@
+@extends('layouts.app')
+
 <x-guest-layout>
     <style>
         .fade-in {

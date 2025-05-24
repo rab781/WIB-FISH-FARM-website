@@ -38,7 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Middleware grup 'api'
         $middleware->group('api', [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
+            // In Laravel 12, it's better to use the middleware alias
+            'throttle:60,1', // Direct throttle config (60 requests per minute)
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 

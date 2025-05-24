@@ -58,7 +58,7 @@
                     </div>
                 </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                <a href="{{ route('admin.pesanan.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
                     <div class="flex items-center">
                         <i class="fas fa-box w-6"></i>
                         <span>Pesanan</span>
@@ -134,7 +134,7 @@
                                  x-transition:leave-end="transform opacity-0 scale-95"
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                                 <div class="py-1">
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
+                                    <a href="{{ route('admin.profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

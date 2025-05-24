@@ -18,16 +18,17 @@ class Ongkir extends Model
 
     // Atribut yang dapat diisi
     protected $fillable = [
-        'kabupaten_id',
+        'alamat_id',
         'biaya',
         'keterangan',
     ];
 
     /**
-     * Relasi dengan kabupaten
+     * Relasi dengan alamat
+     * Kini menggunakan id langsung dari RajaOngkir
      */
-    public function kabupaten(): BelongsTo
+    public function alamat(): BelongsTo
     {
-        return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'id');
+        return $this->belongsTo(Alamat::class, 'alamat_id');
     }
 }

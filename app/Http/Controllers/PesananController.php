@@ -19,9 +19,10 @@ class PesananController extends Controller
      */
     public function index()
     {
-        $pesanan = Pesanan::where('user_id', Auth::id())
+        $pesanan = Pesanan::with(['detailPesanan.produk'])
+            ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('pesanan.index', compact('pesanan'));
     }
@@ -336,19 +337,22 @@ class PesananController extends Controller
 
         // Cek apakah user sudah memiliki alamat lengkap
         $alamatLengkap = null;
-        if ($user->provinsi_id && $user->kabupaten_id && $user->kecamatan_id && $user->alamat_jalan) {
-            // Ambil data lengkap provinsi, kabupaten, dan kecamatan dengan eager loading
-            $userWithRelations = User::with(['provinsi', 'kabupaten', 'kecamatan'])
+        if ($user->alamat_id && $user->alamat_jalan) {
+            // Ambil data lengkap alamat dengan eager loading
+            $userWithRelations = User::with(['alamat'])
                 ->where('id', $user->id)
                 ->first();
 
-            $alamatLengkap = [
-                'provinsi' => $userWithRelations->provinsi->nama_provinsi,
-                'kabupaten' => $userWithRelations->kabupaten->nama_kabupaten,
-                'kecamatan' => $userWithRelations->kecamatan->nama_kecamatan,
-                'jalan' => $user->alamat_jalan,
-                'kabupaten_id' => $user->kabupaten_id, // Untuk perhitungan ongkir
-            ];
+            if ($userWithRelations->alamat) {
+                $alamatLengkap = [
+                    'provinsi' => $userWithRelations->alamat->provinsi,
+                    'kabupaten' => $userWithRelations->alamat->kabupaten,
+                    'kecamatan' => $userWithRelations->alamat->kecamatan,
+                    'kode_pos' => $userWithRelations->alamat->kode_pos,
+                    'jalan' => $user->alamat_jalan,
+                    'alamat_id' => $user->alamat_id, // Untuk perhitungan ongkir
+                ];
+            }
         }
 
         // Ambil daftar metode pembayaran
@@ -367,10 +371,8 @@ class PesananController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil data provinsi untuk dropdown
-        $provinsi = \App\Models\Provinsi::orderBy('nama_provinsi')->get();
-
-        return view('pesanan.tambah_alamat', compact('user', 'provinsi'));
+        // Tidak perlu mendapatkan provinsi lagi karena kita menggunakan RajaOngkir API
+        return view('pesanan.tambah_alamat', compact('user'));
     }
 
     /**
@@ -379,20 +381,18 @@ class PesananController extends Controller
     public function simpanAlamat(Request $request)
     {
         $request->validate([
-            'provinsi_id' => 'required|exists:provinsi,id',
-            'kabupaten_id' => 'required|exists:kabupaten,id',
-            'kecamatan_id' => 'required|exists:kecamatan,id',
+            'alamat_id' => 'required|exists:alamat,id',
             'alamat_jalan' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
             'selected_items' => 'required|array',
             'selected_items.*' => 'exists:keranjang,id_keranjang',
         ]);
 
         // Update data alamat user
         User::where('id', Auth::id())->update([
-            'provinsi_id' => $request->provinsi_id,
-            'kabupaten_id' => $request->kabupaten_id,
-            'kecamatan_id' => $request->kecamatan_id,
-            'alamat_jalan' => $request->alamat_jalan
+            'alamat_id' => $request->alamat_id,
+            'alamat_jalan' => $request->alamat_jalan,
+            'no_hp' => $request->no_hp
         ]);
 
         // Redirect ke halaman checkout dengan meneruskan selected_items
@@ -401,48 +401,215 @@ class PesananController extends Controller
     }
 
     /**
-     * Get ongkir berdasarkan kabupaten
+     * Get ongkir berdasarkan alamat dengan RajaOngkir API
      */
-    public function getOngkir($kabupatanId)
+    public function getOngkir($alamatId)
     {
-        // Ambil data ongkir berdasarkan kabupaten_id
-        $ongkir = \App\Models\Ongkir::where('kabupaten_id', $kabupatanId)->first();
+        try {
+            // Cek apakah ada cache untuk request ini
+            $cacheKey = 'ongkir_' . $alamatId . '_' . implode('_', request('selected_items', []));
 
-        // Ambil items yang dipilih untuk dihitung total jumlah
-        $selectedItems = request('selected_items', []);
-        $totalJumlah = 0;
-
-        if (!empty($selectedItems)) {
-            $keranjangItems = Keranjang::whereIn('id_keranjang', $selectedItems)
-                            ->where('user_id', Auth::id())
-                            ->get();
-
-            foreach ($keranjangItems as $item) {
-                $totalJumlah += $item->jumlah;
+            // Coba ambil dari cache dulu
+            if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                return response()->json(\Illuminate\Support\Facades\Cache::get($cacheKey));
             }
-        }
 
-        // Hitung biaya ongkir
-        $biayaOngkir = 0;
-        if ($ongkir) {
-            $biayaOngkir = $ongkir->biaya;
+            // Ambil items yang dipilih untuk dihitung total jumlah dan berat
+            $selectedItems = request('selected_items', []);
+            $totalJumlah = 0;
+            $totalBerat = 0; // dalam gram
+            $jumlahIkan = 0; // khusus untuk menghitung jumlah ikan
 
-            // Jika jumlah ikan lebih dari 3, tambahkan 2000
-            // dan tambahkan 2000 lagi untuk setiap kelipatan 3
-            if ($totalJumlah > 3) {
-                $tambahan = ceil(($totalJumlah - 3) / 3) * 2000;
-                $biayaOngkir += $tambahan;
+            if (!empty($selectedItems)) {
+                $keranjangItems = Keranjang::whereIn('id_keranjang', $selectedItems)
+                                ->where('user_id', Auth::id())
+                                ->with('produk')
+                                ->get();
+
+                foreach ($keranjangItems as $item) {
+                    $totalJumlah += $item->jumlah;
+
+                    // Semua produk adalah ikan hias, jadi kita hitung jumlah ikan
+                    $jumlahIkan += $item->jumlah;
+                }
+
+                // Hitung jumlah box yang dibutuhkan (3 ikan per box)
+                $jumlahBox = ceil($jumlahIkan / 3);
+
+                // Setiap box memiliki berat 10kg (10.000 gram)
+                $totalBerat = $jumlahBox * 10000;
+            } else {
+                // Return empty result if no items
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items selected for shipping calculation',
+                    'jumlah_total' => 0,
+                    'berat_total' => 0,
+                    'jumlah_box' => 0
+                ]);
+
+                // Simpan ke cache selama 15 menit
+                \Illuminate\Support\Facades\Cache::put($cacheKey, $fallbackResult, now()->addMinutes(15));
+
+                return response()->json($fallbackResult);
             }
-        } else {
-            // Default ongkir jika tidak ditemukan
-            $biayaOngkir = 50000;
-        }
 
-        return response()->json([
-            'success' => true,
-            'ongkir' => $biayaOngkir,
-            'jumlah_total' => $totalJumlah
-        ]);
+            // Ambil alamat lengkap
+            $alamat = \App\Models\Alamat::find($alamatId);
+            if (!$alamat) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Alamat tidak ditemukan',
+                ], 404);
+            }
+
+            // Gunakan RajaOngkir API untuk menghitung ongkos kirim dengan timeout
+            $originId = env('STORE_LOCATION_ID', 30957); // ID lokasi toko
+
+            // Persiapkan parameter untuk API RajaOngkir
+            $params = [
+                'origin' => $originId,
+                'destination' => $alamatId,
+                'weight' => max(1000, $totalBerat), // Minimal 1000 gram (1 kg)
+                'courier' => 'tiki', // Default courier untuk pengiriman ikan hias
+            ];
+
+            // Call RajaOngkir API through RajaOngkirController
+            $rajaOngkirController = new \App\Http\Controllers\RajaOngkirController();
+            $ongkirRequest = new \Illuminate\Http\Request();
+            $ongkirRequest->merge([
+                'origin' => $originId,
+                'destination' => $alamatId,
+                'weight' => max(1000, $totalBerat),
+                'courier' => 'tiki'
+            ]);
+
+            $response = $rajaOngkirController->cekOngkir($ongkirRequest);
+            $responseData = $response->getData(true);
+
+            if ($response->status() === 200 && $responseData['success']) {
+
+                // Proses data hasil API
+                if (isset($responseData['data']) && !empty($responseData['data'])) {
+                    // Ambil opsi pengiriman termurah sebagai default
+                    $ongkirOptions = [];
+                    $defaultOngkir = PHP_INT_MAX;
+
+                    foreach ($responseData['data'] as $courier) {
+                        if (isset($courier['costs']) && is_array($courier['costs'])) {
+                            foreach ($courier['costs'] as $cost) {
+                                $biaya = $cost['cost'][0]['value'] ?? 0;
+                                $estimasi = $cost['cost'][0]['etd'] ?? '-';
+                                $layanan = $cost['service'] ?? '';
+
+                                $ongkirOptions[] = [
+                                    'courier' => $courier['code'],
+                                    'courier_name' => $courier['name'],
+                                    'service' => $layanan,
+                                    'cost' => $biaya,
+                                    'etd' => $estimasi
+                                ];
+
+                                // Update ongkir termurah
+                                if ($biaya < $defaultOngkir) {
+                                    $defaultOngkir = $biaya;
+                                }
+                            }
+                        }
+                    }
+
+                    // Tambahan biaya berdasarkan jumlah item (sesuai dengan logika sebelumnya)
+                    $tambahan = 0;
+                    if ($totalJumlah > 3) {
+                        $tambahan = ceil(($totalJumlah - 3) / 3) * 2000;
+                    }
+
+                    $finalOngkir = $defaultOngkir + $tambahan;
+
+                    $result = [                    'success' => true,
+                    'ongkir' => $responseData['data']['recommended']['cost'],
+                    'ongkir_options' => $responseData['data']['shipping_options'],
+                    'jumlah_total' => $totalJumlah,
+                        'berat_total' => $totalBerat,
+                        'jumlah_box' => $jumlahBox,
+                        'ikan_per_box' => 3,
+                        'berat_per_box' => 10, // dalam kg
+                        'biaya_tambahan' => $tambahan,
+                        'box_info' => [
+                            'ukuran_box' => '40x40x40 cm',
+                            'deskripsi' => 'Box khusus pengiriman ikan hias dengan sistem aerasi',
+                            'max_kapasitas' => 3,
+                            'rekomendasi' => 'Pengiriman menggunakan kurir TIKI untuk menjaga keamanan dan kesegaran ikan'
+                        ]
+                    ];
+
+                    // Simpan ke cache selama 30 menit
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, $result, now()->addMinutes(30));
+
+                    return response()->json($result);
+                }
+            }
+
+            // Fallback jika API gagal
+            $fallbackResult = [
+                'success' => true,
+                'ongkir' => 50000, // Default ongkir
+                'ongkir_options' => [
+                    [
+                        'courier' => 'tiki',
+                        'courier_name' => 'TIKI',
+                        'service' => 'REG',
+                        'cost' => 50000,
+                        'etd' => '1-3'
+                    ]
+                ],
+                'jumlah_total' => $totalJumlah,
+                'berat_total' => $totalBerat,
+                'jumlah_box' => $jumlahBox,
+                'ikan_per_box' => 3,
+                'berat_per_box' => 10, // dalam kg
+                'box_info' => [
+                    'ukuran_box' => '40x40x40 cm',
+                    'deskripsi' => 'Box khusus pengiriman ikan hias dengan sistem aerasi',
+                    'max_kapasitas' => 3,
+                    'rekomendasi' => 'Pengiriman menggunakan kurir TIKI untuk menjaga keamanan dan kesegaran ikan'
+                ]
+            ];
+
+            // Simpan fallback ke cache selama 15 menit
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $fallbackResult, now()->addMinutes(15));
+
+            return response()->json($fallbackResult);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in getOngkir: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Menggunakan tarif standar: ' . $e->getMessage(),
+                'ongkir' => 50000, // Default ongkir jika gagal
+                'ongkir_options' => [
+                    [
+                        'courier' => 'tiki',
+                        'courier_name' => 'TIKI',
+                        'service' => 'REG',
+                        'cost' => 50000,
+                        'etd' => '1-3'
+                    ]
+                ],
+                'jumlah_total' => $totalJumlah ?? 0,
+                'berat_total' => isset($jumlahBox) ? $jumlahBox * 10000 : 10000,
+                'jumlah_box' => $jumlahBox ?? 1,
+                'ikan_per_box' => 3,
+                'berat_per_box' => 10, // dalam kg
+                'box_info' => [
+                    'ukuran_box' => '40x40x40 cm',
+                    'deskripsi' => 'Box khusus pengiriman ikan hias dengan sistem aerasi',
+                    'max_kapasitas' => 3,
+                    'rekomendasi' => 'Pengiriman menggunakan kurir TIKI untuk menjaga keamanan dan kesegaran ikan'
+                ]
+            ]);
+        }
     }
 
     /**
@@ -454,7 +621,15 @@ class PesananController extends Controller
             'selected_items' => 'required|array',
             'selected_items.*' => 'exists:keranjang,id_keranjang',
             'metode_pembayaran' => 'required|string|in:transfer_bank,qris',
+            'courier' => 'sometimes|required|string',
+            'courier_service' => 'sometimes|required|string',
         ]);
+
+        // Validate that only TIKI courier is used for fish shipments
+        if ($request->courier && $request->courier !== 'tiki') {
+            return redirect()->back()
+                ->with('error', 'Pengiriman ikan hias hanya dapat menggunakan kurir TIKI untuk menjaga keamanan dan kualitas ikan.');
+        }
 
         try {
             DB::beginTransaction();
@@ -472,33 +647,110 @@ class PesananController extends Controller
 
             // Get user's address
             $user = Auth::user();
-            if (!$user->alamat_jalan || !$user->kabupaten_id) {
+            if (!$user->alamat_jalan || !$user->alamat_id) {
                 return redirect()->route('alamat.tambah', ['selected_items' => $request->selected_items])
                     ->with('error', 'Harap lengkapi alamat pengiriman terlebih dahulu.');
             }
 
             // Get user's address with relations
-            $userWithRelations = User::with(['provinsi', 'kabupaten', 'kecamatan'])
+            $userWithRelations = User::with(['alamat'])
                 ->where('id', Auth::id())
                 ->first();
 
             // Construct complete address
             $alamatPengiriman = $userWithRelations->alamat_jalan . ', ' .
-                                $userWithRelations->kecamatan->nama_kecamatan . ', ' .
-                                $userWithRelations->kabupaten->nama_kabupaten . ', ' .
-                                $userWithRelations->provinsi->nama_provinsi;
+                                $userWithRelations->alamat->kecamatan . ', ' .
+                                $userWithRelations->alamat->kabupaten . ', ' .
+                                $userWithRelations->alamat->provinsi . ' ' .
+                                $userWithRelations->alamat->kode_pos;
 
             // Calculate subtotal
             $subtotal = $keranjangItems->sum('total_harga');
 
-            // Calculate total quantity
+            // Calculate total quantity and weight
             $totalJumlah = $keranjangItems->sum('jumlah');
+            $totalBerat = 0;
+            $jumlahIkan = 0; // Khusus untuk menghitung jumlah ikan
 
-            // Get shipping cost
-            $ongkir = \App\Models\Ongkir::where('kabupaten_id', $user->kabupaten_id)->first();
-            $ongkirBiaya = $ongkir ? $ongkir->biaya : 50000; // Default if not found
+            // Hitung jumlah ikan
+            foreach ($keranjangItems as $item) {
+                $jumlahIkan += $item->jumlah;
+            }
 
-            // Jika jumlah ikan lebih dari 3, tambahkan biaya tambahan
+            // Hitung jumlah box yang dibutuhkan (3 ikan per box)
+            $jumlahBox = ceil($jumlahIkan / 3);
+
+            // Setiap box memiliki berat 10kg (10.000 gram)
+            $totalBerat = $jumlahBox * 10000;
+
+            // Use RajaOngkir API for shipping cost calculation
+            $originId = env('STORE_LOCATION_ID', 1); // ID lokasi toko
+
+            try {
+                // Call RajaOngkir API
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'key' => env('RAJA_ONGKIR_API_KEY'),
+                ])->asForm()->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
+                    'origin' => $originId,
+                    'destination' => $user->alamat_id,
+                    'weight' => max(1000, $totalBerat), // Minimum 1kg
+                    'courier' => 'tiki', // Selalu menggunakan TIKI untuk pengiriman ikan hias
+                ]);
+
+                if ($response->successful()) {
+                    $responseData = $response->json();
+
+                    // Get shipping cost from API response
+                    if (isset($responseData['data']) && !empty($responseData['data'])) {
+                        // Get specified courier and service from request
+                        $selectedCourier = $request->courier ?? 'jne';
+                        $selectedService = $request->courier_service ?? '';
+
+                        $ongkirBiaya = 50000; // Default if not found
+
+                        // Cari layanan TIKI dalam respons API
+                        foreach ($responseData['data'] as $courier) {
+                            if ($courier['code'] == 'tiki') {
+                                if (isset($courier['costs']) && !empty($courier['costs'])) {
+                                    // Default ke layanan REG (reguler) jika tersedia
+                                    $regService = null;
+                                    $bestService = null;
+
+                                    foreach ($courier['costs'] as $cost) {
+                                        if ($cost['service'] == 'REG') {
+                                            $regService = $cost;
+                                            break;
+                                        } else {
+                                            $bestService = $cost;
+                                        }
+                                    }
+
+                                    // Gunakan layanan REG jika tersedia, atau layanan terbaik lainnya
+                                    if ($regService) {
+                                        $ongkirBiaya = $regService['cost'][0]['value'] ?? $ongkirBiaya;
+                                        $selectedService = 'REG';
+                                    } else if ($bestService) {
+                                        $ongkirBiaya = $bestService['cost'][0]['value'] ?? $ongkirBiaya;
+                                        $selectedService = $bestService['service'] ?? '';
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback to database ongkir if API fails
+                    $ongkir = \App\Models\Ongkir::where('alamat_id', $user->alamat_id)->first();
+                    $ongkirBiaya = $ongkir ? $ongkir->biaya : 50000;
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error calculating shipping cost: ' . $e->getMessage());
+                // Fallback to database ongkir if API fails
+                $ongkir = \App\Models\Ongkir::where('alamat_id', $user->alamat_id)->first();
+                $ongkirBiaya = $ongkir ? $ongkir->biaya : 50000;
+            }
+
+            // Tambahan biaya berdasarkan jumlah
             if ($totalJumlah > 3) {
                 $tambahan = ceil(($totalJumlah - 3) / 3) * 2000;
                 $ongkirBiaya += $tambahan;
@@ -516,6 +768,12 @@ class PesananController extends Controller
                 'alamat_pengiriman' => $alamatPengiriman,
                 'metode_pembayaran' => $request->metode_pembayaran,
                 'batas_waktu' => now()->addHour(), // Tambahkan batas waktu 1 jam dari sekarang
+                'alamat_id' => $user->alamat_id, // Save the alamat_id for future reference
+                'kurir' => 'tiki', // Menggunakan TIKI untuk pengiriman ikan hias
+                'kurir_service' => $selectedService ?? 'REG', // Informasi layanan kurir (default REG)
+                'ongkir_biaya' => $ongkirBiaya, // Simpan biaya ongkir terpisah
+                'berat_total' => $totalBerat, // Simpan berat total
+                'jumlah_box' => $jumlahBox, // Simpan jumlah box yang dibutuhkan
             ]);                // Create order details
             foreach ($keranjangItems as $item) {
                 DetailPesanan::create([
@@ -556,6 +814,23 @@ class PesananController extends Controller
                     'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
                 ]
             ]);
+
+            // Special notification for fish shipment
+            if ($jumlahBox > 0) {
+                NotificationController::notifyAdmins([
+                    'type' => 'fish-shipment',
+                    'title' => 'Pengiriman Ikan Hias Memerlukan Perhatian Khusus',
+                    'message' => 'Pesanan #' . $pesanan->id_pesanan . ' berisi ' . $jumlahIkan . ' ekor ikan hias yang memerlukan ' .
+                                 $jumlahBox . ' box khusus. Pastikan persiapan pengiriman dilakukan dengan benar.',
+                    'data' => [
+                        'order_id' => $pesanan->id_pesanan,
+                        'url' => route('admin.pesanan.show', $pesanan->id_pesanan),
+                        'jumlah_ikan' => $jumlahIkan,
+                        'jumlah_box' => $jumlahBox,
+                        'kurir' => 'TIKI'
+                    ]
+                ]);
+            }
 
             // Notify customer about their order
             NotificationController::notifyCustomer(Auth::id(), [
