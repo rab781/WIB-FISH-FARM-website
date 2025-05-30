@@ -36,9 +36,6 @@
                             <option value="">Pilih Jenis Ikan</option>
                             <option value="Koi" {{ old('jenis_ikan') == 'Koi' ? 'selected' : '' }}>Koi</option>
                             <option value="Koki" {{ old('jenis_ikan') == 'Koki' ? 'selected' : '' }}>Koki</option>
-                            <option value="Cupang" {{ old('jenis_ikan') == 'Cupang' ? 'selected' : '' }}>Cupang</option>
-                            <option value="Arwana" {{ old('jenis_ikan') == 'Arwana' ? 'selected' : '' }}>Arwana</option>
-                            <option value="Lainnya" {{ old('jenis_ikan') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                         @error('jenis_ikan')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

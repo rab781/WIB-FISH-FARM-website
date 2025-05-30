@@ -1,9 +1,13 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
+@section('title', 'Manajemen Produk')
 
 @section('content')
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">Manajemen</h1>
+        <div>
+            <h1 class="text-2xl font-semibold">Manajemen Produk</h1>
+            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Klik pada baris produk untuk melihat detail lengkap</p>
+        </div>
         <a href="{{ route('admin.produk.create') }}" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md flex items-center">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -39,7 +43,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($produk as $p)
-                <tr class="{{ $p->deleted_at ? 'bg-red-50' : '' }}">
+                <tr class="{{ $p->deleted_at ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' }} cursor-pointer transition-colors duration-200" onclick="window.location.href='{{ route('admin.produk.show', $p->id_Produk) }}'">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
@@ -83,7 +87,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                        <div class="flex justify-center space-x-2">
+                        <div class="flex justify-center space-x-2" onclick="event.stopPropagation()">
                             @if(!$p->deleted_at)
                             <a href="{{ route('admin.produk.edit', $p->id_Produk) }}" class="text-blue-600 hover:text-blue-900" title="Edit">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

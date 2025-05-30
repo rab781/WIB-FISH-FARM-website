@@ -7,6 +7,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use App\Models\Pesanan;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -20,20 +21,27 @@ class RouteServiceProvider extends ServiceProvider
     public const HOME = '/';
 
     /**
-     * The path to admin dashboard route.
+     * The path to your application's admin "home" route.
      *
-     * Admin users are redirected here after authentication.
+     * This is used by the authentication system to redirect admin users.
      *
      * @var string
      */
-    public const ADMIN_HOME = '/admin/dashboard';
+    public const ADMIN_HOME = 'admin/dashboard';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
      */
     public function boot(): void
     {
-        $this->configureRateLimiting();
+        // Configure route model binding for Pesanan model
+        Route::bind('pesanan', function ($value) {
+            return Pesanan::where('id_pesanan', $value)->firstOrFail();
+        });
+
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
 
         $this->routes(function () {
             Route::middleware('api')
@@ -42,28 +50,6 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
-
-            // Muat rute pengujian
-            if (file_exists(base_path('routes/web/address-testing.php'))) {
-                Route::middleware('web')
-                    ->group(base_path('routes/web/address-testing.php'));
-            }
-        });
-    }
-
-    /**
-     * Configure the rate limiters for the application.
-     */
-    protected function configureRateLimiting(): void
-    {
-        // Define the 'api' rate limiter used by the ThrottleRequests middleware
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
-
-        // Add a named rate limiter for specific routes if needed
-        RateLimiter::for('rajaongkir', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
         });
     }
 }

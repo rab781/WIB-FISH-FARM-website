@@ -16,6 +16,7 @@ use App\Http\Controllers\RajaOngkirController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
 Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detailProduk');
+Route::get('/produk/{id}/reviews', [App\Http\Controllers\ReviewController::class, 'publicIndex'])->name('produk.reviews');
 Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang-kami');
 
 Route::middleware('auth')->group(function () {
@@ -31,7 +32,7 @@ Route::middleware('auth')->group(function () {
 
     // Pesanan routes
     Route::post('/checkout/process', [App\Http\Controllers\PesananController::class, 'processCheckout'])->name('checkout.process');
-    Route::post('/checkout', [App\Http\Controllers\PesananController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout', [App\Http\Controllers\PesananController::class, 'checkout'])->name('checkout.store');
     Route::get('/checkout', [App\Http\Controllers\PesananController::class, 'checkout'])->name('checkout');
     Route::get('/alamat/tambah', [App\Http\Controllers\PesananController::class, 'tambahAlamat'])->name('alamat.tambah');
     Route::post('/alamat/simpan', [App\Http\Controllers\PesananController::class, 'simpanAlamat'])->name('alamat.simpan');
@@ -40,8 +41,36 @@ Route::middleware('auth')->group(function () {
     // Pesanan management
     Route::get('/pesanan', [App\Http\Controllers\PesananController::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{id}', [App\Http\Controllers\PesananController::class, 'show'])->name('pesanan.show');
+    Route::get('/pesanan/{id}/payment/upload', [App\Http\Controllers\PesananController::class, 'showPaymentUpload'])->name('pembayaran.upload');
     Route::post('/pesanan/{id}/payment', [App\Http\Controllers\PesananController::class, 'submitPayment'])->name('pesanan.payment');
     Route::post('/pesanan/{id}/konfirmasi', [App\Http\Controllers\PesananController::class, 'konfirmasiPesanan'])->name('pesanan.konfirmasi');
+
+    // Direct payment proof viewing route
+    Route::get('/pesanan/{id}/payment-proof', [App\Http\Controllers\PesananController::class, 'viewPaymentProof'])->name('pesanan.payment-proof');
+
+    // Enhanced order tracking and management
+    Route::get('/pesanan/{pesanan}/tracking', [App\Http\Controllers\PesananController::class, 'tracking'])->name('pesanan.tracking');
+    Route::post('/pesanan/{pesanan}/delivery-status', [App\Http\Controllers\PesananController::class, 'updateDeliveryStatus'])->name('pesanan.delivery-status');
+    Route::get('/pesanan/{pesanan}/track-shipping', [App\Http\Controllers\PesananController::class, 'trackShipping'])->name('pesanan.track-shipping');
+    Route::get('/pesanan/{pesanan}/review', [App\Http\Controllers\PesananController::class, 'review'])->name('pesanan.review');
+    Route::get('/pesanan/{pesanan}/invoice', [App\Http\Controllers\PesananController::class, 'downloadInvoice'])->name('pesanan.invoice');
+    Route::post('/pesanan/{pesanan}/cancel', [App\Http\Controllers\PesananController::class, 'cancel'])->name('pesanan.cancel');
+    Route::get('/pesanan/statistics', [App\Http\Controllers\PesananController::class, 'statistics'])->name('pesanan.statistics');
+
+    // Refund management - Customer
+    Route::get('/refunds', [App\Http\Controllers\RefundController::class, 'customerIndex'])->name('refunds.index');
+    Route::get('/refunds/{refund}', [App\Http\Controllers\RefundController::class, 'customerShow'])->name('refunds.show');
+    Route::get('/pesanan/{pesanan}/refund/create', [App\Http\Controllers\RefundController::class, 'customerCreate'])->name('refunds.create');
+    Route::post('/pesanan/{pesanan}/refund', [App\Http\Controllers\RefundController::class, 'store'])->name('refunds.store');
+
+    // Quarantine viewing - Customer
+    Route::get('/pesanan/{pesanan}/quarantine', [App\Http\Controllers\QuarantineController::class, 'customerView'])->name('quarantine.view');
+
+    // Review management - Customer
+    Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'customerIndex'])->name('reviews.index');
+    Route::get('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'customerShow'])->name('reviews.show');
+    Route::post('/pesanan/{pesanan}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews/{review}/interaction', [App\Http\Controllers\ReviewController::class, 'toggleInteraction'])->name('reviews.interaction');
 
     // Profile routes
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
@@ -56,6 +85,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
     // Order routes
+    Route::get('/pesanan/edit-alamat/{id}', [App\Http\Controllers\PesananController::class, 'editAlamat'])->name('pesanan.editAlamat');
 });
 
 // Auth routes - make sure these exist and are properly defined
@@ -96,8 +126,23 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     // Admin pesanan routes
     Route::get('pesanan', [App\Http\Controllers\Admin\PesananController::class, 'index'])->name('admin.pesanan.index');
     Route::get('pesanan/{id}', [App\Http\Controllers\Admin\PesananController::class, 'show'])->name('admin.pesanan.show');
-    Route::post('pesanan/{id}/update-status', [App\Http\Controllers\Admin\PesananController::class, 'updateStatus'])->name('admin.pesanan.updateStatus');
+    Route::get('pesanan/{id}/edit', [App\Http\Controllers\Admin\PesananController::class, 'edit'])->name('admin.pesanan.edit');
+    Route::match(['post', 'put'], 'pesanan/{id}/update-status', [App\Http\Controllers\Admin\PesananController::class, 'updateStatus'])->name('admin.pesanan.updateStatus');
     Route::post('pesanan/{id}/force-expire', [App\Http\Controllers\Admin\PesananController::class, 'forceExpireOrder'])->name('admin.pesanan.forceExpire');
+
+    // Add missing order processing routes
+    Route::post('pesanan/{id}/process', [App\Http\Controllers\Admin\PesananController::class, 'process'])->name('admin.pesanan.process');
+    Route::post('pesanan/{id}/ship', [App\Http\Controllers\Admin\PesananController::class, 'ship'])->name('admin.pesanan.ship');
+    Route::post('pesanan/{id}/confirm-payment', [App\Http\Controllers\Admin\PesananController::class, 'confirmPayment'])->name('admin.pesanan.confirm-payment');
+    Route::post('pesanan/{id}/cancel', [App\Http\Controllers\Admin\PesananController::class, 'cancel'])->name('admin.pesanan.cancel');
+    Route::get('pesanan/{id}/payment-proof', [App\Http\Controllers\Admin\PesananController::class, 'viewPaymentProof'])->name('admin.pesanan.payment-proof');
+
+    // Admin users routes
+    Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users.index');
+    Route::get('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('admin.users.show');
+    Route::get('users/{id}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.users.update');
+    Route::post('users/{id}/toggle-active', [App\Http\Controllers\Admin\UserController::class, 'toggleActive'])->name('admin.users.toggle-active');
 
     // Admin produk routes
     Route::resource('/produk', AdminProdukController::class)->names([
@@ -112,6 +157,48 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/produk/{id}/restore', [AdminProdukController::class, 'restore'])->name('admin.produk.restore');
     Route::delete('/produk/{id}/forceDelete', [AdminProdukController::class, 'forceDelete'])->name('admin.produk.forceDelete');
+
+    // Enhanced Order Management - Admin Routes
+
+    // Enhanced Pesanan Management
+    Route::get('pesanan/dashboard', [App\Http\Controllers\Admin\PesananController::class, 'dashboard'])->name('admin.pesanan.dashboard');
+    Route::get('pesanan/statistics', [App\Http\Controllers\Admin\PesananController::class, 'statistics'])->name('admin.pesanan.statistics');
+    Route::get('pesanan/export', [App\Http\Controllers\Admin\PesananController::class, 'export'])->name('admin.pesanan.export');
+    Route::post('pesanan/bulk-action', [App\Http\Controllers\Admin\PesananController::class, 'bulkAction'])->name('admin.pesanan.bulk-action');
+    Route::get('pesanan/{pesanan}/timeline', [App\Http\Controllers\Admin\PesananController::class, 'timeline'])->name('admin.pesanan.timeline');
+    Route::post('pesanan/{pesanan}/timeline', [App\Http\Controllers\Admin\PesananController::class, 'addTimeline'])->name('admin.pesanan.timeline.add');
+
+    // Quarantine Management
+    Route::prefix('quarantine')->group(function () {
+        Route::get('/', [App\Http\Controllers\QuarantineController::class, 'adminIndex'])->name('admin.quarantine.index');
+        Route::get('/{quarantine}', [App\Http\Controllers\QuarantineController::class, 'adminShow'])->name('admin.quarantine.show');
+        Route::post('/{quarantine}/update', [App\Http\Controllers\QuarantineController::class, 'update'])->name('admin.quarantine.update');
+        Route::get('/dashboard/stats', [App\Http\Controllers\QuarantineController::class, 'dashboardStats'])->name('admin.quarantine.dashboard');
+        Route::get('/daily/check', [App\Http\Controllers\QuarantineController::class, 'dailyCheck'])->name('admin.quarantine.daily-check');
+    });
+
+    // Refund Management
+    Route::prefix('refunds')->group(function () {
+        Route::get('/', [App\Http\Controllers\RefundController::class, 'adminIndex'])->name('admin.refunds.index');
+        Route::get('/{refund}', [App\Http\Controllers\RefundController::class, 'adminShow'])->name('admin.refunds.show');
+        Route::post('/{refund}/process', [App\Http\Controllers\RefundController::class, 'process'])->name('admin.refunds.process');
+        Route::get('/dashboard/stats', [App\Http\Controllers\RefundController::class, 'dashboardStats'])->name('admin.refunds.dashboard');
+        Route::get('/export', [App\Http\Controllers\RefundController::class, 'export'])->name('admin.refunds.export');
+    });
+
+    // Review Management
+    Route::prefix('reviews')->group(function () {
+        Route::get('/', [App\Http\Controllers\ReviewController::class, 'adminIndex'])->name('admin.reviews.index');
+        Route::get('/moderate', [App\Http\Controllers\ReviewController::class, 'moderate'])->name('admin.reviews.moderate');
+        Route::get('/statistics', [App\Http\Controllers\ReviewController::class, 'statistics'])->name('admin.reviews.statistics');
+        Route::get('/{review}', [App\Http\Controllers\ReviewController::class, 'adminShow'])->name('admin.reviews.show');
+        Route::post('/{review}/reply', [App\Http\Controllers\ReviewController::class, 'addAdminReply'])->name('admin.reviews.addAdminReply');
+        Route::post('/{review}/update-status', [App\Http\Controllers\ReviewController::class, 'updateStatus'])->name('admin.reviews.updateStatus');
+        Route::post('/bulk-moderate', [App\Http\Controllers\ReviewController::class, 'bulkModerate'])->name('admin.reviews.bulkModerate');
+    });
+
+    // Diagnostic Tools
+    Route::get('diagnostic/payment-proofs', [App\Http\Controllers\Admin\DiagnosticController::class, 'checkPaymentProofPaths'])->name('admin.diagnostic.payment-proofs');
 });
 
 // Test route to ensure views are working
@@ -160,7 +247,20 @@ Route::get('/diagnosa-api', function () {
 Route::get('/test-rajaongkir-api', [RajaOngkirController::class, 'testApiStatus'])->name('test-rajaongkir-api');
 Route::get('/test-komerce', [RajaOngkirController::class, 'testKomerce'])->name('test-komerce');
 Route::get('/test-standard', [RajaOngkirController::class, 'testStandard'])->name('test-standard');
+Route::get('/debug-http-request', [RajaOngkirController::class, 'debugHttpRequest'])->name('debug-http-request');
+Route::get('/test-domestic-cost', [RajaOngkirController::class, 'testDomesticCost'])->name('test-domestic-cost');
 Route::post('/cek-tracking', [RajaOngkirController::class, 'cekTrackingStatus'])->name('cek-tracking');
+
+// Public address search for shipping calculator
+Route::get('/public/search-alamat', [RajaOngkirController::class, 'publicSearchAlamat'])->name('public.search-alamat');
+
+// Web endpoint for shipping cost calculation (for testing without throttle)
+Route::post('/web/cek-ongkir', [RajaOngkirController::class, 'cekOngkir'])->name('web.cek-ongkir');
+
+// Shipping calculator frontend page
+Route::get('/shipping-calculator', function () {
+    return view('shipping-calculator');
+})->name('shipping-calculator');
 
 // Auth Google routes
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
@@ -174,7 +274,7 @@ Route::get('/test/api/raja-ongkir-search', [App\Http\Controllers\TestController:
 Route::get('/test/api/response', [App\Http\Controllers\TestController::class, 'testApiResponse'])->name('test.api-response');
 Route::get('/test/debug', [App\Http\Controllers\TestController::class, 'debugAddressSearch'])->name('test.debug');
 Route::get('/test/enhanced-search', [App\Http\Controllers\TestController::class, 'enhancedSearch'])->name('test.enhanced-search');
-                                      
+
 // Test route for rate limiter
 Route::get('/test/rate-limiter', function () {
     return view('test.rate_limiter_test');

@@ -31,9 +31,11 @@ Route::middleware('throttle:30,1')->group(function() {
 Route::middleware('throttle:5,1')->group(function() {
     Route::get('/komerce/test', [RajaOngkirController::class, 'testKomerce']);
     Route::get('/standard/test', [RajaOngkirController::class, 'testStandard']);
+    Route::get('/domestic-cost/test', [RajaOngkirController::class, 'testDomesticCost']);
 
     // Route for calculating shipping cost
     Route::post('/ongkir/calculate', [RajaOngkirController::class, 'cekOngkir']);
+    Route::post('/cek-ongkir', [RajaOngkirController::class, 'cekOngkir']);
 });
 
 // Test API connection

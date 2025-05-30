@@ -18,6 +18,7 @@
         </div>
     @endif
 
+    <!-- Enhanced layout and styling for better user experience -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="p-4 bg-gray-50 border-b border-gray-200">
             <h2 class="text-lg font-medium text-gray-900">Alamat Pengiriman</h2>
@@ -32,52 +33,41 @@
                 @endforeach
 
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <!-- Cari Alamat (RajaOngkir) -->
+                    <!-- Cari & Pilih Alamat dengan Autocomplete -->
                     <div class="sm:col-span-6">
-                        <label for="alamat_search" class="block text-sm font-medium text-gray-700">Cari Alamat</label>
-                        <div class="mt-1">
-                            <input type="text" id="alamat_search" name="alamat_search" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Ketik nama kota/kabupaten untuk mencari">
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">Cari alamat berdasarkan nama kota/kabupaten</p>
-                    </div>
+                        <label for="alamat_search" class="block text-sm font-medium text-gray-700 mb-1">Cari & Pilih Alamat</label>
+                        <input type="text" id="alamat_search" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('alamat_id') border-red-300 @enderror" placeholder="Ketik untuk mencari (cth: Jakarta, Bandung, Surabaya)">
+                        <input type="hidden" id="alamat_id" name="alamat_id" value="{{ $user->alamat_id ?? '' }}">
 
-                    <!-- Pilih Alamat dari Hasil Pencarian -->
-                    <div class="sm:col-span-6">
-                        <label for="alamat_id" class="block text-sm font-medium text-gray-700">Pilih Alamat</label>
-                        <div class="mt-1">
-                            <select id="alamat_id" name="alamat_id" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
-                                <option value="">Pilih alamat dari hasil pencarian</option>
-                                @if($user->alamat)
-                                    <option value="{{ $user->alamat->id }}" selected>
-                                        {{ $user->alamat->kecamatan }}, {{ $user->alamat->tipe }} {{ $user->alamat->kabupaten }}, {{ $user->alamat->provinsi }} {{ $user->alamat->kode_pos }}
-                                    </option>
-                                @endif
-                            </select>
+                        <!-- Dropdown hasil pencarian -->
+                        <div id="address-dropdown" class="address-dropdown"></div>
+
+                        <!-- Tampilan alamat yang terpilih -->
+                        <div class="selected-address mt-2" style="{{ $user->alamat_id && $alamat ? '' : 'display:none' }}">
+                            <span id="selected-address-display" class="text-sm text-gray-700">{{ $user->alamat_id && $alamat ? $alamat->kecamatan . ', ' . $alamat->kabupaten . ', ' . $alamat->provinsi . ' ' . $alamat->kode_pos : '' }}</span>
+                            <span id="clear-address" class="clear-address text-red-500 cursor-pointer ml-2" title="Hapus alamat">×</span>
                         </div>
+                        <p class="mt-1 text-xs text-gray-500">Ketik minimal 3 karakter untuk mencari alamat</p>
                         @error('alamat_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Alamat Jalan -->
                     <div class="sm:col-span-6">
-                        <label for="alamat_jalan" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, Nomor Rumah, RT/RW)</label>
-                        <div class="mt-1">
-                            <textarea id="alamat_jalan" name="alamat_jalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" required>{{ old('alamat_jalan', $user->alamat_jalan) }}</textarea>
-                        </div>
+                        <label for="alamat_jalan" class="block text-sm font-medium text-gray-700 mb-1">Alamat Jalan</label>
+                        <textarea name="alamat_jalan" id="alamat_jalan" rows="3" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('alamat_jalan') border-red-300 @enderror">{{ old('alamat_jalan', $user->alamat_jalan) }}</textarea>
                         @error('alamat_jalan')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- No. HP -->
                     <div class="sm:col-span-3">
                         <label for="no_hp" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
-                        <div class="mt-1">
-                            <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
-                        </div>
+                        <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
                         @error('no_hp')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -96,6 +86,6 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('js/address-search-inline.js') }}"></script>
+<script src="{{ asset('js/address-autocomplete-fixed.js') }}"></script>
 @endpush
 @endsection

@@ -19,6 +19,8 @@
 
     <title>{{ $title ?? 'Admin Dashboard - WIB Fish Farm' }}</title>
 
+    <!-- jQuery first, then other scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -28,70 +30,116 @@
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-white">
-            <div class="p-4 flex items-center space-x-2">
+        <aside class="w-64 bg-gray-800 text-white flex flex-col">
+            <div class="p-4 flex items-center space-x-2 border-b border-gray-700">
                 <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="Logo" class="h-8 w-8">
                 <div>
                     <p class="text-lg font-bold">Admin Panel</p>
+                    <p class="text-xs text-gray-400">WIB Fish Farm</p>
                 </div>
             </div>
 
-            <nav class="mt-4">
-                <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
-                    <div class="flex items-center">
-                        <i class="fas fa-tachometer-alt w-6"></i>
-                        <span>Dashboard</span>
-                    </div>
-                </a>
+            <nav class="mt-4 flex flex-col h-full">
+                <div class="flex-1">
+                    <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                        <div class="flex items-center">
+                            <i class="fas fa-tachometer-alt w-6 mr-3"></i>
+                            <span>Dashboard</span>
+                        </div>
+                    </a>
 
-                <a href="{{ route('admin.produk.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.produk.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
-                    <div class="flex items-center">
-                        <i class="fas fa-fish w-6"></i>
-                        <span>Manajemen Produk</span>
-                    </div>
-                </a>
+                    <a href="{{ route('admin.produk.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.produk.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                        <div class="flex items-center">
+                            <i class="fas fa-fish w-6 mr-3"></i>
+                            <span>Manajemen Produk</span>
+                        </div>
+                    </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-shopping-cart w-6"></i>
-                        <span>Laporan Penjualan</span>
-                    </div>
-                </a>
+                    <!-- Enhanced Order Management -->
+                    <div class="py-2">
+                        <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Order Management</div>
 
-                <a href="{{ route('admin.pesanan.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-box w-6"></i>
-                        <span>Pesanan</span>
-                    </div>
-                </a>
+                        <a href="{{ route('admin.pesanan.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.pesanan.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                            <div class="flex items-center">
+                                <i class="fas fa-box w-6 mr-3"></i>
+                                <span>Pesanan</span>
+                            </div>
+                        </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-money-bill-wave w-6"></i>
-                        <span>Catatan Keuangan</span>
-                    </div>
-                </a>
+                        <a href="{{ route('admin.quarantine.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.quarantine.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                            <div class="flex items-center">
+                                <i class="fas fa-shield-alt w-6 mr-3"></i>
+                                <span>Karantina</span>
+                            </div>
+                        </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-star w-6"></i>
-                        <span>Ulasan</span>
-                    </div>
-                </a>
+                        <a href="{{ route('admin.refunds.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.refunds.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                            <div class="flex items-center">
+                                <i class="fas fa-undo w-6 mr-3"></i>
+                                <span>Refund</span>
+                            </div>
+                        </a>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                    <div class="flex items-center">
-                        <i class="fas fa-headset w-6"></i>
-                        <span>Keluhan</span>
+                        <a href="{{ route('admin.reviews.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.reviews.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                            <div class="flex items-center">
+                                <i class="fas fa-star w-6 mr-3"></i>
+                                <span>Ulasan</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <!-- Logout button in sidebar -->
-                <div class="mt-8 px-4">
+                    <!-- Reports & Analytics -->
+                    <div class="py-2">
+                        <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Reports</div>
+
+                        <a href="{{ route('admin.pesanan.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.pesanan.dashboard') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                            <div class="flex items-center">
+                                <i class="fas fa-chart-line w-6 mr-3"></i>
+                                <span>Dashboard Pesanan</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-shopping-cart w-6 mr-3"></i>
+                                <span>Laporan Penjualan</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-money-bill-wave w-6 mr-3"></i>
+                                <span>Catatan Keuangan</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Customer Management -->
+                    <div class="py-2">
+                        <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Customer</div>
+
+                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-users w-6 mr-3"></i>
+                                <span>Manajemen User</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-headset w-6 mr-3"></i>
+                                <span>Keluhan</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Logout button at bottom -->
+                <div class="mt-auto p-4 border-t border-gray-700">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full flex items-center py-2.5 px-4 rounded text-white bg-red-600 hover:bg-red-700 transition duration-200">
-                            <i class="fas fa-sign-out-alt w-6"></i>
+                        <button type="submit" class="w-full flex items-center justify-center py-3 px-4 rounded-lg text-white bg-red-600 hover:bg-red-700 transition duration-200 font-medium shadow-lg hover:shadow-xl">
+                            <i class="fas fa-sign-out-alt w-5 mr-3"></i>
                             <span>Logout</span>
                         </button>
                     </form>
@@ -183,6 +231,73 @@
     </div>
 
     @stack('scripts')
+    <script>
+        window.updateStatus = function(orderId, status) {
+            console.log('updateStatus function is called with orderId:', orderId, 'and status:', status);
+            const statusMapping = {
+                'Menunggu Konfirmasi': 'Pembayaran Dikonfirmasi',
+                'Sedang Diproses': 'Diproses',
+                'Sedang Dikirim': 'Dikirim',
+                'Dibatalkan': 'Dibatalkan',
+                'Karantina': 'Karantina',
+                'Pengembalian': 'Pengembalian'
+            };
+
+            const actualStatus = statusMapping[status] || status;
+
+            if (confirm('Apakah Anda yakin ingin mengubah status pesanan #' + orderId + ' menjadi "' + status + '"?')) {
+                const form = document.getElementById('statusForm-' + orderId);
+                // Use the POST route which is properly defined
+                console.log('Setting form action and method');
+                form.setAttribute('action', '{{ route("admin.pesanan.updateStatus", "__id__") }}'.replace('__id__', orderId));
+                form.setAttribute('method', 'POST');
+                console.log('Form method after setting:', form.getAttribute('method'));
+
+                // Clear out any existing hidden fields to prevent duplicates
+                const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
+                console.log('Found hidden inputs:', hiddenInputs.length);
+
+                hiddenInputs.forEach(input => {
+                    console.log('Input field:', input.name, input.value);
+                    if (input.name !== '_token') {
+                        console.log('Removing input:', input.name);
+                        input.remove();
+                    }
+                });
+
+                // Make sure we have CSRF token
+                if (!form.querySelector('input[name="_token"]')) {
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+                }
+
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status_pesanan';
+                statusInput.value = actualStatus;
+                form.appendChild(statusInput);
+
+                // Ensure there is no _method field (this would enable method spoofing)
+                if (form.querySelector('input[name="_method"]')) {
+                    console.log('Found _method field, removing it');
+                    form.querySelector('input[name="_method"]').remove();
+                }
+
+                console.log('Final form elements before submission:');
+                const allInputs = form.querySelectorAll('input[type="hidden"]');
+                allInputs.forEach(input => {
+                    console.log('- Input:', input.name, '=', input.value);
+                });
+
+                form.submit();
+            }
+        };
+
+        console.log('updateStatus function is globally accessible:', typeof window.updateStatus === 'function');
+    </script>
 </body>
 
 </html>

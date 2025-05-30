@@ -32,29 +32,6 @@
       x-data="appState()"
       x-init="init()">
 
-    <!-- Auth Modal -->
-    @guest
-    <div x-show="showAuthModal"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform scale-90"
-         x-transition:enter-end="opacity-100 transform scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 transform scale-100"
-         x-transition:leave-end="opacity-0 transform scale-90"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-200/90 backdrop-filter backdrop-blur-md"
-         @click.self="showAuthModal = false">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full backdrop-filter-none">
-            <h3 class="text-xl font-bold mb-4 text-gray-800">Akses Terbatas</h3>
-            <p class="text-gray-600 mb-6" x-text="modalMessage"></p>
-            <div class="flex flex-col space-y-3">
-                <a href="{{ route('login') }}" class="bg-blue-600 text-white py-2 px-4 rounded-md text-center hover:bg-blue-700 transition">Masuk</a>
-                <a href="{{ route('register') }}" class="border border-gray-300 py-2 px-4 rounded-md text-center hover:bg-gray-50 transition">Daftar</a>
-                <button @click="showAuthModal = false" class="text-gray-500 hover:text-gray-800 text-sm mt-2">Tutup</button>
-            </div>
-        </div>
-    </div>
-    @endguest
-
     @include('partials.navbar')
 
     <main>

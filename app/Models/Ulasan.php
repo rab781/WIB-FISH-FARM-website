@@ -21,6 +21,22 @@ class Ulasan extends Model
         'id_Produk',
         'rating',
         'komentar',
+        'balasan_admin',
+        'tanggal_balasan',
+        'admin_reply_by',
+        'is_verified_purchase',
+        'foto_review',
+        'status_review',
+        'is_helpful',
+        'helpful_count'
+    ];
+
+    protected $casts = [
+        'tanggal_balasan' => 'datetime',
+        'is_verified_purchase' => 'boolean',
+        'foto_review' => 'array',
+        'is_helpful' => 'boolean',
+        'helpful_count' => 'integer'
     ];
 
     // Relasi ke user
@@ -33,5 +49,135 @@ class Ulasan extends Model
     public function produk()
     {
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
+    }
+
+    // Enhanced relationships
+    public function adminReplier()
+    {
+        return $this->belongsTo(User::class, 'admin_reply_by');
+    }
+
+    public function interactions()
+    {
+        return $this->hasMany(ReviewInteraction::class, 'ulasan_id', 'id_ulasan');
+    }
+
+    public function helpfulInteractions()
+    {
+        return $this->hasMany(ReviewInteraction::class, 'ulasan_id', 'id_ulasan')
+                   ->where('interaction_type', 'helpful');
+    }
+
+    // Review status methods
+    public function getStatusBadgeAttribute(): string
+    {
+        return match($this->status_review) {
+            'pending' => '<span class="badge bg-warning text-dark">Menunggu Review</span>',
+            'approved' => '<span class="badge bg-success">Disetujui</span>',
+            'rejected' => '<span class="badge bg-danger">Ditolak</span>',
+            default => '<span class="badge bg-secondary">Unknown</span>'
+        };
+    }
+
+    public function getRatingStarsAttribute(): string
+    {
+        $stars = '';
+        for ($i = 1; $i <= 5; $i++) {
+            if ($i <= $this->rating) {
+                $stars .= '<i class="fas fa-star text-warning"></i>';
+            } else {
+                $stars .= '<i class="far fa-star text-muted"></i>';
+            }
+        }
+        return $stars;
+    }
+
+    // Admin reply methods
+    public function addAdminReply(string $reply): void
+    {
+        $this->update([
+            'balasan_admin' => $reply,
+            'tanggal_balasan' => now(),
+            'admin_reply_by' => \Illuminate\Support\Facades\Auth::id()
+        ]);
+    }
+
+    public function hasAdminReply(): bool
+    {
+        return !empty($this->balasan_admin);
+    }
+
+    // Interaction methods
+    public function toggleInteraction(int $userId, string $type): void
+    {
+        $existing = $this->interactions()
+                        ->where('user_id', $userId)
+                        ->first();
+
+        if ($existing) {
+            if ($existing->interaction_type === $type) {
+                // Remove interaction if same type
+                $existing->delete();
+                $this->updateHelpfulCount();
+                return;
+            } else {
+                // Update interaction type
+                $existing->update(['interaction_type' => $type]);
+            }
+        } else {
+            // Create new interaction
+            $this->interactions()->create([
+                'user_id' => $userId,
+                'interaction_type' => $type
+            ]);
+        }
+
+        $this->updateHelpfulCount();
+    }
+
+    public function updateHelpfulCount(): void
+    {
+        $helpfulCount = $this->helpfulInteractions()->count();
+        $this->update(['helpful_count' => $helpfulCount]);
+    }
+
+    public function getUserInteraction(int $userId): ?ReviewInteraction
+    {
+        return $this->interactions()
+                   ->where('user_id', $userId)
+                   ->first();
+    }
+
+    // Verification methods
+    public function verifyPurchase(): void
+    {
+        $this->update(['is_verified_purchase' => true]);
+    }
+
+    public function getVerificationBadgeAttribute(): string
+    {
+        if ($this->is_verified_purchase) {
+            return '<span class="badge bg-primary text-white" title="Pembelian Terverifikasi">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </span>';
+        }
+        return '';
+    }
+
+    // Photo methods
+    public function hasPhotos(): bool
+    {
+        return !empty($this->foto_review) && is_array($this->foto_review);
+    }
+
+    public function getPhotoUrlsAttribute(): array
+    {
+        if (!$this->hasPhotos()) {
+            return [];
+        }
+
+        return array_map(function($photo) {
+            return asset('storage/' . $photo);
+        }, $this->foto_review);
     }
 }

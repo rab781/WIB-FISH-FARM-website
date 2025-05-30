@@ -22,7 +22,7 @@ class PesananController extends Controller
         $pesanan = Pesanan::with(['detailPesanan.produk'])
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('pesanan.index', compact('pesanan'));
     }
@@ -254,6 +254,140 @@ class PesananController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Gagal mengonfirmasi pesanan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show payment upload form
+     */
+    public function showPaymentUpload(string $id)
+    {
+        $pesanan = Pesanan::where('id_pesanan', $id)
+            ->where('user_id', Auth::id())
+            ->with(['detailPesanan.produk', 'user'])
+            ->firstOrFail();
+
+        if ($pesanan->status_pesanan != 'Menunggu Pembayaran') {
+            return redirect()->route('pesanan.show', $id)
+                ->with('error', 'Tidak dapat mengunggah bukti pembayaran karena status pesanan tidak valid.');
+        }
+
+        return view('pesanan.payment-upload', compact('pesanan'));
+    }
+
+    /**
+     * View payment proof directly
+     */
+    public function viewPaymentProof(string $id)
+    {
+        try {
+            $pesanan = Pesanan::where('id_pesanan', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            if (!$pesanan->bukti_pembayaran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bukti pembayaran tidak ditemukan'
+                ], 404);
+            }
+
+            $fileName = basename($pesanan->bukti_pembayaran);
+            $imagePath = '';
+            $pathsChecked = [];
+
+            // Check all possible paths with proper logging for debugging
+
+            // First priority: Check uploads/payments directory with the filename
+            $uploadsPaymentPath = public_path('uploads/payments/' . $fileName);
+            $pathsChecked[] = $uploadsPaymentPath;
+            if (file_exists($uploadsPaymentPath)) {
+                $imagePath = $uploadsPaymentPath;
+            }
+
+            // Second: Check if the bukti_pembayaran is a full path that exists
+            if (!$imagePath) {
+                $directPath = public_path($pesanan->bukti_pembayaran);
+                $pathsChecked[] = $directPath;
+                if (file_exists($directPath)) {
+                    $imagePath = $directPath;
+                }
+            }
+
+            // Third: Check storage/app/public path
+            if (!$imagePath) {
+                $storagePath = storage_path('app/public/' . $pesanan->bukti_pembayaran);
+                $pathsChecked[] = $storagePath;
+                if (file_exists($storagePath)) {
+                    $imagePath = $storagePath;
+                }
+            }
+
+            // Fourth: Check storage/app/public/payment_proofs path
+            if (!$imagePath) {
+                $storagePaymentsPath = storage_path('app/public/payment_proofs/' . $fileName);
+                $pathsChecked[] = $storagePaymentsPath;
+                if (file_exists($storagePaymentsPath)) {
+                    $imagePath = $storagePaymentsPath;
+                }
+            }
+
+            // If still not found, check if there's a direct uploads/payments path stored
+            if (!$imagePath && strpos($pesanan->bukti_pembayaran, 'uploads/payments/') !== false) {
+                $uploadsDirectPath = public_path($pesanan->bukti_pembayaran);
+                $pathsChecked[] = $uploadsDirectPath;
+                if (file_exists($uploadsDirectPath)) {
+                    $imagePath = $uploadsDirectPath;
+                }
+            }
+
+            // If we still don't have an image path, return 404 with debugging info
+            if (!$imagePath || !file_exists($imagePath)) {
+                // Log the error for server-side diagnostics
+                \Illuminate\Support\Facades\Log::warning('Payment proof image not found (customer view)', [
+                    'pesanan_id' => $pesanan->id_pesanan,
+                    'bukti_pembayaran' => $pesanan->bukti_pembayaran,
+                    'paths_checked' => $pathsChecked
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File bukti pembayaran tidak ditemukan di server',
+                    'paths_checked' => $pathsChecked,
+                    'file_name' => $fileName,
+                    'bukti_pembayaran_path' => $pesanan->bukti_pembayaran
+                ], 404);
+            }
+
+            // Get file extension to determine content type
+            $ext = pathinfo($imagePath, PATHINFO_EXTENSION);
+            $contentType = 'image/jpeg'; // Default
+
+            if ($ext == 'png') {
+                $contentType = 'image/png';
+            } elseif ($ext == 'gif') {
+                $contentType = 'image/gif';
+            } elseif ($ext == 'jpg' || $ext == 'jpeg') {
+                $contentType = 'image/jpeg';
+            } elseif ($ext == 'pdf') {
+                $contentType = 'application/pdf';
+            } elseif ($ext == 'webp') {
+                $contentType = 'image/webp';
+            }
+
+            // Return the file with proper content type
+            return response()->file($imagePath, ['Content-Type' => $contentType]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error viewing payment proof (customer view)', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -854,5 +988,228 @@ class PesananController extends Controller
                 ->with('error', 'Gagal membuat pesanan: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Show detailed order tracking with timeline
+     */
+    public function tracking(Pesanan $pesanan)
+    {
+        // Ensure user can only view their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $pesanan->load(['timeline', 'quarantineLog', 'refundRequests']);
+
+        return view('pesanan.tracking', compact('pesanan'));
+    }
+
+    /**
+     * Update order delivery status
+     */
+    public function updateDeliveryStatus(Request $request, Pesanan $pesanan)
+    {
+        // Ensure user can only update their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'kondisi_diterima' => 'required|in:baik,rusak',
+            'catatan_penerimaan' => 'nullable|string|max:500'
+        ]);
+
+        if ($pesanan->status_pesanan !== 'Dikirim') {
+            return back()->with('error', 'Pesanan belum dikirim');
+        }
+
+        $pesanan->markAsDelivered(
+            $request->kondisi_diterima,
+            $request->catatan_penerimaan
+        );
+
+        $message = $request->kondisi_diterima === 'baik' ?
+            'Terima kasih! Pesanan telah dikonfirmasi diterima dalam kondisi baik.' :
+            'Pesanan dikonfirmasi diterima dalam kondisi rusak. Tim kami akan menghubungi Anda segera.';
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Track order using shipping API
+     */
+    public function trackShipping(Pesanan $pesanan)
+    {
+        // Ensure user can only track their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (!$pesanan->is_trackable) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan belum dapat dilacak'
+            ]);
+        }
+
+        try {
+            // Mock tracking data - replace with real TIKI API call
+            $trackingData = [
+                'status' => 'success',
+                'data' => [
+                    'waybill' => $pesanan->no_resi,
+                    'status' => 'DELIVERED',
+                    'history' => [
+                        [
+                            'date' => now()->subDays(2)->format('Y-m-d H:i:s'),
+                            'description' => 'Paket telah diterima di kantor pos',
+                            'location' => 'Jakarta Hub'
+                        ],
+                        [
+                            'date' => now()->subDays(1)->format('Y-m-d H:i:s'),
+                            'description' => 'Paket dalam perjalanan',
+                            'location' => 'Dalam perjalanan ke ' . $pesanan->alamat->kecamatan
+                        ],
+                        [
+                            'date' => now()->format('Y-m-d H:i:s'),
+                            'description' => 'Paket telah diterima',
+                            'location' => $pesanan->alamat->kecamatan
+                        ]
+                    ]
+                ]
+            ];
+
+            // Update tracking history
+            $pesanan->updateTracking($trackingData['data']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $trackingData['data']
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melacak pesanan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Show review form for completed orders
+     */
+    public function review(Pesanan $pesanan)
+    {
+        // Ensure user can only review their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (!$pesanan->is_reviewable) {
+            return back()->with('error', 'Pesanan belum dapat direview');
+        }
+
+        $pesanan->load(['detailPesanan.produk']);
+
+        return view('pesanan.review', compact('pesanan'));
+    }
+
+    /**
+     * Get order statistics for dashboard
+     */
+    public function statistics()
+    {
+        $userId = Auth::id();
+
+        $stats = [
+            'total_orders' => Pesanan::where('user_id', $userId)->count(),
+            'pending_payment' => Pesanan::where('user_id', $userId)
+                                       ->where('status_pesanan', 'Menunggu Pembayaran')
+                                       ->count(),
+            'in_process' => Pesanan::where('user_id', $userId)
+                                  ->whereIn('status_pesanan', ['Diproses', 'Karantina'])
+                                  ->count(),
+            'shipped' => Pesanan::where('user_id', $userId)
+                               ->where('status_pesanan', 'Dikirim')
+                               ->count(),
+            'completed' => Pesanan::where('user_id', $userId)
+                                 ->where('status_pesanan', 'Selesai')
+                                 ->count(),
+            'refunded' => Pesanan::where('user_id', $userId)
+                                ->where('status_refund', 'processed')
+                                ->count()
+        ];
+
+        $recentOrders = Pesanan::where('user_id', $userId)
+                              ->with(['detailPesanan.produk'])
+                              ->orderBy('created_at', 'desc')
+                              ->limit(5)
+                              ->get();
+
+        return response()->json([
+            'stats' => $stats,
+            'recent_orders' => $recentOrders
+        ]);
+    }
+
+    /**
+     * Download order invoice/receipt
+     */
+    public function downloadInvoice(Pesanan $pesanan)
+    {
+        // Ensure user can only download their own invoices
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $pesanan->load(['detailPesanan.produk', 'user', 'alamat']);
+
+        // For now, return a view instead of PDF until PDF package is installed
+        return view('pesanan.invoice', compact('pesanan'));
+    }
+
+    /**
+     * Cancel order (only if payment not confirmed)
+     */
+    public function cancel(Request $request, Pesanan $pesanan)
+    {
+        // Ensure user can only cancel their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($pesanan->status_pesanan !== 'Menunggu Pembayaran') {
+            return back()->with('error', 'Pesanan hanya dapat dibatalkan saat status "Menunggu Pembayaran"');
+        }
+
+        $request->validate([
+            'alasan_pembatalan' => 'required|string|min:10'
+        ]);
+
+        $pesanan->update([
+            'status_pesanan' => 'Dibatalkan',
+            'alasan_pembatalan' => $request->alasan_pembatalan
+        ]);
+
+        $pesanan->addTimelineEntry(
+            'Dibatalkan',
+            'Pesanan Dibatalkan',
+            'Pesanan dibatalkan oleh customer: ' . $request->alasan_pembatalan
+        );
+
+        // Notify admin about cancellation
+        NotificationController::notifyAdmins([
+            'type' => 'order-cancelled',
+            'title' => 'Pesanan Dibatalkan',
+            'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah dibatalkan oleh customer.',
+            'data' => [
+                'order_id' => $pesanan->id_pesanan,
+                'reason' => $request->alasan_pembatalan
+            ]
+        ]);
+
+        return redirect()->route('pesanan.index')
+                        ->with('success', 'Pesanan berhasil dibatalkan');
     }
 }

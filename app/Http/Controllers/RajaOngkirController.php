@@ -94,12 +94,11 @@ class RajaOngkirController extends Controller
         }
     }
 
-    // method cek ongkir
+    // method cek ongkir - optimized for TIKI courier only
     public function cekOngkir(Request $request)
     {
         // Validate request
         $request->validate([
-            'courier' => 'required|string',
             'origin' => 'required',
             'destination' => 'required',
             'weight' => 'required|integer|min:1000', // minimum 1kg in grams
@@ -110,77 +109,104 @@ class RajaOngkirController extends Controller
         header("Access-Control-Allow-Methods: GET, POST");
         header("Access-Control-Allow-Headers: Content-Type, X-Requested-With");
 
-        Log::info('Calculating shipping cost with params:', $request->all());
+        // Force TIKI as the courier for fish shipping
+        $courier = 'tiki';
+
+        Log::info('Calculating TIKI shipping cost with params:', [
+            'origin' => $request->origin,
+            'destination' => $request->destination,
+            'weight' => $request->weight,
+            'courier' => $courier
+        ]);
 
         try {
-            // Call Komerce RajaOngkir API
+            // Call Komerce RajaOngkir API with TIKI courier
             $response = Http::withHeaders([
                 'key' => env('RAJA_ONGKIR_API_KEY'),
             ])->asForm()->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
                 'origin' => $request->origin,
                 'destination' => $request->destination,
                 'weight' => $request->weight,
-                'courier' => $request->courier
+                'courier' => $courier
             ]);
 
             $responseData = $response->json();
             Log::info('RajaOngkir API Response:', $responseData);
 
             // Check if we got a successful response
-            if ($response->successful() && isset($responseData['data'])) {
+            if ($response->successful() && isset($responseData['data']) && !empty($responseData['data'])) {
                 // Initialize shipping options array
                 $shippingOptions = [];
 
-                // Process each courier's cost options
-                foreach ($responseData['data'] as $courier) {
-                    if (isset($courier['costs']) && is_array($courier['costs'])) {
-                        foreach ($courier['costs'] as $cost) {
-                            $shippingOptions[] = [
-                                'courier' => $courier['code'],
-                                'courier_name' => $courier['name'],
-                                'service' => $cost['service'],
-                                'cost' => $cost['cost'][0]['value'] ?? 0,
-                                'etd' => $cost['cost'][0]['etd'] ?? '-',
-                                'description' => $cost['description']
-                            ];
-                        }
+                // Process TIKI courier options - based on the successful test response format
+                foreach ($responseData['data'] as $courierData) {
+                    if ($courierData['code'] === 'tiki') {
+                        $shippingOptions[] = [
+                            'courier' => $courierData['code'],
+                            'courier_name' => $courierData['name'],
+                            'service' => $courierData['service'],
+                            'service_description' => $courierData['description'],
+                            'cost' => $courierData['cost'],
+                            'etd' => $courierData['etd'],
+                            'formatted_cost' => 'Rp ' . number_format($courierData['cost'], 0, ',', '.'),
+                            'etd_text' => $courierData['etd'] . ' hari'
+                        ];
                     }
                 }
 
-                // If no options found, handle appropriately
+                // If no TIKI options found, handle appropriately
                 if (empty($shippingOptions)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'No shipping options available for the given parameters',
+                        'message' => 'TIKI shipping service is not available for this route',
+                        'error_type' => 'NO_TIKI_SERVICE'
                     ], 404);
                 }
 
-                // Sort options by cost and get the default option
+                // Sort options by cost (cheapest first)
                 usort($shippingOptions, function($a, $b) {
                     return $a['cost'] - $b['cost'];
                 });
 
+                // Filter out expensive motorcycle/trucking services for fish shipping
+                $fishShippingOptions = array_filter($shippingOptions, function($option) {
+                    $service = strtoupper($option['service']);
+                    // Exclude motorcycle (T15, T25, T60) and trucking (TRC) services
+                    return !in_array($service, ['T15', 'T25', 'T60', 'TRC']);
+                });
+
+                // Re-index array after filtering
+                $fishShippingOptions = array_values($fishShippingOptions);
+
                 return response()->json([
                     'success' => true,
                     'data' => [
-                        'shipping_options' => $shippingOptions,
-                        'recommended' => $shippingOptions[0] // Cheapest option as default
+                        'shipping_options' => $fishShippingOptions,
+                        'recommended' => $fishShippingOptions[0] ?? null, // Cheapest suitable option
+                        'total_options' => count($fishShippingOptions),
+                        'courier_info' => [
+                            'name' => 'TIKI (Citra Van Titipan Kilat)',
+                            'code' => 'tiki',
+                            'specialization' => 'Specialized for live fish delivery'
+                        ]
                     ]
                 ]);
             }
 
-            // If API call was successful but data format is unexpected
+            // If API call was successful but no data
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid response format from shipping API',
-                'data' => $responseData
+                'message' => 'No shipping cost data available from TIKI',
+                'error_type' => 'NO_DATA',
+                'debug_response' => $responseData
             ], 500);
 
         } catch (\Exception $e) {
             Log::error('Error in cekOngkir: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to calculate shipping cost: ' . $e->getMessage()
+                'message' => 'Failed to calculate TIKI shipping cost: ' . $e->getMessage(),
+                'error_type' => 'EXCEPTION'
             ], 500);
         }
     }
@@ -398,6 +424,88 @@ class RajaOngkirController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Public address search endpoint for frontend testing
+     * No authentication required
+     */
+    public function publicSearchAlamat(Request $request)
+    {
+        // Add CORS headers
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST");
+        header("Access-Control-Allow-Headers: Content-Type, X-Requested-With");
+
+        $searchTerm = $request->input('search', '');
+
+        Log::info('Public address search called with term: ' . $searchTerm);
+
+        if (strlen($searchTerm) < 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Search term must be at least 2 characters',
+                'data' => []
+            ]);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'key' => env('RAJA_ONGKIR_API_KEY'),
+            ])->get('https://rajaongkir.komerce.id/api/v1/destination/domestic-destination', [
+                'search' => $searchTerm,
+                'limit' => 10,
+                'offset' => 0,
+            ]);
+
+            Log::info('Public search API Response status: ' . $response->status());
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                $results = [];
+
+                if (isset($responseData['data']) && is_array($responseData['data'])) {
+                    foreach ($responseData['data'] as $item) {
+                        $cityId = $item['id'];
+                        $provinsi = $item['province_name'] ?? $item['province'] ?? '';
+                        $kabupaten = $item['city_name'] ?? $item['city'] ?? '';
+                        $kecamatan = $item['subdistrict_name'] ?? $item['district_name'] ?? $item['subdistrict'] ?? '';
+                        $kodePos = $item['zip_code'] ?? $item['postal_code'] ?? '';
+
+                        $fullAddress = trim("{$kabupaten}, {$kecamatan}, {$provinsi} {$kodePos}");
+
+                        $results[] = [
+                            'city_id' => $cityId,
+                            'provinsi' => $provinsi,
+                            'kabupaten' => $kabupaten,
+                            'kecamatan' => $kecamatan,
+                            'kode_pos' => $kodePos,
+                            'full_address' => $fullAddress
+                        ];
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $results,
+                    'count' => count($results)
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch address data',
+                'data' => []
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error('Error in publicSearchAlamat: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Search failed: ' . $e->getMessage(),
                 'data' => []
             ], 500);
         }
@@ -637,6 +745,51 @@ class RajaOngkirController extends Controller
     }
 
     /**
+     * Get mock address data for testing purposes
+     *
+     * @param string $term Search term
+     * @return array
+     */
+    private function getMockAlamatData($term)
+    {
+        // Mock data for testing purposes
+        $mockData = [
+            [
+                'id' => 1,
+                'province' => 'Jakarta',
+                'city' => 'Jakarta Pusat',
+                'subdistrict' => 'Gambir',
+                'type' => 'Kota',
+                'postal_code' => '10110',
+            ],
+            [
+                'id' => 2,
+                'province' => 'Jawa Barat',
+                'city' => 'Bandung',
+                'subdistrict' => 'Sumur Bandung',
+                'type' => 'Kota',
+                'postal_code' => '40111',
+            ],
+            [
+                'id' => 3,
+                'province' => 'Jawa Timur',
+                'city' => 'Surabaya',
+                'subdistrict' => 'Genteng',
+                'type' => 'Kota',
+                'postal_code' => '60275',
+            ],
+        ];
+
+        // Filter mock data based on search term
+        return array_filter($mockData, function($item) use ($term) {
+            return stripos($item['province'], $term) !== false ||
+                   stripos($item['city'], $term) !== false ||
+                   stripos($item['subdistrict'], $term) !== false;
+        });
+    }
+
+
+    /**
      * Get address data from local database as fallback when API fails
      *
      * @param string $term Search term
@@ -672,6 +825,196 @@ class RajaOngkirController extends Controller
         } catch (\Exception $e) {
             Log::error('Error getting local alamat data: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Debug method to test exact request differences between cURL and Laravel HTTP
+     */
+    public function debugHttpRequest()
+    {
+        try {
+            $apiKey = env('RAJA_ONGKIR_API_KEY');
+            Log::info('DEBUG: Testing HTTP request differences');
+            Log::info('DEBUG: API Key: ' . substr($apiKey, 0, 5) . '...');
+
+            $url = 'https://rajaongkir.komerce.id/api/v1/destination/domestic-destination';
+            $params = [
+                'search' => 'jakarta',
+                'limit' => 2,
+                'offset' => 0
+            ];
+
+            // Test 1: Basic Laravel HTTP request (current method)
+            Log::info('DEBUG: Testing basic Laravel HTTP request');
+            $response1 = Http::withHeaders([
+                'key' => $apiKey,
+            ])->get($url, $params);
+
+            Log::info('DEBUG: Basic request status: ' . $response1->status());
+            Log::info('DEBUG: Basic request body sample: ' . substr($response1->body(), 0, 200));
+
+            // Test 2: Laravel HTTP with explicit User-Agent
+            Log::info('DEBUG: Testing with explicit User-Agent');
+            $response2 = Http::withHeaders([
+                'key' => $apiKey,
+                'User-Agent' => 'Laravel/11.0 PHP/' . PHP_VERSION,
+            ])->get($url, $params);
+
+            Log::info('DEBUG: User-Agent request status: ' . $response2->status());
+            Log::info('DEBUG: User-Agent request body sample: ' . substr($response2->body(), 0, 200));
+
+            // Test 3: Laravel HTTP with cURL-like headers
+            Log::info('DEBUG: Testing with cURL-like headers');
+            $response3 = Http::withHeaders([
+                'key' => $apiKey,
+                'User-Agent' => 'curl/7.68.0',
+                'Accept' => '*/*',
+            ])->get($url, $params);
+
+            Log::info('DEBUG: cURL-like request status: ' . $response3->status());
+            Log::info('DEBUG: cURL-like request body sample: ' . substr($response3->body(), 0, 200));
+
+            // Test 4: Using different HTTP options
+            Log::info('DEBUG: Testing with timeout and verify options');
+            $response4 = Http::withHeaders([
+                'key' => $apiKey,
+            ])->timeout(30)
+              ->withOptions([
+                  'verify' => false, // Disable SSL verification temporarily
+              ])->get($url, $params);
+
+            Log::info('DEBUG: No-verify request status: ' . $response4->status());
+            Log::info('DEBUG: No-verify request body sample: ' . substr($response4->body(), 0, 200));
+
+            // Test 5: Raw cURL through Laravel
+            Log::info('DEBUG: Testing raw cURL through Laravel');
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $url . '?' . http_build_query($params),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'key: ' . $apiKey,
+                ],
+                CURLOPT_TIMEOUT => 30,
+            ]);
+
+            $curlResponse = curl_exec($curl);
+            $curlHttpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+
+            Log::info('DEBUG: Raw cURL status: ' . $curlHttpCode);
+            Log::info('DEBUG: Raw cURL error: ' . ($curlError ?: 'none'));
+            Log::info('DEBUG: Raw cURL body sample: ' . substr($curlResponse, 0, 200));
+
+            return response()->json([
+                'success' => true,
+                'tests' => [
+                    'basic_laravel' => [
+                        'status' => $response1->status(),
+                        'success' => $response1->successful(),
+                        'body_sample' => substr($response1->body(), 0, 200),
+                    ],
+                    'with_user_agent' => [
+                        'status' => $response2->status(),
+                        'success' => $response2->successful(),
+                        'body_sample' => substr($response2->body(), 0, 200),
+                    ],
+                    'curl_like_headers' => [
+                        'status' => $response3->status(),
+                        'success' => $response3->successful(),
+                        'body_sample' => substr($response3->body(), 0, 200),
+                    ],
+                    'no_ssl_verify' => [
+                        'status' => $response4->status(),
+                        'success' => $response4->successful(),
+                        'body_sample' => substr($response4->body(), 0, 200),
+                    ],
+                    'raw_curl' => [
+                        'status' => $curlHttpCode,
+                        'success' => $curlHttpCode == 200,
+                        'error' => $curlError,
+                        'body_sample' => substr($curlResponse, 0, 200),
+                    ],
+                ],
+                'api_key_used' => substr($apiKey, 0, 5) . '...' . substr($apiKey, -3),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('DEBUG: Exception in debugHttpRequest: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * Test domestic shipping cost calculation specifically for TIKI courier
+     */
+    public function testDomesticCost()
+    {
+        try {
+            $apiKey = env('RAJA_ONGKIR_API_KEY');
+            Log::info('Testing domestic cost calculation with TIKI courier');
+            Log::info('Using API key: ' . substr($apiKey, 0, 5) . '...');
+
+            // Test with known city IDs (Jakarta to Bandung example)
+            $testParams = [
+                'origin' => '152', // Jakarta (common ID)
+                'destination' => '22', // Bandung (common ID)
+                'weight' => 1000, // 1kg in grams
+                'courier' => 'tiki'
+            ];
+
+            Log::info('Test parameters: ' . json_encode($testParams));
+
+            $response = Http::withHeaders([
+                'key' => $apiKey,
+            ])->asForm()->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', $testParams);
+
+            $statusCode = $response->status();
+            $responseBody = $response->body();
+
+            Log::info("Domestic cost test status: {$statusCode}");
+            Log::info("Domestic cost test response: " . $responseBody);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                // Log the structure to understand the response format
+                Log::info('Response data structure: ' . json_encode(array_keys($responseData)));
+
+                if (isset($responseData['data'])) {
+                    Log::info('Data array structure: ' . json_encode($responseData['data']));
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'status_code' => $statusCode,
+                    'test_parameters' => $testParams,
+                    'response_data' => $responseData,
+                    'message' => 'TIKI domestic cost calculation test successful'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'status_code' => $statusCode,
+                    'test_parameters' => $testParams,
+                    'error_response' => $responseBody,
+                    'message' => 'TIKI domestic cost calculation test failed'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Exception in testDomesticCost: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
     }
 }
