@@ -14,6 +14,7 @@
                 <a href="{{ route('tentang-kami') }}" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
                 @auth
                     <a href="/pesanan" class="text-gray-700 hover:text-orange-600 font-medium">Pesanan Saya</a>
+                    <a href="{{ route('keluhan.index') }}" class="text-gray-700 hover:text-orange-600 font-medium">Keluhan</a>
                 @endauth
             </nav>
 
@@ -108,8 +109,13 @@
 
         <!-- Mobile Menu -->
         <div class="mobile-menu hidden md:hidden mt-4 pb-2">
+            <a href="/" class="block py-2 text-gray-700 hover:text-orange-600">Beranda</a>
             <a href="/produk" class="block py-2 text-gray-700 hover:text-orange-600">Produk</a>
             <a href="/tentang-kami" class="block py-2 text-gray-700 hover:text-orange-600">Tentang Kami</a>
+            @auth
+                <a href="/pesanan" class="block py-2 text-gray-700 hover:text-orange-600">Pesanan Saya</a>
+                <a href="{{ route('keluhan.index') }}" class="block py-2 text-gray-700 hover:text-orange-600">Keluhan</a>
+            @endauth
         </div>
     </div>
 </header>

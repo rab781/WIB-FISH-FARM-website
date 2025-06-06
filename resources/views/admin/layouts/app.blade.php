@@ -104,9 +104,9 @@
                     <div class="py-2">
                         <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Customer</div>
 
-                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.notifications.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                        <a href="{{ route('admin.keluhan.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.keluhan.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
-                                <i class="fas fa-bell w-6 mr-3"></i>
+                                <i class="fas fa-comment-alt w-6 mr-3"></i>
                                 <span>Keluhan</span>
                             </div>
                         </a>

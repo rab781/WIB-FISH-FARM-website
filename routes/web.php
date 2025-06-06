@@ -48,6 +48,12 @@ Route::middleware('auth')->group(function () {
     // Direct payment proof viewing route
     Route::get('/pesanan/{id}/payment-proof', [App\Http\Controllers\PesananController::class, 'viewPaymentProof'])->name('pesanan.payment-proof');
 
+    // Keluhan routes
+    Route::get('/keluhan', [App\Http\Controllers\KeluhanController::class, 'index'])->name('keluhan.index');
+    Route::get('/keluhan/create', [App\Http\Controllers\KeluhanController::class, 'create'])->name('keluhan.create');
+    Route::post('/keluhan', [App\Http\Controllers\KeluhanController::class, 'store'])->name('keluhan.store');
+    Route::get('/keluhan/{id}', [App\Http\Controllers\KeluhanController::class, 'show'])->name('keluhan.show');
+
     // Enhanced order tracking and management
     Route::get('/pesanan/{pesanan}/tracking', [App\Http\Controllers\PesananController::class, 'tracking'])->name('pesanan.tracking');
     Route::post('/pesanan/{pesanan}/delivery-status', [App\Http\Controllers\PesananController::class, 'updateDeliveryStatus'])->name('pesanan.delivery-status');
@@ -119,10 +125,20 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     // Expense management routes
     Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class, ['as' => 'admin']);
 
+    // Keluhan management routes
+    Route::get('keluhan', [App\Http\Controllers\Admin\KeluhanController::class, 'index'])->name('admin.keluhan.index');
+    Route::get('keluhan/{id}', [App\Http\Controllers\Admin\KeluhanController::class, 'show'])->name('admin.keluhan.show');
+    Route::put('keluhan/{id}/respond', [App\Http\Controllers\Admin\KeluhanController::class, 'respond'])->name('admin.keluhan.respond');
+
     // Admin profile routes
     Route::get('profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('admin.profile.show');
     Route::get('profile/edit', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profile.edit');
     Route::put('profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profile.update');
+
+    // Admin keluhan routes
+    Route::get('keluhan', [App\Http\Controllers\Admin\KeluhanController::class, 'index'])->name('admin.keluhan.index');
+    Route::get('keluhan/{id}', [App\Http\Controllers\Admin\KeluhanController::class, 'show'])->name('admin.keluhan.show');
+    Route::post('keluhan/{id}/respond', [App\Http\Controllers\Admin\KeluhanController::class, 'respond'])->name('admin.keluhan.respond');
 
     // Admin notification routes
     Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
@@ -222,6 +238,12 @@ Route::get('/cart', [App\Http\Controllers\KeranjangController::class, 'index'])-
 Route::post('/cart/remove', [App\Http\Controllers\KeranjangController::class, 'destroy'])->name('cart.remove')->middleware('auth');
 Route::post('/cart/bulk-delete', [App\Http\Controllers\KeranjangController::class, 'bulkDelete'])->name('cart.bulk-delete')->middleware('auth');
 Route::get('/cart/count', [App\Http\Controllers\KeranjangController::class, 'getCartCount'])->name('cart.count');
+
+// Keluhan routes
+Route::get('/keluhan', [App\Http\Controllers\KeluhanController::class, 'index'])->name('keluhan.index')->middleware('auth');
+Route::get('/keluhan/create', [App\Http\Controllers\KeluhanController::class, 'create'])->name('keluhan.create')->middleware('auth');
+Route::post('/keluhan', [App\Http\Controllers\KeluhanController::class, 'store'])->name('keluhan.store')->middleware('auth');
+Route::get('/keluhan/{id}', [App\Http\Controllers\KeluhanController::class, 'show'])->name('keluhan.show')->middleware('auth');
 
 // fallback route
 Route::fallback(function () {
