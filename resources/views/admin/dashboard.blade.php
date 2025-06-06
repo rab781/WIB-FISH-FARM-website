@@ -8,15 +8,15 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-sm font-medium text-gray-500">Total Penjualan</h3>
-                <span class="text-green-500 flex items-center text-xs font-medium">
+                <span class="{{ $revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500' }} flex items-center text-xs font-medium">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $revenueGrowth >= 0 ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 14l-7 7m0 0l-7-7m7 7V3' }}"></path>
                     </svg>
-                    32%
+                    {{ number_format(abs($revenueGrowth), 1) }}%
                 </span>
             </div>
             <div>
-                <span class="text-3xl font-bold text-gray-900">Rp 24.500.000</span>
+                <span class="text-3xl font-bold text-gray-900">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</span>
                 <p class="text-xs text-gray-500 mt-1">Dibandingkan bulan lalu</p>
             </div>
         </div>
@@ -25,15 +25,15 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-sm font-medium text-gray-500">Total Pesanan</h3>
-                <span class="text-green-500 flex items-center text-xs font-medium">
+                <span class="{{ $ordersGrowth >= 0 ? 'text-green-500' : 'text-red-500' }} flex items-center text-xs font-medium">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $ordersGrowth >= 0 ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 14l-7 7m0 0l-7-7m7 7V3' }}"></path>
                     </svg>
-                    12%
+                    {{ number_format(abs($ordersGrowth), 1) }}%
                 </span>
             </div>
             <div>
-                <span class="text-3xl font-bold text-gray-900">156</span>
+                <span class="text-3xl font-bold text-gray-900">{{ number_format($totalOrders) }}</span>
                 <p class="text-xs text-gray-500 mt-1">Dibandingkan bulan lalu</p>
             </div>
         </div>
@@ -41,16 +41,16 @@
         <!-- Pelanggan Card -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-2">
-                <h3 class="text-sm font-medium text-gray-500">Pelanggan Aktif</h3>
-                <span class="text-green-500 flex items-center text-xs font-medium">
+                <h3 class="text-sm font-medium text-gray-500">Total Pelanggan</h3>
+                <span class="{{ $customersGrowth >= 0 ? 'text-green-500' : 'text-red-500' }} flex items-center text-xs font-medium">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $customersGrowth >= 0 ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 14l-7 7m0 0l-7-7m7 7V3' }}"></path>
                     </svg>
-                    18%
+                    {{ number_format(abs($customersGrowth), 1) }}%
                 </span>
             </div>
             <div>
-                <span class="text-3xl font-bold text-gray-900">89</span>
+                <span class="text-3xl font-bold text-gray-900">{{ number_format($totalCustomers) }}</span>
                 <p class="text-xs text-gray-500 mt-1">Dibandingkan bulan lalu</p>
             </div>
         </div>
@@ -58,17 +58,17 @@
         <!-- Produk Card -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-2">
-                <h3 class="text-sm font-medium text-gray-500">Produk Terjual</h3>
-                <span class="text-red-500 flex items-center text-xs font-medium">
+                <h3 class="text-sm font-medium text-gray-500">Total Produk</h3>
+                <span class="text-blue-500 flex items-center text-xs font-medium">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
-                    5%
+                    Aktif
                 </span>
             </div>
             <div>
-                <span class="text-3xl font-bold text-gray-900">312</span>
-                <p class="text-xs text-gray-500 mt-1">Dibandingkan bulan lalu</p>
+                <span class="text-3xl font-bold text-gray-900">{{ number_format($totalProducts) }}</span>
+                <p class="text-xs text-gray-500 mt-1">Produk tersedia</p>
             </div>
         </div>
     </div>
@@ -126,37 +126,54 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($recentOrders as $order)
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            #ORD-1234
+                            #{{ $order->id_pesanan }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-sm font-medium">AS</span>
+                                    <span class="text-sm font-medium">{{ strtoupper(substr($order->user->nama ?? 'UN', 0, 2)) }}</span>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">Adit Santoso</div>
-                                    <div class="text-sm text-gray-500">adit@example.com</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $order->user->nama ?? 'Unknown' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $order->user->email ?? '' }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            12 Jul 2023
+                            {{ $order->created_at->format('d M Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Rp 450.000
+                            Rp {{ number_format($order->total_harga, 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Selesai
+                            @php
+                                $statusClass = match($order->status_pesanan) {
+                                    'Selesai' => 'bg-green-100 text-green-800',
+                                    'Dikirim' => 'bg-blue-100 text-blue-800',
+                                    'Diproses' => 'bg-yellow-100 text-yellow-800',
+                                    'Menunggu Pembayaran' => 'bg-gray-100 text-gray-800',
+                                    'Dibatalkan' => 'bg-red-100 text-red-800',
+                                    default => 'bg-gray-100 text-gray-800'
+                                };
+                            @endphp
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                                {{ $order->status_pesanan }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="#" class="text-blue-600 hover:text-blue-900">Detail</a>
+                            <a href="{{ route('admin.pesanan.show', $order->id_pesanan) }}" class="text-blue-600 hover:text-blue-900">Detail</a>
                         </td>
                     </tr>
-                    <!-- More rows... -->
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                            Tidak ada pesanan terbaru
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -166,15 +183,17 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Sales Chart
+        // Sales Chart with real data
         const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const monthlySalesData = @json($monthlySales);
+
         const salesChart = new Chart(salesCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                labels: monthlySalesData.map(item => item.month),
                 datasets: [{
-                    label: 'Penjualan 2023',
-                    data: [1000000, 1800000, 2000000, 1800000, 2400000, 3000000, 3800000, 3000000, 4200000, 4500000, 5000000, 5500000],
+                    label: 'Penjualan {{ date("Y") }}',
+                    data: monthlySalesData.map(item => item.total),
                     backgroundColor: 'rgba(79, 209, 197, 0.2)',
                     borderColor: 'rgb(79, 209, 197)',
                     borderWidth: 2,
@@ -190,7 +209,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return 'Rp ' + (value / 1000000) + ' M';
+                                return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
                             }
                         }
                     }
@@ -199,20 +218,29 @@
                     legend: {
                         display: true,
                         position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Penjualan: Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // Products Chart
+        // Products Chart with real data
         const productsCtx = document.getElementById('productsChart').getContext('2d');
+        const topProductsData = @json($topProducts);
+
         const productsChart = new Chart(productsCtx, {
             type: 'bar',
             data: {
-                labels: ['Koi Kohaku', 'Koi Showa', 'Koi Sanke', 'Arwana Super Red', 'Ikan Koki Merah'],
+                labels: topProductsData.map(item => item.name),
                 datasets: [{
                     label: 'Jumlah Terjual',
-                    data: [54, 42, 38, 28, 25],
+                    data: topProductsData.map(item => item.sold),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.7)',
                         'rgba(54, 162, 235, 0.7)',
@@ -241,6 +269,13 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Terjual: ' + context.parsed.y + ' unit';
+                            }
+                        }
                     }
                 }
             }

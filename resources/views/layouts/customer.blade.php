@@ -28,7 +28,7 @@
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
     <!-- Title -->
-    <title>{{ $title ?? 'WIB Fish Farm - Katalog' }}</title>
+    <title>{{ $title ?? 'WIB Fish Farm' }}</title>
 
     <!-- Scripts - Deferred to improve page load speed -->
     <script src="//unpkg.com/alpinejs" defer></script>

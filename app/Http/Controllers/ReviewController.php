@@ -285,4 +285,19 @@ class ReviewController extends Controller
 
         return view('public.reviews.index', compact('produk', 'reviews', 'stats'));
     }
+
+    public function create(Pesanan $pesanan)
+    {
+        // Ensure user can only create reviews for their own orders
+        if ($pesanan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (!$pesanan->is_reviewable) {
+            return back()->with('error', 'Pesanan belum dapat direview');
+        }
+
+        $pesanan->load(['detailPesanan.produk']);
+        return view('customer.reviews.create', compact('pesanan'));
+    }
 }

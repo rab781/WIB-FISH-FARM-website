@@ -22,8 +22,6 @@ return new class extends Migration
                     'Menunggu Pembayaran',
                     'Pembayaran Dikonfirmasi',
                     'Diproses',
-                    'Karantina',
-                    'Dikirim',
                     'Selesai',
                     'Dibatalkan',
                     'Refund Requested',
@@ -95,23 +93,6 @@ return new class extends Migration
                 $table->json('metadata')->nullable()->comment('Additional data like tracking info');
                 $table->boolean('is_customer_visible')->default(true);
                 $table->foreignId('created_by')->nullable()->constrained('users');
-                $table->timestamps();
-
-                $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
-            });
-        }
-
-        // Create quarantine_logs table if not exists
-        if (!Schema::hasTable('quarantine_logs')) {
-            Schema::create('quarantine_logs', function (Blueprint $table) {
-                $table->id();
-                $table->unsignedBigInteger('id_pesanan');
-                $table->timestamp('started_at');
-                $table->timestamp('scheduled_end_at');
-                $table->timestamp('completed_at')->nullable();
-                $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
-                $table->text('notes')->nullable();
-                $table->json('daily_checks')->nullable()->comment('Daily quarantine check logs');
                 $table->timestamps();
 
                 $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');

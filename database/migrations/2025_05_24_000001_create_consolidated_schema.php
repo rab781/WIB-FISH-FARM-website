@@ -79,19 +79,6 @@ return new class extends Migration
             });
         }
 
-        // Create produk_ukuran table
-        if (!Schema::hasTable('produk_ukuran')) {
-            Schema::create('produk_ukuran', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('id_produk')->constrained('produk', 'id_Produk')->onDelete('cascade');
-                $table->string('ukuran', 50);
-                $table->integer('stok')->default(0);
-                $table->decimal('harga', 10, 2)->nullable();
-                $table->boolean('is_active')->default(true);
-                $table->timestamps();
-            });
-        }
-
         // Create pesanan table
         if (!Schema::hasTable('pesanan')) {
             Schema::create('pesanan', function (Blueprint $table) {

@@ -1,4 +1,5 @@
 @extends('admin.layouts.app')
+@section('title', 'Profil Admin')
 
 @section('content')
 <div class="py-6 px-6">

@@ -1,0 +1,385 @@
+/* Advanced User Interaction Enhancements for Financial Reports */
+
+/* Keyboard Shortcut Tooltip */
+.keyboard-shortcut {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+}
+
+.keyboard-shortcut kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.07);
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0.125rem 0.35rem;
+    min-width: 1.5rem;
+    font-size: 0.75rem;
+    font-family: monospace;
+    line-height: 1;
+    color: var(--text-secondary);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .keyboard-shortcut kbd {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: var(--text-tertiary);
+}
+
+/* Keyboard shortcuts help panel */
+.keyboard-shortcuts-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.keyboard-shortcuts-panel.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.shortcuts-dialog {
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    background-color: var(--background-white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.keyboard-shortcuts-panel.visible .shortcuts-dialog {
+    transform: translateY(0);
+}
+
+.shortcuts-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shortcuts-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.shortcuts-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shortcuts-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .shortcuts-close:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.shortcuts-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.shortcuts-section {
+    margin-bottom: 1.5rem;
+}
+
+.shortcuts-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.shortcut-description {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.shortcut-key {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.shortcut-key-combo {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.shortcut-key kbd {
+    padding: 0.25rem 0.5rem;
+    min-width: 1.75rem;
+    font-size: 0.8rem;
+}
+
+.shortcut-plus {
+    color: var(--text-tertiary);
+    font-weight: 400;
+    margin: 0 0.25rem;
+}
+
+/* Command Palette */
+.command-palette {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    width: 600px;
+    max-width: 90vw;
+    background-color: var(--background-white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    overflow: hidden;
+}
+
+.command-palette.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.command-input-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.command-input-icon {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.command-input {
+    flex: 1;
+    border: none;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+}
+
+.command-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.command-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.command-group-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    padding: 0.5rem 1.25rem;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .command-group-title {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.command-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.command-item:hover,
+.command-item.selected {
+    background-color: rgba(12, 84, 125, 0.05);
+}
+
+[data-theme="dark"] .command-item:hover,
+[data-theme="dark"] .command-item.selected {
+    background-color: rgba(26, 130, 199, 0.1);
+}
+
+.command-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.command-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.command-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.command-title {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.command-description {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.command-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.command-footer {
+    padding: 0.5rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+/* Context Menu */
+.context-menu {
+    position: absolute;
+    background-color: var(--background-white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    z-index: 9998;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.95);
+    transform-origin: top left;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.context-menu.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .context-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.context-menu-icon {
+    color: var(--text-secondary);
+    margin-right: 0.75rem;
+    width: 16px;
+    text-align: center;
+}
+
+.context-menu-text {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.context-menu-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0.25rem 0;
+}
+
+/* Focus Trap Navigation */
+.focus-trap {
+    position: relative;
+}
+
+.focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Screen reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}

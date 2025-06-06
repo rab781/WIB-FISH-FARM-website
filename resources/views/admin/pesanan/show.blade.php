@@ -5,6 +5,43 @@
 @section('styles')
 <style>
     /* Tailwind utility classes for order details page */
+    /* Modal styling */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+    }
+
+    .modal-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        z-index: 51;
+    }
+
+    /* Make modal visible when show class is added */
+    #orderActionModal.show, #paymentProofModal.show {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
     /* Color variables */
     .color-orange {
         color: #ea580c; /* text-orange-600 */
@@ -79,58 +116,6 @@
         padding-left: 2rem;
     }
 
-    /* We don't need this anymore as we use a custom line in the HTML
-    .timeline:before {
-        content: '';
-        position: absolute;
-        left: 9px;
-        top: 0;
-        height: 100%;
-        width: 2px;
-        background-color: #e5e7eb;
-    }
-    */
-
-    /* These styles are now applied directly in the HTML with Tailwind classes
-    .timeline-item {
-        position: relative;
-        padding-bottom: 1.5rem;
-    }
-
-    .timeline-item:last-child {
-        padding-bottom: 0;
-    }
-
-    .timeline-item:before {
-        content: '';
-        position: absolute;
-        left: -2rem;
-        top: 0;
-        width: 1.25rem;
-        height: 1.25rem;
-        border-radius: 9999px;
-        background-color: white;
-        border: 2px solid #2563eb;
-    }
-
-    .timeline-item.completed:before {
-        background-color: #16a34a;
-        border-color: #16a34a;
-    }
-
-    .timeline-item.current:before {
-        background-color: white;
-        border-color: #ea580c;
-        box-shadow: 0 0 0 3px rgba(234,88,12,0.2);
-    }
-
-    .timeline-item.pending:before {
-        background-color: white;
-        border-color: #e5e7eb;
-    }
-    */
-
-    /* We keep these for compatibility with other parts of the page */
     .timeline-date {
         font-size: 0.75rem;
         color: #6b7280;
@@ -228,9 +213,14 @@
     }
 
     .step.current .step-icon {
+        background-color: white;
         border-color: #ea580c;
-        border-width: 3px;
-        color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.2);
+    }
+
+    .step.pending:before {
+        background-color: white;
+        border-color: #e5e7eb;
     }
 
     .step-label {
@@ -268,37 +258,58 @@
         color: white;
     }
 
-    /* Modal system - complete overhaul */
+    /* Modal system - complete overhaul with improved animations */
     .modal-hidden {
         display: none !important;
     }
 
-    .modal-overlay {
-        display: none;
+    /* Fixed z-index to ensure modals appear above everything */
+    #orderActionModal, #paymentProofModal {
+        z-index: 2050;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    #orderActionModal.show, #paymentProofModal.show {
+        opacity: 1;
+    }
+
+    /* Dialog animation */
+    .modal-content {
+        transform: scale(0.95);
+        transition: transform 0.2s ease;
+    }
+
+    .show .modal-content {
+        transform: scale(1);
+    }
+
+    /* Make sure modals are clickable */
+    .modal-backdrop, .modal-container, .modal-content {
+        pointer-events: auto !important;
+    }
+
+    /* Improved modal styling */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 9999;
+    }
+
+    .modal-container {
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
-        overflow-y: auto;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
     }
 
-    .modal-overlay.show {
-        display: flex !important;
-        animation: fadeIn 0.2s ease-out forwards;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .modal-dialog {
+    .modal-content {
         background: white;
         border-radius: 8px;
         max-width: 600px;
@@ -306,15 +317,25 @@
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        transform: translateY(0);
-        transition: transform 0.3s ease;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    #orderActionModal.show, #paymentProofModal.show {
+        animation: fadeIn 0.2s forwards;
+    }
+
+    /* Modal transforms */
+    #orderActionModal .modal-content, #paymentProofModal .modal-content {
         transform: scale(0.9);
         transition: transform 0.2s ease-out;
     }
 
-    .modal-overlay.show .modal-dialog {
+    #orderActionModal.show .modal-content, #paymentProofModal.show .modal-content {
         transform: scale(1);
     }
 </style>
@@ -322,7 +343,6 @@
 
 @section('content')
 <div class="container mx-auto">
-    <!-- Page Heading -->
     <div class="flex items-center justify-between mb-4">
         <div>
             <a href="{{ route('admin.pesanan.index') }}" class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded mb-2 transition duration-150">
@@ -333,53 +353,8 @@
                 Dibuat pada {{ $pesanan->created_at->format('d M Y, H:i') }} WIB
             </div>
         </div>
-        <div class="flex items-center space-x-2">
-            <button onclick="window.print()" class="inline-flex items-center px-3 py-1.5 border border-orange-500 text-orange-500 hover:bg-orange-50 text-sm font-medium rounded shadow-sm transition duration-150">
-                <i class="fas fa-print fa-sm mr-1"></i> Cetak Invoice
-            </button>
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" type="button" class="inline-flex items-center px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded shadow-sm transition duration-150">
-                    <i class="fas fa-cog fa-sm mr-1"></i> Tindakan
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div x-show="open"
-                     @click.away="open = false"
-                     class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="transform opacity-0 scale-95"
-                     x-transition:enter-end="transform opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="transform opacity-100 scale-100"
-                     x-transition:leave-end="transform opacity-0 scale-95">
-                    <div class="py-1">
-                        @if($pesanan->status_pesanan == 'Menunggu Pembayaran')
-                            @if($pesanan->bukti_pembayaran)
-                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 confirm-payment" href="#" data-id="{{ $pesanan->id_pesanan }}">
-                                    <i class="fas fa-check-circle fa-sm fa-fw mr-2 text-gray-400"></i> Konfirmasi Pembayaran
-                                </a>
-                            @endif
-                            <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cancel-order" href="#" data-id="{{ $pesanan->id_pesanan }}">
-                                <i class="fas fa-times-circle fa-sm fa-fw mr-2 text-gray-400"></i> Batalkan Pesanan
-                            </a>
-                        @elseif($pesanan->status_pesanan == 'Pembayaran Dikonfirmasi')
-                            <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 process-order" href="#" data-id="{{ $pesanan->id_pesanan }}">
-                                <i class="fas fa-box fa-sm fa-fw mr-2 text-gray-400"></i> Proses Pesanan
-                            </a>
-                        @elseif($pesanan->status_pesanan == 'Diproses')
-                            <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ship-order" href="#" data-id="{{ $pesanan->id_pesanan }}">
-                                <i class="fas fa-shipping-fast fa-sm fa-fw mr-2 text-gray-400"></i> Kirim Pesanan
-                            </a>
-                        @endif
-                        <div class="border-t border-gray-100 my-1"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Order Status Header -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-orange-600 text-white px-5 py-3 flex justify-between items-center">
             <div class="flex items-center">
@@ -424,7 +399,6 @@
             </div>
         </div>
 
-        <!-- Order Flow Status -->
         <div class="p-6">
             <div class="mb-6">
                 <h2 class="text-lg font-bold text-gray-800 flex items-center">
@@ -804,11 +778,8 @@
         </div>
     </div>
 
-    <!-- Content Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main content area -->
         <div class="lg:col-span-2">
-            <!-- Product Details -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="px-5 py-4 flex justify-between items-center border-b border-gray-200">
                     <h3 class="text-base font-semibold text-orange-600 flex items-center">
@@ -823,7 +794,6 @@
                         </div>
                     </div>
 
-                    <!-- Product List -->
                     <div>
                         @foreach($pesanan->detailPesanan as $detail)
                             <div class="product-item">
@@ -877,7 +847,6 @@
                         @endforeach
                     </div>
 
-                    <!-- Order Summary -->
                     <div class="p-4 bg-gray-50 border-t border-gray-200">
                         <div class="grid grid-cols-1 md:grid-cols-2">
                             <div class="md:col-start-2">
@@ -902,7 +871,6 @@
                 </div>
             </div>
 
-            <!-- Order Timeline -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="border-b border-gray-200 px-5 py-4">
                     <h3 class="text-base font-semibold text-orange-600 flex items-center">
@@ -911,7 +879,6 @@
                 </div>
                 <div class="p-6">
                     <div class="timeline relative">
-                        <!-- Line running through timeline -->
                         @php
                             $timelineItemCount = 0;
                             if($pesanan->created_at) $timelineItemCount++;
@@ -1005,6 +972,22 @@
                                         dengan nomor resi <span class="font-medium text-purple-700">{{ $pesanan->nomor_resi }}</span>
                                         @endif.
                                     </div>
+                                    @if($pesanan->nomor_resi)
+                                    <div class="mt-3 pt-3 border-t border-purple-200">
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-sm text-gray-600">
+                                                <i class="fas fa-barcode mr-2 text-purple-500"></i>
+                                                <span class="font-medium">Nomor Resi:</span> {{ $pesanan->nomor_resi }}
+                                            </div>
+                                            <a href="https://www.tiki.id/id/tracking"
+                                               target="_blank"
+                                               class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded transition duration-150">
+                                                <i class="fas fa-external-link-alt mr-1"></i>
+                                                Cek Resi TIKI
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @endif
@@ -1053,9 +1036,7 @@
             </div>
         </div>
 
-        <!-- Sidebar Content -->
         <div class="lg:col-span-1">
-            <!-- Customer Info -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="border-b border-gray-200 px-5 py-4">
                     <h3 class="text-base font-semibold text-orange-600 flex items-center">
@@ -1073,8 +1054,8 @@
                             <div class="ml-3">
                                 <h4 class="font-medium text-lg text-gray-900">{{ $pesanan->user->name ?? 'Pelanggan' }}</h4>
                                 <div class="text-sm text-gray-600">{{ $pesanan->user->email ?? 'Email tidak tersedia' }}</div>
-                                @if($pesanan->user && $pesanan->user->phone)
-                                    <div class="text-sm text-gray-600">{{ $pesanan->user->phone }}</div>
+                                @if($pesanan->user && $pesanan->user->no_hp) {{-- Changed from 'phone' to 'no_hp' based on profile file --}}
+                                    <div class="text-sm text-gray-600">{{ $pesanan->user->no_hp }}</div>
                                 @endif
                             </div>
                         </div>
@@ -1089,7 +1070,6 @@
                 </div>
             </div>
 
-            <!-- Payment & Shipping Info -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="border-b border-gray-200 px-5 py-4">
                     <h3 class="text-base font-semibold text-orange-600 flex items-center">
@@ -1126,7 +1106,7 @@
                             </div>
                             @if($pesanan->bukti_pembayaran)
                                 <div class="mt-3 text-center">
-                                    <button type="button" class="btnLihatBuktiPembayaran inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 border border-orange-300 text-sm font-medium rounded-md hover:bg-orange-200 transition-colors duration-150 shadow-sm">
+                                    <button type="button" class="btnLihatBuktiPembayaran inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 border border-orange-300 text-sm font-medium rounded-md hover:bg-orange-200 transition-colors duration-150">
                                         <i class="fas fa-image fa-sm mr-2"></i> Lihat Bukti Pembayaran
                                     </button>
                                     <div class="text-xs text-gray-500 mt-1">Klik untuk melihat bukti pembayaran</div>
@@ -1192,7 +1172,6 @@
                 </div>
             </div>
 
-            <!-- Admin Actions -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="border-b border-gray-200 px-5 py-4">
                     <h3 class="text-base font-semibold text-orange-600 flex items-center">
@@ -1203,25 +1182,33 @@
                     <div class="space-y-3">
                         @if($pesanan->status_pesanan == 'Menunggu Pembayaran')
                             @if($pesanan->bukti_pembayaran)
-                                <button class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 confirm-payment" data-id="{{ $pesanan->id_pesanan }}">
+                                <button type="button" onclick="window.setupAdminOrderAction('confirm-payment', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 confirm-payment" data-id="{{ $pesanan->id_pesanan }}">
                                     <i class="fas fa-check-circle mr-2"></i> Konfirmasi Pembayaran
                                 </button>
-                                <button class="w-full flex justify-center items-center py-2.5 px-4 border border-red-500 text-red-500 hover:bg-red-50 text-sm font-medium rounded-md transition duration-150 cancel-order" data-id="{{ $pesanan->id_pesanan }}">
+                                <button type="button" onclick="window.setupAdminOrderAction('cancel-order', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 border border-red-500 text-red-500 hover:bg-red-50 text-sm font-medium rounded-md transition duration-150 cancel-order" data-id="{{ $pesanan->id_pesanan }}">
                                     <i class="fas fa-times-circle mr-2"></i> Batalkan Pesanan
                                 </button>
                             @else
-                                <button class="w-full flex justify-center items-center py-2.5 px-4 border border-red-500 text-red-500 hover:bg-red-50 text-sm font-medium rounded-md transition duration-150 cancel-order" data-id="{{ $pesanan->id_pesanan }}">
+                                <button type="button" onclick="window.setupAdminOrderAction('cancel-order', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 border border-red-500 text-red-500 hover:bg-red-50 text-sm font-medium rounded-md transition duration-150 cancel-order" data-id="{{ $pesanan->id_pesanan }}">
                                     <i class="fas fa-times-circle mr-2"></i> Batalkan Pesanan
                                 </button>
                             @endif
                         @elseif($pesanan->status_pesanan == 'Pembayaran Dikonfirmasi')
-                            <button class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 process-order" data-id="{{ $pesanan->id_pesanan }}">
+                            <button type="button" onclick="window.setupAdminOrderAction('process-order', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 process-order" data-id="{{ $pesanan->id_pesanan }}">
                                 <i class="fas fa-box mr-2"></i> Proses Pesanan
                             </button>
                         @elseif($pesanan->status_pesanan == 'Diproses')
-                            <button class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 ship-order" data-id="{{ $pesanan->id_pesanan }}">
+                            <button type="button" onclick="window.setupAdminOrderAction('ship-order', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition duration-150 ship-order" data-id="{{ $pesanan->id_pesanan }}">
                                 <i class="fas fa-shipping-fast mr-2"></i> Kirim Pesanan
                             </button>
+                        @elseif($pesanan->status_pesanan == 'Dikirim')
+                            <button type="button" onclick="window.setupAdminOrderAction('complete-order', '{{ $pesanan->id_pesanan }}')" class="w-full flex justify-center items-center py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-150 complete-order" data-id="{{ $pesanan->id_pesanan }}">
+                                <i class="fas fa-check mr-2"></i> Tandai Selesai
+                            </button>
+                        @elseif($pesanan->status_pesanan == 'Selesai' || $pesanan->status_pesanan == 'Dibatalkan')
+                            <div class="p-4 bg-gray-100 rounded-md text-center text-gray-600 text-sm">
+                                <i class="fas fa-info-circle mr-1"></i> Pesanan sudah selesai atau dibatalkan. Tidak ada tindakan lebih lanjut.
+                            </div>
                         @endif
 
                         <div class="border-t border-gray-200 my-4"></div>
@@ -1234,17 +1221,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Debug Log Section - Admin Only -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="border-b border-gray-200 px-5 py-4 bg-gray-50">
+            <h3 class="text-base font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-bug mr-2"></i> Debug Info (Admin Only)
+                <button type="button" id="clearLog" class="ml-auto px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100">
+                    Clear Log
+                </button>
+            </h3>
+        </div>
+        <div class="p-5">
+            <div id="debugLog" class="text-xs font-mono bg-gray-900 text-green-500 p-3 rounded-lg h-48 overflow-y-auto">
+                <div>[LOG] Debug mode active - {{ now() }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Payment Proof Modal -->
-<div id="paymentProofModal" class="modal-hidden">
-    <div class="modal-dialog">
+<div id="paymentProofModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" onclick="window.closeAllAdminModals()"></div>
+
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <div class="modal-content max-w-2xl w-full mx-auto">
         <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-3 flex justify-between items-center rounded-t-lg">
             <h3 class="text-lg leading-6 font-medium text-white flex items-center" id="paymentProofModalLabel">
                 <i class="fas fa-receipt mr-2"></i>
                 Bukti Pembayaran
             </h3>
-            <button type="button" class="text-white hover:text-gray-200 modal-close focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1" aria-label="Close">
+            <button type="button" onclick="window.closeAllAdminModals()" class="text-white hover:text-gray-200 modal-close focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1" aria-label="Close">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -1334,453 +1342,320 @@
             @endif
         </div>
         <div class="bg-gray-50 px-4 py-3 flex justify-end rounded-b-lg border-t border-gray-200">
-            <button type="button" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors duration-150 font-medium modal-close focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <button type="button" onclick="window.closeAllAdminModals()" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors duration-150 font-medium modal-close focus:outline-none focus:ring-2 focus:ring-orange-500">
                 <i class="fas fa-times mr-1"></i> Tutup
             </button>
         </div>
     </div>
 </div>
 
-<!-- Modal for Order Actions -->
-<div id="orderActionModal" class="modal-hidden">
-    <div class="modal-dialog">
-        <div class="bg-orange-600 px-4 py-3 flex justify-between items-center">
-            <h3 class="text-lg leading-6 font-medium text-white" id="orderActionModalLabel">Update Status Pesanan</h3>
-            <button type="button" class="text-white hover:text-gray-200 modal-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>        <form id="orderActionForm" method="POST">
-                                @csrf
-                                <!-- No method spoofing, always use POST -->
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <p id="orderActionText" class="text-gray-700 mb-4">Apakah Anda yakin ingin mengubah status pesanan ini?</p>
+<div id="orderActionModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" onclick="window.closeAllAdminModals()"></div>
 
-                <div id="orderCancelReasonContainer" class="mb-4 hidden">
-                    <label for="alasan_pembatalan" class="block text-sm font-medium text-gray-700 mb-1">Alasan Pembatalan</label>
-                    <textarea id="alasan_pembatalan" name="alasan_pembatalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan alasan pembatalan pesanan"></textarea>
-                </div>
-
-                <div id="orderShippingContainer" class="mb-4 hidden">
-                    <label for="nomor_resi" class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi Pengiriman</label>
-                    <input type="text" id="nomor_resi" name="resi" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan nomor resi pengiriman">
-                </div>
-            </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm" id="orderActionButton">
-                    Konfirmasi
-                </button>
-                <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close">
-                    Batal
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <!-- Modal Content -->
+        <div class="modal-content max-w-2xl w-full mx-auto">
+            <div class="bg-orange-600 px-4 py-3 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-white" id="orderActionModalLabel">Update Status Pesanan</h3>
+                <button type="button" onclick="window.closeAllAdminModals()" class="text-white hover:text-gray-200 modal-close">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-        </form>
+            <form id="orderActionForm" method="POST">
+                @csrf
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <p id="orderActionText" class="text-gray-700 mb-4">Apakah Anda yakin ingin mengubah status pesanan ini?</p>
+
+                    <div id="orderCancelReasonContainer" class="mb-4 hidden">
+                        <label for="alasan_pembatalan" class="block text-sm font-medium text-gray-700 mb-1">Alasan Pembatalan</label>
+                        <textarea id="alasan_pembatalan" name="alasan_pembatalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan alasan pembatalan pesanan"></textarea>
+                    </div>
+
+                    <div id="orderShippingContainer" class="mb-4 hidden">
+                        <label for="nomor_resi" class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi Pengiriman</label>
+                        <input type="text" id="nomor_resi" name="nomor_resi" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan nomor resi pengiriman">
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm" id="orderActionButton">
+                        Konfirmasi
+                    </button>
+                    <button type="button" onclick="window.closeAllAdminModals()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
 
 @section('scripts')
+<!-- Load the dedicated admin modal script -->
+<script src="{{ asset('js/admin-modal.js') }}"></script>
+
 <script>
-$(document).ready(function() {
-    // Modal functionality
+// DEBUG: Pastikan script ini benar-benar dijalankan
+console.log('Script admin order actions loaded!');
+
+// Legacy support for older code
+window.closeAllModals = function() {
+    console.log('Legacy closeAllModals called, redirecting to closeAllAdminModals');
+    if (typeof window.closeAllAdminModals === 'function') {
+        return window.closeAllAdminModals();
+    } else {
+        console.error('closeAllAdminModals function not found!');
+        // Fallback implementation
+        document.querySelectorAll('#orderActionModal, #paymentProofModal').forEach(modal => {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('show');
+        });
+        document.body.style.overflow = '';
+        return true;
+    }
+};
+
+window.showModal = function(modal) {
+    console.log('Legacy showModal called with:', modal);
+    if (typeof window.showAdminModal === 'function') {
+        if (typeof modal === 'string') {
+            return window.showAdminModal(modal);
+        } else if (modal && modal.id) {
+            return window.showAdminModal(modal.id);
+        }
+    } else {
+        console.error('showAdminModal function not found!');
+        // Fallback implementation
+        const modalEl = typeof modal === 'string' ? document.getElementById(modal) : modal;
+        if (modalEl) {
+            modalEl.style.display = 'flex';
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            return true;
+        }
+    }
+    console.error('Invalid modal parameter:', modal);
+    return false;
+};
+
+// Make debugModal available globally
+window.debugModal = function() {
+    return window.debugAdminModal('orderActionModal');
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // DEBUG: Pastikan DOM sudah siap
+    console.log('DOMContentLoaded!');
+
     const orderActionModal = document.getElementById('orderActionModal');
     const paymentProofModal = document.getElementById('paymentProofModal');
+    const debugLog = document.getElementById('debugLog');
 
-    // Close modal buttons
-    document.querySelectorAll('.modal-close').forEach(button => {
-        button.addEventListener('click', function() {
-            closeAllModals();
+    // Enhanced logging function that shows logs on page
+    function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        console.log(`[${timestamp}] ${message}`);
+
+        // Log to the debug div on page
+        if (debugLog) {
+            const logItem = document.createElement('div');
+
+            // Style based on message type
+            let className = '';
+            switch (type) {
+                case 'error':
+                    className = 'text-red-500';
+                    break;
+                case 'success':
+                    className = 'text-green-400';
+                    break;
+                case 'warning':
+                    className = 'text-yellow-400';
+                    break;
+                case 'action':
+                    className = 'text-blue-400';
+                    break;
+                default:
+                    className = 'text-green-500';
+            }
+
+            logItem.className = className;
+            logItem.innerHTML = `[${timestamp}] ${message}`;
+            debugLog.appendChild(logItem);
+
+            // Auto-scroll to bottom
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+    }
+
+    // Clear log button
+    const clearLogBtn = document.getElementById('clearLog');
+    if (clearLogBtn) {
+        clearLogBtn.addEventListener('click', function() {
+            if (debugLog) {
+                debugLog.innerHTML = '<div>[LOG] Log cleared - ' + new Date().toLocaleTimeString() + '</div>';
+                log('Debug log cleared');
+            }
         });
-    });
-
-    // Close modal when clicking on backdrop
-    if (orderActionModal) {
-        orderActionModal.addEventListener('click', function(e) {
-            if (e.target === orderActionModal) {
-                closeAllModals();
-            }
-        });
     }
 
-    if (paymentProofModal) {
-        paymentProofModal.addEventListener('click', function(e) {
-            if (e.target === paymentProofModal) {
-                closeAllModals();
-            }
-        });
-    }
+    log('Debug log initialized', 'success');
+    log('Checking modal elements...', 'info');
+    log('orderActionModal exists: ' + (orderActionModal ? 'YES' : 'NO'), orderActionModal ? 'success' : 'error');
+    log('paymentProofModal exists: ' + (paymentProofModal ? 'YES' : 'NO'), paymentProofModal ? 'success' : 'error');
 
-    // Function to close all modals
-    function closeAllModals() {
-        if (orderActionModal) {
-            orderActionModal.classList.remove('modal-overlay', 'show');
-            orderActionModal.classList.add('modal-hidden');
-        }
-        if (paymentProofModal) {
-            paymentProofModal.classList.remove('modal-overlay', 'show');
-            paymentProofModal.classList.add('modal-hidden');
-        }
+    // Log how many buttons we found
+    const actionButtons = document.querySelectorAll('.confirm-payment, .process-order, .ship-order, .cancel-order, .complete-order');
+    log(`Found ${actionButtons.length} action buttons on page`, actionButtons.length > 0 ? 'success' : 'warning');
 
-        // Remove any body scroll lock
-        document.body.style.overflow = '';
-    }
-
-    // Function to show modal with enhanced handling and error recovery
-    function showModal(modal) {
-        if (!modal) {
-            console.error('Modal element is null or undefined');
-            return;
-        }
-
-        // Close other modals first
-        closeAllModals();
-
-        try {
-            // Force modal to be visible through multiple methods for redundancy
-            // Method 1: Use our custom classes
-            modal.classList.remove('modal-hidden');
-            modal.classList.add('modal-overlay', 'show');
-
-            // Method 2: Direct style manipulation as backup
-            modal.style.display = 'flex';
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.right = '0';
-            modal.style.bottom = '0';
-            modal.style.zIndex = '9999';
-            modal.style.alignItems = 'center';
-            modal.style.justifyContent = 'center';
-            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-
-            // Ensure dialog part is visible too
-            const dialog = modal.querySelector('.modal-dialog');
-            if (dialog) {
-                dialog.style.backgroundColor = 'white';
-                dialog.style.borderRadius = '8px';
-                dialog.style.maxWidth = '600px';
-                dialog.style.width = '100%';
-                dialog.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
-            }
-
-            // Debugging - inspect style properties that might be causing issues
-            console.log('Modal visibility: ' + getComputedStyle(modal).display);
-            console.log('Modal z-index: ' + getComputedStyle(modal).zIndex);
-            console.log('Modal position: ' + getComputedStyle(modal).position);
-
-            // Check if modal is really visible by checking its computed style
-            if (getComputedStyle(modal).display === 'none') {
-                console.warn('Modal still not visible after CSS class changes. Forcing display style.');
-                // Emergency approach - add style tag to document
-                const styleTag = document.createElement('style');
-                styleTag.textContent = '#' + modal.id + '.show { display: flex !important; z-index: 9999 !important; }';
-                document.head.appendChild(styleTag);
-
-                // Try once more
-                modal.classList.remove('modal-hidden');
-                modal.classList.add('modal-overlay', 'show');
-            }
-
-            // Prevent body scroll
-            document.body.style.overflow = 'hidden';
-
-            // Focus management for accessibility
-            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) {
-                setTimeout(() => firstFocusable.focus(), 100);
-            }
-
-            // For payment proof modal, check if image loaded correctly
-            if (modal.id === 'paymentProofModal') {
-                const img = modal.querySelector('img');
-                if (img) {
-                    img.onload = function() {
-                        console.log('Payment proof image loaded successfully.');
-                    };
-                    img.onerror = function() {
-                        console.error('Payment proof image failed to load.');
-                        document.getElementById('imageError').classList.remove('hidden');
-                    };
-                }
-            }
-
-            console.log('showModal completed');
-        } catch (err) {
-            console.error('Error showing modal:', err);
-            alert('Terjadi kesalahan saat menampilkan bukti pembayaran. Silakan coba buka gambar langsung di tab baru.');
-        }
-    }
-
-    // ESC key to close modals
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeAllModals();
-        }
+    // List all found buttons
+    actionButtons.forEach(function(btn, index) {
+        const classes = Array.from(btn.classList).join(', ');
+        const id = btn.dataset.id || 'no-id';
+        const text = btn.textContent.trim();
+        log(`Button ${index+1}: class=[${classes}], id=${id}, text="${text}"`, 'info');
     });
 
-    // Open payment proof modal - Enhanced handling with better debugging and fallback
-    $(document).on('click', '.btnLihatBuktiPembayaran', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // ENHANCEMENT: Forcefully attach event handlers to all action buttons
+    log('Forcefully attaching event handlers to all action buttons...', 'action');
 
-        console.log('Lihat Bukti Pembayaran button clicked');
+    // Clear any existing onclick attributes to avoid double execution
+    actionButtons.forEach(function(btn) {
+        // Read any existing attributes before clearing
+        const orderId = btn.getAttribute('data-id');
+        let actionType = '';
 
-        if (paymentProofModal) {
-            console.log('Modal element found, showing modal');
+        // Determine action type from button classes
+        if (btn.classList.contains('confirm-payment')) actionType = 'confirm-payment';
+        else if (btn.classList.contains('process-order')) actionType = 'process-order';
+        else if (btn.classList.contains('ship-order')) actionType = 'ship-order';
+        else if (btn.classList.contains('cancel-order')) actionType = 'cancel-order';
+        else if (btn.classList.contains('complete-order')) actionType = 'complete-order';
 
-            // Make sure the modal is visible with inline style as backup
-            paymentProofModal.style.display = 'flex';
-            paymentProofModal.style.position = 'fixed';
-            paymentProofModal.style.zIndex = '9999';
-            paymentProofModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-
-            showModal(paymentProofModal);
-
-            // Get the payment proof image element
-            const imgElement = document.getElementById('paymentProofImage');
-            if (imgElement) {
-                console.log('Image source:', imgElement.src);
-
-                // Add event listeners for image loading success/failure
-                imgElement.onload = function() {
-                    console.log('Image loaded successfully');
-                    // Hide any error message if it was previously shown
-                    const errorElement = document.getElementById('imageError');
-                    if (errorElement) errorElement.classList.add('hidden');
-                };
-
-                imgElement.onerror = function() {
-                    console.error('Image failed to load from', imgElement.src);
-
-                    // Show error message
-                    const errorElement = document.getElementById('imageError');
-                    if (errorElement) {
-                        errorElement.classList.remove('hidden');
-
-                        // Set fallback image
-                        this.onerror = null; // prevent infinite loop
-                        this.src = '/Images/image-not-found.png';
-
-                        // Get the direct link for opening in new tab
-                        const directLink = document.querySelector('#imageError a');
-                        if (directLink) {
-                            // Make sure it's actually clickable
-                            directLink.style.pointerEvents = 'auto';
-                            directLink.style.cursor = 'pointer';
-                        }
-                    }
-                };
-
-                // Force reload the image to ensure proper loading
-                const originalSrc = imgElement.src;
-                imgElement.src = originalSrc + '?t=' + new Date().getTime();
-            }
-        } else {
-            console.error('Payment proof modal not found!');
-
-            // Try to find the modal by tag instead of ID as fallback
-            const modalFallback = document.querySelector('#paymentProofModal');
-            if (modalFallback) {
-                console.log('Found modal via querySelector, showing it');
-                modalFallback.style.display = 'flex';
-                modalFallback.classList.remove('modal-hidden');
-                modalFallback.classList.add('modal-overlay', 'show');
-            } else {
-                alert('Terjadi kesalahan saat membuka modal. Silakan refresh halaman.');
-            }
-        }
-    });
-
-    // Handle order action buttons
-    $('.process-order').click(function(e) {
-        e.preventDefault();
-               const orderId = $(this).data('id');
-        setupOrderActionModal(
-            orderId,
-            'Proses Pesanan',
-            'Apakah Anda yakin ingin memproses pesanan #' + orderId + '?',
-            'Proses Pesanan',
-            '{{ route("admin.pesanan.process", ["id" => "__id__"]) }}'.replace('__id__', orderId)
-        );
-    });
-
-    $('.ship-order').click(function(e) {
-        e.preventDefault();
-        const orderId = $(this).data('id');
-        setupOrderActionModal(
-            orderId,
-            'Kirim Pesanan',
-            'Masukkan nomor resi pengiriman untuk pesanan #' + orderId,
-            'Kirim Pesanan',
-            '{{ route("admin.pesanan.ship", ["id" => "__id__"]) }}'.replace('__id__', orderId),
-            'shipping'
-        );
-    });
-
-    $('.confirm-payment').click(function(e) {
-        e.preventDefault();
-        console.log('Confirm payment clicked!');
-        const orderId = $(this).data('id');
-        console.log('Order ID:', orderId);
-
-        if (!orderActionModal) {
-            console.error('orderActionModal not found!');
-            alert('Modal tidak ditemukan. Silakan refresh halaman.');
-            return;
-        }
-
-        setupOrderActionModal(
-            orderId,
-            'Konfirmasi Pembayaran',
-            'Apakah Anda yakin ingin mengkonfirmasi pembayaran untuk pesanan #' + orderId + '?',
-            'Konfirmasi Pembayaran',
-            '{{ route("admin.pesanan.confirm-payment", ["id" => "__id__"]) }}'.replace('__id__', orderId)
-        );
-    });
-
-    $('.cancel-order').click(function(e) {
-        e.preventDefault();
-        const orderId = $(this).data('id');
-        setupOrderActionModal(
-            orderId,
-            'Batalkan Pesanan',
-            'Apakah Anda yakin ingin membatalkan pesanan #' + orderId + '?',
-            'Batalkan Pesanan',
-            '{{ route("admin.pesanan.cancel", ["id" => "__id__"]) }}'.replace('__id__', orderId),
-            'cancel'
-        );
-    });
-
-    function setupOrderActionModal(orderId, title, text, buttonText, formAction, type = null) {
-        console.log('setupOrderActionModal called with:', {orderId, title, text, buttonText, formAction, type});
-
-        $('#orderActionModalLabel').text(title);
-        $('#orderActionText').text(text);
-        $('#orderActionButton').text(buttonText);
-        $('#orderActionForm').attr('action', formAction);
-
-        // Reset containers
-        $('#orderCancelReasonContainer').addClass('hidden');
-        $('#orderShippingContainer').addClass('hidden');
-
-        // Show specific container based on type
-        if(type === 'cancel') {
-            $('#orderCancelReasonContainer').removeClass('hidden');
-        } else if(type === 'shipping') {
-            $('#orderShippingContainer').removeClass('hidden');
-        }
-
-        console.log('About to show modal, orderActionModal element:', orderActionModal);
-        // Show modal
-        showModal(orderActionModal);
-
-        // Handle form submission
-        $('#orderActionForm').off('submit').on('submit', function(e) {
+        // Set new direct event listener
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
+            log(`Button clicked: ${actionType} for order ${orderId}`, 'action');
 
-            const url = $(this).attr('action');
-            const formData = new FormData(this);
+            // Call the setup function directly
+            if (window.setupAdminOrderAction) {
+                window.setupAdminOrderAction(actionType, orderId);
+            } else {
+                log('setupAdminOrderAction function not found!', 'error');
+            }
+        });
+    });
 
-            // Log the form action for debugging
-            console.log('Submitting form to URL:', url);
+    // Also update the modal close behavior
+    log('Updating modal close behavior...', 'action');
+    document.querySelectorAll('.modal-close, .modal-backdrop').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            log('Modal close element clicked', 'info');
+            if (window.closeAllAdminModals) {
+                window.closeAllAdminModals();
+            } else {
+                log('closeAllAdminModals function not found!', 'error');
 
-            // Remove any _method field if it exists (prevent method spoofing)
-            const formMethodInput = formData.get('_method');
-            if (formMethodInput) {
-                console.log('Removing _method field with value:', formMethodInput);
-                formData.delete('_method');
+                // Fallback close logic
+                if (orderActionModal) {
+                    orderActionModal.style.display = 'none';
+                    orderActionModal.classList.add('hidden');
+                }
+                if (paymentProofModal) {
+                    paymentProofModal.style.display = 'none';
+                    paymentProofModal.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+    // Test the modal system automatically after a short delay
+    setTimeout(function() {
+        log('Auto-testing modal system...', 'action');
+        if (window.testAdminModal) {
+            window.testAdminModal();
+        } else {
+            log('testAdminModal function not found!', 'error');
+        }
+    }, 2000);
+});
+</script>
+
+<!-- Add this script at the very end of the body to ensure it runs last -->
+<script>
+// Final attempt to ensure modals work - runs after everything else
+window.addEventListener('load', function() {
+    console.log('🔍 Final modal check - window load event');
+
+    // Force a small delay to ensure all scripts are loaded
+    setTimeout(function() {
+        // Check if our modal functions exist
+        if (!window.showAdminModal || !window.closeAllAdminModals || !window.setupAdminOrderAction) {
+            console.error('❌ Modal functions not found! Attempting emergency recovery...');
+
+            // Define emergency versions if needed
+            if (!window.showAdminModal) {
+                console.log('Creating emergency showAdminModal function');
+                window.showAdminModal = function(modalEl) {
+                    const modal = typeof modalEl === 'string' ? document.getElementById(modalEl) : modalEl;
+                    if (!modal) return false;
+
+                    modal.style.display = 'flex';
+                    modal.classList.remove('hidden');
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    return true;
+                };
             }
 
-            $.ajax({
-                url: url,
-                type: 'POST', // Always use POST method for AJAX calls
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Show success notification
-                        showNotification(response.message || 'Tindakan berhasil dilakukan');
+            if (!window.closeAllAdminModals) {
+                console.log('Creating emergency closeAllAdminModals function');
+                window.closeAllAdminModals = function() {
+                    document.querySelectorAll('#orderActionModal, #paymentProofModal').forEach(modal => {
+                        modal.style.display = 'none';
+                        modal.classList.add('hidden');
+                        modal.classList.remove('show');
+                    });
+                    document.body.style.overflow = '';
+                    return true;
+                };
+            }
 
-                        // Close modal
-                        closeAllModals();
+            if (!window.setupAdminOrderAction) {
+                console.log('Creating emergency setupAdminOrderAction function');
+                window.setupAdminOrderAction = function(actionType, orderId) {
+                    console.log('Emergency setup for', actionType, orderId);
+                    const modal = document.getElementById('orderActionModal');
+                    if (modal) window.showAdminModal(modal);
+                    return true;
+                };
+            }
+        }
 
-                        // Reload page after a short delay
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showNotification('Terjadi kesalahan: ' + (response.message || 'Unknown error'), 'error');
-                    }
-                },
-                error: function(xhr) {
-                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message
-                        ? xhr.responseJSON.message
-                        : 'Terjadi kesalahan saat memproses permintaan';
+        // Final check on action buttons
+        document.querySelectorAll('.confirm-payment, .process-order, .ship-order, .cancel-order, .complete-order').forEach(btn => {
+            // Ensure they have click handlers
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
 
-                    showNotification(errorMsg, 'error');
-                }
+                const actionType = this.classList.contains('confirm-payment') ? 'confirm-payment' :
+                                   this.classList.contains('process-order') ? 'process-order' :
+                                   this.classList.contains('ship-order') ? 'ship-order' :
+                                   this.classList.contains('cancel-order') ? 'cancel-order' : 'complete-order';
+
+                const orderId = this.getAttribute('data-id');
+
+                console.log('Final handler: Button clicked', actionType, orderId);
+                window.setupAdminOrderAction(actionType, orderId);
             });
         });
-    }
+
+        console.log('✓ Final modal check complete');
+    }, 500);
 });
-
-// Copy tracking number to clipboard
-function copyResi() {
-    const resiNumber = document.getElementById("resiNumber");
-    resiNumber.select();
-
-    try {
-        // Modern clipboard API
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(resiNumber.value)
-                .then(() => {
-                    showNotification('Nomor resi berhasil disalin!');
-                })
-                .catch(err => {
-                    console.error('Could not copy text: ', err);
-                    // Fall back to the old method
-                    document.execCommand('copy');
-                    showNotification('Nomor resi berhasil disalin!');
-                });
-        } else {
-            // Fallback for older browsers
-            document.execCommand('copy');
-            showNotification('Nomor resi berhasil disalin!');
-        }
-    } catch (err) {
-        console.error('Could not copy text: ', err);
-        alert('Nomor resi berhasil disalin!');
-    }
-}
-
-// Show a temporary notification
-function showNotification(message, type = 'success') {
-    // Create notification element
-    const notification = document.createElement('div');
-
-    // Set style based on type
-    if (type === 'error') {
-        notification.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-md transition-opacity duration-300';
-    } else {
-        notification.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-md transition-opacity duration-300';
-    }
-
-    notification.style.zIndex = '9999';
-    notification.textContent = message;
-
-    // Add to page
-    document.body.appendChild(notification);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
-}
 </script>
 @endsection

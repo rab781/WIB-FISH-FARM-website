@@ -221,19 +221,22 @@
             <div class="absolute inset-0 opacity-10">
                 <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <pattern id="fish" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                            <path d="M40,10 C55,10 55,30 45,35 C55,40 55,60 40,60 C20,60 10,40 20,35 C10,30 20,10 40,10 Z" fill="currentColor"/>
+                        <pattern id="warning" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                            <path d="M40,5 L75,65 H5 L40,5 Z M40,25 V45 M40,50 V55" stroke="currentColor" fill="none" stroke-width="3"/>
                         </pattern>
                     </defs>
-                    <rect x="0" y="0" width="100%" height="100%" fill="url(#fish)"/>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#warning)"/>
                 </svg>
             </div>
             <div class="relative z-10">
-                <h2 class="text-3xl font-bold text-white mb-4">Siap untuk memiliki ikan berkualitas?</h2>
-                <p class="text-white text-opacity-90 mb-8 max-w-2xl mx-auto">Jelajahi koleksi ikan hias berkualitas kami dan temukan ikan impian untuk akuarium atau kolam Anda.</p>
+                <h2 class="text-3xl font-bold text-white mb-4">Ada Keluhan atau Masalah?</h2>
+                <p class="text-white text-opacity-90 mb-8 max-w-2xl mx-auto">Jika Anda memiliki keluhan baik dengan pelayanan ataupun sistem kami, silakan ajukan keluhan Anda. Kami siap mendengar dan memberikan solusi terbaik.</p>
                 <div class="flex justify-center">
-                    <a href="{{ url('/produk') }}" class="bg-white hover:bg-orange-50 text-orange-600 font-semibold py-3 px-8 rounded-md transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                        Lihat Koleksi Ikan
+                    <a href="{{ url('/keluhan') }}" class="bg-white hover:bg-orange-50 text-orange-600 font-semibold py-3 px-8 rounded-md transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Ajukan Keluhan
                     </a>
                 </div>
             </div>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Modal Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; background: #f7f7f7; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; margin: 5px; }
+        button:hover { background: #45a049; }
+        pre { background: #f5f5f5; padding: 15px; overflow: auto; border-radius: 4px; }
+
+        /* Modal styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-footer { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; display: flex; justify-content: flex-end; }
+        .close-button { background: #f44336; }
+        .close-button:hover { background: #d32f2f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Basic Modal Test</h1>
+        <p>This is a simplified test of modal functionality, with minimal dependencies or complex styling.</p>
+
+        <div>
+            <button id="showNativeModal">Show Native Modal</button>
+            <button id="showCustomModal">Show Custom Modal</button>
+        </div>
+
+        <h2>Console Output:</h2>
+        <pre id="consoleOutput">// Console output will appear here</pre>
+    </div>
+
+    <!-- Basic Modal - Native Implementation -->
+    <div id="nativeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Native Modal</h2>
+                <span id="closeNativeModalX" style="cursor: pointer; font-size: 24px;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>This is a basic modal implemented with native JavaScript.</p>
+                <p>If you can see this modal, basic modal display is working.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeNativeModal" class="close-button">Close Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal - Using admin-modal.js -->
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Custom Modal</h2>
+                <span id="closeCustomModalX" style="cursor: pointer; font-size: 24px;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>This is a modal using the admin-modal.js system.</p>
+                <p>If you can see this modal, the admin-modal.js is properly initialized.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeCustomModal" class="close-button">Close Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the admin-modal.js script -->
+    <script src="js/admin-modal.js"></script>
+
+    <script>
+        // Helper to log both to console and UI
+        function log(message) {
+            console.log(message);
+            const output = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerText += `\n[${timestamp}] ${message}`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Native modal implementation
+        document.getElementById('showNativeModal').addEventListener('click', function() {
+            log('Showing native modal');
+            document.getElementById('nativeModal').classList.add('show');
+        });
+
+        document.getElementById('closeNativeModal').addEventListener('click', function() {
+            log('Closing native modal (button)');
+            document.getElementById('nativeModal').classList.remove('show');
+        });
+
+        document.getElementById('closeNativeModalX').addEventListener('click', function() {
+            log('Closing native modal (X)');
+            document.getElementById('nativeModal').classList.remove('show');
+        });
+
+        document.getElementById('nativeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                log('Closing native modal (backdrop)');
+                this.classList.remove('show');
+            }
+        });
+
+        // Custom modal using admin-modal.js
+        document.getElementById('showCustomModal').addEventListener('click', function() {
+            log('Showing custom modal');
+            if (typeof window.showAdminModal === 'function') {
+                window.showAdminModal('customModal');
+            } else {
+                log('ERROR: showAdminModal function not found!');
+                alert('Admin modal system is not loaded properly!');
+            }
+        });
+
+        document.getElementById('closeCustomModal').addEventListener('click', function() {
+            log('Closing custom modal (button)');
+            if (typeof window.closeAllAdminModals === 'function') {
+                window.closeAllAdminModals();
+            } else {
+                document.getElementById('customModal').classList.remove('show');
+                log('ERROR: closeAllAdminModals function not found!');
+            }
+        });
+
+        document.getElementById('closeCustomModalX').addEventListener('click', function() {
+            log('Closing custom modal (X)');
+            if (typeof window.closeAllAdminModals === 'function') {
+                window.closeAllAdminModals();
+            } else {
+                document.getElementById('customModal').classList.remove('show');
+                log('ERROR: closeAllAdminModals function not found!');
+            }
+        });
+
+        document.getElementById('customModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                log('Closing custom modal (backdrop)');
+                if (typeof window.closeAllAdminModals === 'function') {
+                    window.closeAllAdminModals();
+                } else {
+                    this.classList.remove('show');
+                    log('ERROR: closeAllAdminModals function not found!');
+                }
+            }
+        });
+
+        // Check if admin-modal.js is properly loaded
+        window.addEventListener('load', function() {
+            log('Page loaded. Checking admin modal system...');
+
+            if (typeof window.showAdminModal === 'function') {
+                log('✓ showAdminModal function is available');
+            } else {
+                log('✕ showAdminModal function is NOT available');
+            }
+
+            if (typeof window.closeAllAdminModals === 'function') {
+                log('✓ closeAllAdminModals function is available');
+            } else {
+                log('✕ closeAllAdminModals function is NOT available');
+            }
+
+            if (typeof window.setupAdminOrderAction === 'function') {
+                log('✓ setupAdminOrderAction function is available');
+            } else {
+                log('✕ setupAdminOrderAction function is NOT available');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -129,25 +129,71 @@ class PesananController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pesanan = Pesanan::with(['user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Pesanan::with(['user', 'detailPesanan.produk']);
 
-        // Get counts for summary cards
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $status = $request->status;
+
+            // Handle grouped statuses for tabs
+            if ($status == 'Menunggu Konfirmasi') {
+                $query->where('status_pesanan', 'Menunggu Konfirmasi');
+            } elseif ($status == 'Sedang Diproses') {
+                $query->whereIn('status_pesanan', ['Sedang Diproses', 'Diproses', 'Pembayaran Dikonfirmasi']);
+            } elseif ($status == 'Sedang Dikirim') {
+                $query->whereIn('status_pesanan', ['Sedang Dikirim', 'Dikirim']);
+            } else {
+                $query->where('status_pesanan', $status);
+            }
+        }
+
+        // Filter by search (order ID or customer name)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('id_pesanan', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Filter by date range
+        if ($request->filled('date_range')) {
+            $dateRange = $request->date_range;
+            $dates = explode(' - ', $dateRange);
+
+            if (count($dates) == 2) {
+                $startDate = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                $endDate = \Carbon\Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
+
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        }
+
+        // For DataTables, we want more data per page or all data
+        // Check if this is an AJAX request for DataTables or normal page load
+        $perPage = $request->get('per_page', 100); // Default to 100 for better DataTables performance
+
+        // Always sort by ID desc (newest first) by default - this ensures newest orders appear first
+        // Sort by ID first to ensure consistent ordering, then by created_at as secondary sort
+        $pesanan = $query->orderBy('id_pesanan', 'desc')->orderBy('created_at', 'desc')->paginate($perPage);
+
+        // Get counts for summary cards (always show total counts, not filtered)
         $totalPesanan = Pesanan::count();
-        $menungguPembayaran = Pesanan::where('status_pesanan', 'Menunggu Pembayaran')->count();
+        $menungguPembayaran = Pesanan::where('status_pesanan', 'Menunggu Konfirmasi')->count();
         $pembayaranDikonfirmasi = Pesanan::where('status_pesanan', 'Pembayaran Dikonfirmasi')->count();
-        $sedangDiproses = Pesanan::where('status_pesanan', 'Diproses')->count();
-        $dikirim = Pesanan::where('status_pesanan', 'Dikirim')->count();
+        $sedangDiproses = Pesanan::whereIn('status_pesanan', ['Sedang Diproses', 'Diproses'])->count();
+        $dikirim = Pesanan::whereIn('status_pesanan', ['Sedang Dikirim', 'Dikirim'])->count();
         $selesai = Pesanan::where('status_pesanan', 'Selesai')->count();
         $dibatalkan = Pesanan::where('status_pesanan', 'Dibatalkan')->count();
-        $karantina = Pesanan::where('status_pesanan', 'Karantina')->count();
         $pengembalian = Pesanan::where('status_pesanan', 'Pengembalian')->count();
 
         return view('admin.pesanan.index', compact('pesanan', 'totalPesanan', 'menungguPembayaran',
-            'pembayaranDikonfirmasi', 'sedangDiproses', 'dikirim', 'selesai', 'dibatalkan', 'karantina', 'pengembalian'));
+            'pembayaranDikonfirmasi', 'sedangDiproses', 'dikirim', 'selesai', 'dibatalkan', 'pengembalian'));
     }
 
     /**
@@ -171,6 +217,12 @@ class PesananController extends Controller
             $pesanan = Pesanan::findOrFail($id);
 
             if ($pesanan->status_pesanan !== 'Pembayaran Dikonfirmasi') {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Hanya pesanan dengan status Pembayaran Dikonfirmasi yang dapat diproses.'
+                    ], 400);
+                }
                 return redirect()->back()->with('error', 'Hanya pesanan dengan status Pembayaran Dikonfirmasi yang dapat diproses.');
             }
 
@@ -178,9 +230,24 @@ class PesananController extends Controller
             $pesanan->status_pesanan = 'Diproses';
             $pesanan->save();
 
+            // Return JSON response for AJAX requests
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil diproses.'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Pesanan berhasil diproses');
 
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal memproses pesanan: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
         }
     }
@@ -192,25 +259,46 @@ class PesananController extends Controller
     public function ship(Request $request, string $id)
     {
         $request->validate([
-            'nomor_resi' => 'required|string|max:50',
+            'resi' => 'required|string|max:50',
         ]);
 
         try {
             $pesanan = Pesanan::findOrFail($id);
 
             if ($pesanan->status_pesanan !== 'Diproses') {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Hanya pesanan dengan status Diproses yang dapat dikirim.'
+                    ], 400);
+                }
                 return redirect()->back()->with('error', 'Hanya pesanan dengan status Diproses yang dapat dikirim.');
             }
 
             // Update status and tracking number
             $pesanan->status_pesanan = 'Dikirim';
-            $pesanan->nomor_resi = $request->nomor_resi;
+            $pesanan->nomor_resi = $request->resi;
             $pesanan->tanggal_pengiriman = now();
             $pesanan->save();
 
-            return redirect()->back()->with('success', 'Pesanan berhasil dikirim dengan nomor resi ' . $request->nomor_resi);
+            // Return JSON response for AJAX requests
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil dikirim dengan nomor resi ' . $request->resi
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Pesanan berhasil dikirim dengan nomor resi ' . $request->resi);
 
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengirim pesanan: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Gagal mengirim pesanan: ' . $e->getMessage());
         }
     }
@@ -223,8 +311,12 @@ class PesananController extends Controller
         try {
             $pesanan = Pesanan::findOrFail($id);
 
-            if ($pesanan->status_pesanan !== 'Menunggu Konfirmasi') {
-                return redirect()->back()->with('error', 'Hanya pesanan dengan status Menunggu Konfirmasi yang dapat dikonfirmasi.');
+            // Allow confirmation for orders with payment proof uploaded (status still 'Menunggu Pembayaran' but bukti_pembayaran exists)
+            if ($pesanan->status_pesanan !== 'Menunggu Pembayaran' || !$pesanan->bukti_pembayaran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya pesanan dengan bukti pembayaran yang dapat dikonfirmasi.'
+                ], 400);
             }
 
             // Update status to Pembayaran Dikonfirmasi
@@ -232,9 +324,24 @@ class PesananController extends Controller
             $pesanan->tanggal_pembayaran = now();
             $pesanan->save();
 
+            // Return JSON response for AJAX requests
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran pesanan berhasil dikonfirmasi.'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Pembayaran pesanan berhasil dikonfirmasi.');
 
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengkonfirmasi pembayaran: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Gagal mengkonfirmasi pembayaran: ' . $e->getMessage());
         }
     }
@@ -248,6 +355,12 @@ class PesananController extends Controller
             $pesanan = Pesanan::findOrFail($id);
 
             if (in_array($pesanan->status_pesanan, ['Selesai', 'Dibatalkan'])) {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pesanan dengan status Selesai atau Dibatalkan tidak dapat dibatalkan.'
+                    ], 400);
+                }
                 return redirect()->back()->with('error', 'Pesanan dengan status Selesai atau Dibatalkan tidak dapat dibatalkan.');
             }
 
@@ -256,9 +369,24 @@ class PesananController extends Controller
             $pesanan->alasan_pembatalan = $request->alasan_pembatalan ?? 'Dibatalkan oleh admin';
             $pesanan->save();
 
+            // Return JSON response for AJAX requests
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil dibatalkan.'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
 
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membatalkan pesanan: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Gagal membatalkan pesanan: ' . $e->getMessage());
         }
     }
@@ -617,4 +745,5 @@ class PesananController extends Controller
             return back()->with('error', 'Gagal bulk update: ' . $e->getMessage());
         }
     }
+    
 }

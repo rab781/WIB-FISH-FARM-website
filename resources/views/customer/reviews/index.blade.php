@@ -15,6 +15,21 @@
         @apply bg-white rounded-lg shadow hover:shadow-md transition-all border border-gray-200 p-6;
     }
 
+    /* Modal styling */
+    .modal-backdrop {
+        @apply fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm;
+        z-index: 40;
+    }
+
+    .modal-container {
+        @apply fixed inset-0 flex items-center justify-center z-50;
+    }
+
+    .modal-content {
+        @apply bg-white rounded-lg shadow-xl overflow-hidden;
+        z-index: 50;
+    }
+
     .review-card:hover {
         transform: translateY(-2px);
     }
@@ -168,15 +183,15 @@
             <div class="flex flex-wrap justify-between items-start mb-4">
                 <div class="flex items-center space-x-4">
                     <!-- Product Image -->
-                    @if($review->pesanan->produk && $review->pesanan->produk->gambar)
+                    @if($review->pesanan && $review->pesanan->produk && $review->pesanan->produk->gambar)
                     <img src="{{ asset('storage/' . $review->pesanan->produk->gambar) }}"
                          alt="{{ $review->pesanan->produk->nama }}"
                          class="w-16 h-16 object-cover rounded-lg">
                     @endif
 
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">{{ $review->pesanan->produk->nama ?? 'Produk' }}</h3>
-                        <p class="text-gray-600">Pesanan: {{ $review->pesanan->nomor_pesanan }}</p>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $review->pesanan && $review->pesanan->produk ? $review->pesanan->produk->nama : 'Produk' }}</h3>
+                        <p class="text-gray-600">Pesanan: {{ $review->pesanan ? $review->pesanan->nomor_pesanan : 'N/A' }}</p>
                         <div class="flex items-center space-x-2 mt-1">
                             <div class="star-rating">
                                 @for($i = 1; $i <= 5; $i++)
@@ -308,11 +323,13 @@
 
 <!-- Photo Modal -->
 <div id="photoModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-black opacity-75" onclick="closePhotoModal()"></div>
-        </div>
-        <div class="inline-block align-middle bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-4xl w-full">
+    <!-- Modal Backdrop with Blur -->
+    <div class="modal-backdrop" onclick="closePhotoModal()"></div>
+
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <!-- Modal Content -->
+        <div class="modal-content max-w-4xl w-full mx-auto">
             <div class="bg-white">
                 <div class="flex justify-between items-center p-4 border-b">
                     <h3 class="text-lg font-medium text-gray-900">Foto Ulasan</h3>
@@ -341,10 +358,7 @@ function closePhotoModal() {
 }
 
 // Close modal when clicking outside
-document.getElementById('photoModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closePhotoModal();
-    }
-});
+// We don't need this listener anymore since we added an onclick handler to the backdrop
+// The modal backdrop already has an onclick handler that calls closePhotoModal()
 </script>
 @endpush

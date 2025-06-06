@@ -66,13 +66,6 @@
                             </div>
                         </a>
 
-                        <a href="{{ route('admin.quarantine.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.quarantine.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
-                            <div class="flex items-center">
-                                <i class="fas fa-shield-alt w-6 mr-3"></i>
-                                <span>Karantina</span>
-                            </div>
-                        </a>
-
                         <a href="{{ route('admin.refunds.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.refunds.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
                                 <i class="fas fa-undo w-6 mr-3"></i>

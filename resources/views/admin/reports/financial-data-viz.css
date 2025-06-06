@@ -1,0 +1,402 @@
+/* Advanced Data Visualization Components for Financial Reports */
+
+/* Financial KPI Cards with 3D Effects */
+.kpi-card-3d {
+    background-color: var(--background-white);
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    overflow: visible;
+}
+
+.kpi-card-3d:hover {
+    transform: rotateX(5deg) rotateY(-5deg);
+    box-shadow:
+        -10px 10px 32px rgba(0,0,0,0.08),
+        -5px 5px 16px rgba(0,0,0,0.04);
+}
+
+.kpi-card-content {
+    transform-style: preserve-3d;
+}
+
+.kpi-card-title {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    transform: translateZ(10px);
+}
+
+.kpi-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    transform: translateZ(20px);
+}
+
+.kpi-card-change {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transform: translateZ(15px);
+}
+
+.kpi-card-change.positive {
+    color: var(--success-color);
+    background-color: rgba(4, 169, 109, 0.1);
+}
+
+.kpi-card-change.negative {
+    color: var(--danger-color);
+    background-color: rgba(255, 71, 87, 0.1);
+}
+
+.kpi-card-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 12px;
+    transform: translateZ(30px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.kpi-card-3d:hover .kpi-card-icon {
+    transform: translateZ(40px) scale(1.1);
+}
+
+/* Financial Comparison Sliders */
+.comparison-slider-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.comparison-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-white);
+}
+
+.comparison-slider-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--primary-color);
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ew-resize;
+    z-index: 10;
+}
+
+.comparison-slider-handle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+.comparison-slider-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.comparison-slider-left,
+.comparison-slider-right {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    transition: width 0.1s ease;
+}
+
+.comparison-slider-left {
+    left: 0;
+    background-color: rgba(12, 84, 125, 0.05);
+    border-right: 4px solid var(--primary-color);
+}
+
+.comparison-slider-right {
+    right: 0;
+}
+
+.comparison-label {
+    position: absolute;
+    top: 20px;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-label-left {
+    left: 20px;
+}
+
+.comparison-label-right {
+    right: 20px;
+}
+
+/* Enhanced Data Tooltips */
+.enhanced-tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.enhanced-tooltip-content {
+    position: absolute;
+    z-index: 100;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    min-width: 200px;
+    max-width: 300px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1),
+                0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+}
+
+.enhanced-tooltip:hover .enhanced-tooltip-content {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+    visibility: visible;
+}
+
+.enhanced-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+.tooltip-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tooltip-data {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tooltip-data-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+}
+
+.tooltip-label {
+    color: var(--text-secondary);
+}
+
+.tooltip-value {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.tooltip-sparkline {
+    margin-top: 0.5rem;
+    height: 30px;
+}
+
+/* Interactive Financial Gauges */
+.gauge-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2/1;
+}
+
+.gauge {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.gauge-background {
+    position: absolute;
+    width: calc(100% - 20px);
+    height: calc(200% - 20px);
+    bottom: 0;
+    left: 10px;
+    background-color: #f0f0f0;
+    border-radius: 100% 100% 0 0;
+}
+
+.gauge-filler {
+    position: absolute;
+    width: calc(100% - 20px);
+    height: 0;
+    bottom: 0;
+    left: 10px;
+    background: var(--primary-gradient);
+    border-radius: 100% 100% 0 0;
+    transition: height 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom center;
+}
+
+.gauge-center {
+    position: absolute;
+    width: calc(100% - 60px);
+    height: calc(200% - 60px);
+    bottom: 0;
+    left: 30px;
+    background-color: white;
+    border-radius: 100% 100% 0 0;
+}
+
+.gauge-value {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.gauge-label {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.gauge-ticks {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.gauge-tick {
+    position: absolute;
+    bottom: 0;
+    width: 2px;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    transform-origin: bottom center;
+}
+
+.gauge-tick-label {
+    position: absolute;
+    bottom: 15px;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    transform: translateX(-50%);
+}
+
+/* Advanced Trend Indicators */
+.trend-indicator-advanced {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--card-radius);
+    background-color: white;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.trend-indicator-advanced:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.trend-icon-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.trend-up .trend-icon-container {
+    background-color: rgba(4, 169, 109, 0.1);
+    color: var(--success-color);
+}
+
+.trend-down .trend-icon-container {
+    background-color: rgba(255, 71, 87, 0.1);
+    color: var(--danger-color);
+}
+
+.trend-data {
+    flex: 1;
+}
+
+.trend-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.trend-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.trend-chart {
+    width: 80px;
+    height: 30px;
+    flex-shrink: 0;
+}

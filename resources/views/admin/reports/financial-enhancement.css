@@ -1,0 +1,230 @@
+/* Enhanced Financial Metrics Tooltips */
+.metric-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.metric-tooltip:hover .metric-tooltip-content {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+    visibility: visible;
+}
+
+.metric-tooltip-content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -80%) scale(0.9);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    width: max-content;
+    max-width: 250px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric-tooltip-content::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+/* Financial Metrics Animation */
+.animate-count-up {
+    position: relative;
+    display: inline-block;
+}
+
+.animate-count-up::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-white);
+    animation: countUpReveal 2s forwards;
+}
+
+@keyframes countUpReveal {
+    0% { width: 100%; }
+    100% { width: 0%; }
+}
+
+/* Data Comparison Indicators */
+.comparison-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.comparison-indicator.positive {
+    background-color: rgba(4, 169, 109, 0.1);
+    color: var(--success-color);
+}
+
+.comparison-indicator.negative {
+    background-color: rgba(255, 71, 87, 0.1);
+    color: var(--danger-color);
+}
+
+.comparison-indicator i {
+    font-size: 0.7rem;
+}
+
+/* Enhanced Financial Period Selector */
+.financial-period-selector {
+    display: flex;
+    background-color: var(--background-light);
+    border-radius: 8px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.period-option {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--text-secondary);
+}
+
+.period-option.active {
+    background-color: var(--background-white);
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.period-option:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: var(--text-primary);
+}
+
+/* Enhanced Data Tables */
+.data-table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.data-table-modern thead th {
+    background-color: var(--background-light);
+    padding: 1rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table-modern tbody td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.data-table-modern tbody tr:hover td {
+    background-color: rgba(12, 84, 125, 0.03);
+}
+
+.data-table-modern tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Financial Data Sparklines */
+.sparkline-container {
+    display: inline-block;
+    height: 24px;
+    width: 80px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.sparkline-positive {
+    color: var(--success-color);
+}
+
+.sparkline-negative {
+    color: var(--danger-color);
+}
+
+/* Financial Insight Cards */
+.insight-card {
+    position: relative;
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+    background-color: var(--background-white);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.insight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.insight-card:hover::before {
+    opacity: 1;
+}
+
+.insight-card__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.insight-card__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.insight-card__description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}

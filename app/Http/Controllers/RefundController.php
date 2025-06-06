@@ -10,19 +10,25 @@ use Illuminate\Support\Facades\Validator;
 
 class RefundController extends Controller
 {
-    public function index()
+    /**
+     * Process timeline entries for refund status changes
+     */
+    private function addRefundTimeline(RefundRequest $refund, string $status, string $notes = null)
     {
-        $refunds = RefundRequest::with(['pesanan.user', 'reviewer'])
-                               ->orderBy('created_at', 'desc')
-                               ->paginate(10);
+        $statusMap = [
+            'approved' => ['Refund Approved', 'Refund Disetujui'],
+            'rejected' => ['Refund Rejected', 'Refund Ditolak'],
+            'processing' => ['Refund Processing', 'Refund Sedang Diproses'],
+            'completed' => ['Refund Completed', 'Refund Selesai']
+        ];
 
-        return view('admin.refunds.index', compact('refunds'));
-    }
-
-    public function show(RefundRequest $refund)
-    {
-        $refund->load(['pesanan.user', 'pesanan.detailPesanan.produk', 'reviewer']);
-        return view('admin.refunds.show', compact('refund'));
+        if (isset($statusMap[$status])) {
+            $refund->pesanan->addTimelineEntry(
+                $statusMap[$status][0],
+                $statusMap[$status][1],
+                $notes ?? 'Status refund diperbarui ke ' . $status
+            );
+        }
     }
 
     public function store(Request $request, Pesanan $pesanan)
@@ -97,38 +103,46 @@ class RefundController extends Controller
         ]);
 
         // Add timeline entry
-        $refund->pesanan->addTimelineEntry(
-            'Refund ' . ucfirst($request->status),
-            'Refund ' . ($request->status === 'approved' ? 'Disetujui' : 'Ditolak'),
-            $request->catatan_admin
-        );
+        $this->addRefundTimeline($refund, $request->status, $request->catatan_admin);
 
         $statusText = $request->status === 'approved' ? 'disetujui' : 'ditolak';
         return back()->with('success', "Permintaan refund berhasil {$statusText}");
     }
 
-    public function process(RefundRequest $refund)
+    public function process(Request $request, RefundRequest $refund)
     {
-        if ($refund->status !== 'approved') {
+        $status = $request->input('status');
+        $allowedStatuses = ['approved', 'processing', 'completed'];
+        
+        if (!in_array($status, $allowedStatuses)) {
+            return back()->with('error', 'Status tidak valid');
+        }
+
+        if ($status === 'processing' && $refund->status !== 'approved') {
             return back()->with('error', 'Hanya refund yang disetujui yang dapat diproses');
         }
 
-        $refund->update([
-            'status' => 'processed',
-            'processed_at' => now()
-        ]);
+        if ($status === 'completed' && $refund->status !== 'processing') {
+            return back()->with('error', 'Hanya refund yang sedang diproses yang dapat diselesaikan');
+        }
+
+        $updateData = ['status' => $status];
+        
+        if ($status === 'processing') {
+            $updateData['processed_at'] = now();
+        } else if ($status === 'completed') {
+            $updateData['completed_at'] = now();
+        }
+
+        $refund->update($updateData);
 
         $refund->pesanan->update([
-            'status_refund' => 'processed',
-            'tanggal_refund_processed' => now()
+            'status_refund' => $status,
+            'tanggal_refund_' . $status => now()
         ]);
 
         // Add timeline entry
-        $refund->pesanan->addTimelineEntry(
-            'Refund Processed',
-            'Refund Diproses',
-            'Refund telah diproses dan dana akan segera dikembalikan'
-        );
+        $this->addRefundTimeline($refund, $status);
 
         return back()->with('success', 'Refund berhasil diproses');
     }
@@ -168,5 +182,85 @@ class RefundController extends Controller
         }
 
         return view('customer.refunds.create', compact('pesanan'));
+    }
+
+    /**
+     * Admin view for refunds listing. Displays a paginated list of all refund requests
+     * with summary statistics.
+     */
+    public function adminIndex()
+    {
+        // Eager load relationships to reduce queries
+        $refunds = RefundRequest::with(['pesanan.user', 'reviewer'])
+                               ->orderBy('created_at', 'desc')
+                               ->paginate(10);
+
+        // Get status counts for statistics
+        $stats = [
+            'pending' => RefundRequest::where('status', 'pending')->count(),
+            'approved' => RefundRequest::where('status', 'approved')->count(),
+            'rejected' => RefundRequest::where('status', 'rejected')->count(),
+            'processing' => RefundRequest::where('status', 'processing')->count(),
+            'completed' => RefundRequest::where('status', 'completed')->count(),
+            'total' => RefundRequest::count(),
+            'total_amount' => RefundRequest::where('status', ['approved', 'processing', 'completed'])
+                                         ->sum('jumlah_disetujui')
+        ];
+
+        return view('admin.refunds.index', compact('refunds', 'stats'));
+    }
+
+    /**
+     * Admin view for single refund request with detailed information
+     */
+    public function adminShow(RefundRequest $refund)
+    {
+        // Eager load all necessary relationships
+        $refund->load([
+            'pesanan.user',
+            'pesanan.detailPesanan.produk',
+            'pesanan.timeline',
+            'reviewer'
+        ]);
+
+        $stats = [
+            'total_customer_refunds' => RefundRequest::whereHas('pesanan', function($q) use ($refund) {
+                $q->where('user_id', $refund->pesanan->user_id);
+            })->count(),
+            'customer_approved_refunds' => RefundRequest::whereHas('pesanan', function($q) use ($refund) {
+                $q->where('user_id', $refund->pesanan->user_id);
+            })->where('status', ['approved', 'processing', 'completed'])->count()
+        ];
+
+        return view('admin.refunds.show', compact('refund', 'stats'));
+    }
+
+    /**
+     * Dashboard stats for admin
+     */
+    public function dashboardStats()
+    {
+        $stats = [
+            'total_refunds' => RefundRequest::count(),
+            'pending_refunds' => RefundRequest::where('status', 'pending')->count(),
+            'approved_refunds' => RefundRequest::where('status', 'approved')->count(),
+            'processed_refunds' => RefundRequest::where('status', 'processed')->count(),
+            'rejected_refunds' => RefundRequest::where('status', 'rejected')->count(),
+            'total_refund_amount' => RefundRequest::where('status', 'processed')->sum('jumlah_disetujui'),
+        ];
+
+        return response()->json($stats);
+    }
+
+    /**
+     * Export refunds data
+     */
+    public function export(Request $request)
+    {
+        $refunds = RefundRequest::with(['pesanan.user', 'reviewer'])
+                               ->orderBy('created_at', 'desc')
+                               ->get();
+
+        return response()->json(['data' => $refunds]);
     }
 }

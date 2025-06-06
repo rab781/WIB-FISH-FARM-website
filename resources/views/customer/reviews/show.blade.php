@@ -2,14 +2,66 @@
 
 @section('title', 'Detail Review')
 
+@push('styles')
+<style>
+    /* Modal styling */
+    .modal-backdrop {
+        @apply fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm;
+        z-index: 40;
+    }
+
+    .modal-container {
+        @apply fixed inset-0 flex items-center justify-center z-50;
+    }
+
+    .modal-content {
+        @apply bg-white rounded-lg shadow-xl overflow-hidden;
+        z-index: 50;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between">
-            <div>
+    {{-- Photo Modal --}}
+<div id="photoModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <!-- Modal Backdrop with Blur -->
+    <div class="modal-backdrop" onclick="closePhotoModal()"></div>
+
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <!-- Modal Content -->
+        <div class="modal-content max-w-4xl w-full mx-auto">
+            <div class="bg-white">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h3 class="text-lg font-medium text-gray-900">Foto Review</h3>
+                    <div class="flex items-center space-x-4">
+                        <span id="photoCounter" class="text-sm text-gray-600"></span>
+                        <button onclick="closePhotoModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <img id="modalImage" src="" alt="Foto review" class="w-full h-auto max-h-96 object-contain">
+                </div>
+                <div class="flex justify-between p-4 border-t">
+                    <button onclick="previousPhoto()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-chevron-left mr-2"></i>Sebelumnya
+                    </button>
+                    <button onclick="nextPhoto()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                        Selanjutnya<i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>v>
                 <h1 class="text-2xl font-bold text-gray-800 mb-2">Detail Review</h1>
-                <p class="text-gray-600">Review untuk pesanan #{{ $review->pesanan->id ?? 'N/A' }}</p>
+                <p class="text-gray-600">Review untuk pesanan #{{ $review->pesanan ? $review->pesanan->id : 'N/A' }}</p>
             </div>
             <a href="{{ route('customer.reviews.index') }}"
                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
@@ -197,35 +249,44 @@
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600">ID Pesanan:</span>
-                            <span class="text-sm font-medium text-gray-800">#{{ $review->pesanan->id }}</span>
+                            <span class="text-sm font-medium text-gray-800">#{{ $review->pesanan ? $review->pesanan->id : 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600">Tanggal Pesanan:</span>
-                            <span class="text-sm font-medium text-gray-800">{{ $review->pesanan->created_at->format('d M Y') }}</span>
+                            <span class="text-sm font-medium text-gray-800">{{ $review->pesanan ? $review->pesanan->created_at->format('d M Y') : 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600">Status:</span>
                             @php
                                 $orderStatusBg = 'bg-gray-100';
                                 $orderStatusText = 'text-gray-800';
-                                if ($review->pesanan->status === 'completed') {
-                                    $orderStatusBg = 'bg-green-100';
-                                    $orderStatusText = 'text-green-800';
-                                } elseif ($review->pesanan->status === 'processing') {
-                                    $orderStatusBg = 'bg-blue-100';
-                                    $orderStatusText = 'text-blue-800';
-                                } elseif ($review->pesanan->status === 'shipped') {
-                                    $orderStatusBg = 'bg-yellow-100';
-                                    $orderStatusText = 'text-yellow-800';
+                                $orderStatus = 'N/A';
+
+                                if ($review->pesanan) {
+                                    $orderStatus = $review->pesanan->status;
+                                    if ($orderStatus === 'completed') {
+                                        $orderStatusBg = 'bg-green-100';
+                                        $orderStatusText = 'text-green-800';
+                                    } elseif ($orderStatus === 'processing') {
+                                        $orderStatusBg = 'bg-blue-100';
+                                        $orderStatusText = 'text-blue-800';
+                                    } elseif ($orderStatus === 'shipped') {
+                                        $orderStatusBg = 'bg-yellow-100';
+                                        $orderStatusText = 'text-yellow-800';
+                                    }
                                 }
                             @endphp
                             <span class="px-2 py-1 rounded-full text-xs font-medium {{ $orderStatusBg }} {{ $orderStatusText }}">
-                                {{ ucfirst($review->pesanan->status) }}
+                                {{ ucfirst($orderStatus) }}
                             </span>
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-gray-200">
+                        @if($review->pesanan)
                         <a href="{{ route('customer.orders.show', $review->pesanan->id) }}"
+                        @else
+                        <a href="#" onclick="alert('Pesanan tidak tersedia'); return false;"
+                        @endif
                            class="text-orange-600 hover:text-orange-700 text-sm font-medium transition-colors duration-200">
                             Lihat Detail Pesanan →
                         </a>
@@ -310,6 +371,10 @@ function updateModalPhoto() {
 
         modalImage.src = `/storage/${photos[currentPhotoIndex]}`;
         photoCounter.textContent = `${currentPhotoIndex + 1} dari ${photos.length}`;
+
+        // Update navigation buttons
+        document.querySelector('button[onclick="previousPhoto()"]').disabled = currentPhotoIndex === 0;
+        document.querySelector('button[onclick="nextPhoto()"]').disabled = currentPhotoIndex === photos.length - 1;
     }
 }
 

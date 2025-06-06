@@ -1,0 +1,334 @@
+/* Advanced UI Animations for Financial Reports */
+
+/* Scroll-triggered animations */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.animate-on-scroll.animate-from-left {
+    transform: translateX(-40px);
+}
+
+.animate-on-scroll.animate-from-right {
+    transform: translateX(40px);
+}
+
+.animate-on-scroll.animate-zoom {
+    transform: scale(0.9);
+}
+
+.animate-on-scroll.animate-rotate {
+    transform: rotateY(-15deg) translateY(30px);
+    transform-origin: center;
+}
+
+.animate-on-scroll.animate-active {
+    opacity: 1;
+    transform: translate(0) scale(1) rotate(0);
+}
+
+/* Staggered animation for groups */
+.stagger-group .stagger-item {
+    opacity: 0;
+    transform: translateY(25px);
+}
+
+.stagger-group.animate-active .stagger-item {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sequential animation delay calculation in JS */
+.stagger-item-1 { transition-delay: 0.1s; }
+.stagger-item-2 { transition-delay: 0.2s; }
+.stagger-item-3 { transition-delay: 0.3s; }
+.stagger-item-4 { transition-delay: 0.4s; }
+.stagger-item-5 { transition-delay: 0.5s; }
+.stagger-item-6 { transition-delay: 0.6s; }
+
+/* Parallax scrolling for cards */
+.parallax-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.parallax-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120%;
+    z-index: -1;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Attention-grabbing animations */
+@keyframes pulse-attention {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.pulse-animation {
+    animation: pulse-attention 2s ease-in-out infinite;
+}
+
+@keyframes border-pulse {
+    0%, 100% { border-color: rgba(12, 84, 125, 0.2); }
+    50% { border-color: rgba(12, 84, 125, 0.8); }
+}
+
+.border-pulse-animation {
+    animation: border-pulse 2s ease-in-out infinite;
+}
+
+/* Hover state animations */
+.hover-lift {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.hover-scale {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-scale:hover {
+    transform: scale(1.03);
+}
+
+/* Rich hover effects for financial cards */
+.rich-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+}
+
+.rich-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.15),
+                rgba(255, 255, 255, 0));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rich-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(45deg);
+    z-index: -1;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rich-card:hover::before {
+    opacity: 1;
+}
+
+.rich-card:hover::after {
+    transform: rotate(45deg) translate(100%, 100%);
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0)
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Cursor focus effect */
+.cursor-focus {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    z-index: 9999;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.cursor-focus.active {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Page transitions */
+.page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-white);
+    z-index: 9999;
+    transform-origin: bottom;
+    transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.page-transition.exiting {
+    transform: scaleY(0);
+}
+
+/* Notification animations */
+@keyframes notification-slide-in {
+    0% { transform: translateX(120%) translateZ(0); opacity: 0; }
+    100% { transform: translateX(0) translateZ(0); opacity: 1; }
+}
+
+@keyframes notification-slide-out {
+    0% { transform: translateX(0) translateZ(0); opacity: 1; }
+    100% { transform: translateX(120%) translateZ(0); opacity: 0; }
+}
+
+.notification-appear {
+    animation: notification-slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.notification-disappear {
+    animation: notification-slide-out 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes notification-progress {
+    0% { width: 100%; }
+    100% { width: 0%; }
+}
+
+.notification-progress-bar {
+    animation: notification-progress 5s linear forwards;
+}
+
+/* Chart animation enhancements */
+@keyframes chart-bar-grow {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
+}
+
+.chart-bar-animation {
+    animation: chart-bar-grow 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom;
+}
+
+@keyframes chart-line-draw {
+    0% { stroke-dashoffset: 1000; }
+    100% { stroke-dashoffset: 0; }
+}
+
+.chart-line-animation {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: chart-line-draw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Value change highlight animation */
+@keyframes value-changed {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(12, 84, 125, 0.15); }
+}
+
+.value-highlight {
+    animation: value-changed 1.5s ease;
+}
+
+/* Tab switching animation */
+.financial-tab-content {
+    position: relative;
+    overflow: hidden;
+}
+
+.financial-tab-pane {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.financial-tab-pane:not(.show) {
+    opacity: 0;
+    transform: translateY(20px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.financial-tab-pane.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Modern card flip effect */
+.flip-card {
+    perspective: 1000px;
+    background-color: transparent;
+    width: 100%;
+    height: 300px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.flip-card-front {
+    background-color: var(--background-white);
+}
+
+.flip-card-back {
+    background-color: var(--primary-color);
+    color: white;
+    transform: rotateY(180deg);
+}

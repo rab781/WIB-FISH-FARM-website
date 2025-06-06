@@ -2,8 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\TestApiController;
+use App\Models\Expense;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,4 +53,22 @@ Route::middleware('throttle:30,1')->group(function() {
             'time' => now()->toDateTimeString()
         ]);
     });
+});
+
+// Expense categories for charts
+Route::get('/expenses/categories', function (Request $request) {
+    $year = $request->input('year', Carbon::now()->year);
+    $month = $request->input('month', Carbon::now()->month);
+
+    $expenseCategories = Expense::select(
+        'category',
+        DB::raw('SUM(amount) as total')
+    )
+    ->whereYear('expense_date', $year)
+    ->whereMonth('expense_date', $month)
+    ->groupBy('category')
+    ->orderByDesc('total')
+    ->get();
+
+    return response()->json($expenseCategories);
 });

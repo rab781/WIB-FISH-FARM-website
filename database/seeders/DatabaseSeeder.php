@@ -25,5 +25,11 @@ class DatabaseSeeder extends Seeder
             PembayaranSeeder::class,    // 8. Pembayaran (membutuhkan Pesanan)
             UlasanSeeder::class,        // 9. Ulasan (membutuhkan User dan Produk)
         ]);
+
+        // Jalankan seeder untuk data laporan
+        $this->call([
+            SalesReportSeeder::class,  // 10. Data penjualan untuk laporan
+            ExpenseSeeder::class,      // 11. Data pengeluaran untuk laporan
+        ]);
     }
 }

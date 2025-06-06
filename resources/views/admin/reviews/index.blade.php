@@ -18,6 +18,21 @@
     .review-card {
         @apply bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow;
     }
+
+    /* Modal styling */
+    .modal-backdrop {
+        @apply fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm;
+        z-index: 40;
+    }
+
+    .modal-container {
+        @apply fixed inset-0 flex items-center justify-center z-50;
+    }
+
+    .modal-content {
+        @apply bg-white rounded-lg shadow-xl overflow-hidden;
+        z-index: 50;
+    }
 </style>
 @endpush
 
@@ -193,7 +208,7 @@
                             @endif
                             <div>
                                 <div class="font-medium text-gray-900">{{ $review->produk->nama }}</div>
-                                <div class="text-sm text-gray-500">Pesanan: {{ $review->pesanan->nomor_pesanan }}</div>
+                                <div class="text-sm text-gray-500">Pesanan: {{ $review->pesanan ? $review->pesanan->nomor_pesanan : 'N/A' }}</div>
                             </div>
                         </div>
                     </div>
@@ -290,12 +305,13 @@
 
 <!-- Reply Modal -->
 <div id="replyModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+    <!-- Modal Backdrop with Blur -->
+    <div class="modal-backdrop"></div>
 
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <!-- Modal Content -->
+        <div class="modal-content max-w-lg w-full mx-auto">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Balas Ulasan</h3>
 
@@ -326,11 +342,13 @@
 
 <!-- Photo Modal -->
 <div id="photoModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-black opacity-75" onclick="closePhotoModal()"></div>
-        </div>
-        <div class="inline-block align-middle bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-4xl sm:w-full">
+    <!-- Modal Backdrop with Blur -->
+    <div class="modal-backdrop" onclick="closePhotoModal()"></div>
+
+    <!-- Modal Container -->
+    <div class="modal-container">
+        <!-- Modal Content -->
+        <div class="modal-content max-w-4xl w-full mx-auto">
             <div class="bg-white">
                 <div class="flex justify-between items-center p-4 border-b">
                     <h3 class="text-lg font-medium text-gray-900">Foto Ulasan</h3>
@@ -447,11 +465,9 @@ function closePhotoModal() {
     document.getElementById('photoModal').classList.add('hidden');
 }
 
-// Close modals when clicking outside
-document.getElementById('replyModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeReplyModal();
-    }
+// Close modals when clicking on the backdrop
+document.querySelector('#replyModal .modal-backdrop').addEventListener('click', function() {
+    closeReplyModal();
 });
 
 // Close photo modal with ESC key

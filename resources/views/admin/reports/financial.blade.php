@@ -1,0 +1,1134 @@
+@extends('admin.layouts.app')
+
+@section('title', 'Catatan Keuangan')
+
+@push('styles')
+{{-- Existing custom financial CSS files are expected to be here or linked in layouts/app.blade.php --}}
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-theme.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-summary-cards.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-enhancement.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-data-viz.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-responsive.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-print.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-interactions.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-state-persistence.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-skeleton.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-chart-extensions.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/reports/financial-animations.css') }}">
+
+<style>
+    /* Main Variables for Consistent Design - Adjusted to match overall theme */
+    :root {
+        /* Primary colors adjusted from admin/layouts/app.blade.php and overall theme */
+        --primary-color: #f97316; /* Tailwind orange-500/600 */
+        --primary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange gradient */
+        --secondary-color: #4b5563; /* Tailwind gray-700 */
+        --success-color: #16a34a; /* Tailwind green-600 */
+        --success-gradient: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        --danger-color: #ef4444; /* Tailwind red-500 */
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --info-color: #3b82f6; /* Tailwind blue-500 */
+        --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --warning-color: #f59e0b; /* Tailwind yellow-500 */
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+
+        /* Text colors */
+        --text-primary: #1f2937; /* Tailwind gray-900 */
+        --text-secondary: #4b5563; /* Tailwind gray-700 */
+        --text-tertiary: #6b7280; /* Tailwind gray-500 */
+
+        /* Background colors */
+        --background-light: #f3f4f6; /* Tailwind gray-100 */
+        --background-white: #ffffff;
+        --border-color: #e5e7eb; /* Tailwind gray-200 */
+
+        /* Shadows for dark mode */
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+
+        --card-radius: 0.75rem; /* 12px for consistent rounded corners */
+        --transition-speed: 0.2s;
+    }
+
+    /* Override any conflicting Bootstrap styles if necessary with Tailwind */
+    .container-fluid {
+        @apply mx-auto px-4 py-8; /* Tailwind equivalent of container-fluid with padding */
+    }
+    .row {
+        @apply flex flex-wrap -mx-3; /* Tailwind equivalent of Bootstrap row with negative margins */
+    }
+    .col, [class*="col-"] {
+        @apply px-3; /* Tailwind equivalent of Bootstrap col padding */
+    }
+    .d-flex { @apply flex; }
+    .justify-content-between { @apply justify-between; }
+    .align-items-center { @apply items-center; }
+    .mb-4 { @apply mb-4; }
+    .gap-3 { @apply gap-3; }
+    .gap-4 { @apply gap-4; }
+    .mr-2 { @apply mr-2; }
+    .me-2 { @apply mr-2; } /* for Bootstrap compatibility if needed */
+    .ms-2 { @apply ml-2; } /* for Bootstrap compatibility if needed */
+    .text-sm { @apply text-sm; }
+    .fw-semibold { @apply font-semibold; }
+    .text-secondary { @apply text-gray-700; } /* Consistent with Tailwind gray-700 */
+    .bg-light { @apply bg-gray-100; } /* Consistent with Tailwind gray-100 */
+    .border-0 { @apply border-0; }
+    .form-select-sm { @apply text-sm; }
+    .d-inline { @apply inline; }
+    .btn-primary-custom {
+        @apply bg-orange-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-orange-700 transition-colors duration-200 flex items-center justify-center;
+    }
+    .btn-light-custom {
+        @apply bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center;
+    }
+
+    /* Specific overrides for clarity or consistency */
+    .financial-header .page-title {
+        @apply text-3xl font-bold;
+    }
+    .metric-value {
+        @apply text-4xl font-extrabold; /* Make these even bolder */
+    }
+    .financial-summary-card .summary-icon {
+        @apply bg-gradient-to-br from-orange-500 to-orange-700; /* Consistent gradient for summary icons */
+    }
+    .financial-card .card-header h5 {
+        @apply text-lg font-bold; /* Consistent font size for card titles */
+    }
+
+    /* Ensure specific custom CSS files are loaded correctly */
+    /* If you placed the financial-*.css files in public/css/admin/reports/, this is correct. */
+    /* Otherwise, adjust the path accordingly. */
+
+    /* Ensure icons are correctly sized */
+    .fas, .far, .fab {
+        font-size: inherit; /* Inherit font size from parent by default */
+    }
+    .metric-icon i {
+        font-size: 1.5rem; /* Larger icons for metric cards */
+    }
+    .summary-icon i {
+        font-size: 1.25rem; /* Standard size for summary icons */
+    }
+    .financial-tabs .nav-link i {
+        font-size: 1rem;
+    }
+    .insight-card .fas {
+        font-size: 1.25rem;
+    }
+
+    /* Ensure custom button styles take precedence */
+    .btn-modern {
+        @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-semibold text-sm transition-all duration-300 ease-in-out;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .btn-modern:hover {
+        @apply transform -translate-y-0.5 shadow-md;
+    }
+    .btn-primary.btn-modern {
+        @apply bg-gradient-to-br from-orange-500 to-orange-700 text-white;
+    }
+    .btn-success.btn-modern {
+        @apply bg-gradient-to-br from-green-500 to-green-700 text-white;
+    }
+    .btn-light.btn-modern {
+        @apply bg-gray-200 text-gray-800;
+    }
+
+    /* Form control styling */
+    .form-control, .form-select {
+        @apply border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:border-orange-500 focus:ring-1 focus:ring-orange-500;
+    }
+    .input-group-text {
+        @apply bg-gray-100 border border-gray-300 px-3 py-2 rounded-l-lg text-gray-600;
+    }
+</style>
+@endpush
+
+@section('content')
+<div class="container-fluid">
+    <div class="notification-container" id="notificationContainer">
+        </div>
+
+    <div class="print-header hidden md:flex items-center justify-between border-b pb-5 mb-5">
+        <img src="{{ asset('Images/Logo_WIB_FISH_FARM.png') }}" alt="Company Logo" class="h-16 mb-3">
+        <div class="text-right">
+            <h2 class="text-2xl font-bold mb-1">Laporan Keuangan</h2>
+            <p class="text-sm text-gray-700">{{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }}</p>
+            <p class="text-xs text-gray-600">Dibuat pada: {{ date('d M Y H:i') }}</p>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="page-title mb-1">Laporan Keuangan</h1>
+            <p class="text-gray-700 mb-0">Lacak performa dan analisis keuangan Anda</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="relative inline-flex items-center bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 cursor-pointer text-sm font-medium transition-all hover:border-orange-500">
+                <i class="fas fa-calendar mr-2 text-orange-600"></i>
+                <span class="font-medium">{{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }}</span>
+                <i class="fas fa-chevron-down ml-2 text-gray-500"></i>
+                {{-- Date range picker actual input will be initialized by JS library --}}
+                <input type="text" id="dateRange" class="absolute inset-0 opacity-0 cursor-pointer">
+            </div>
+            <form id="yearFilterForm" action="{{ route('admin.reports.financial') }}" method="GET" class="inline-flex">
+                <select id="yearFilter" name="year" class="form-select form-select-sm text-sm font-medium border-gray-300 rounded-lg" onchange="this.form.submit()">
+                    @foreach($availableYears as $year)
+                        <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                            {{ $year }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+            <button class="btn-light-custom" onclick="window.print()">
+                <i class="fas fa-print mr-2"></i>
+                <span>Cetak</span>
+            </button>
+            <button class="btn-primary-custom" onclick="exportToExcel()">
+                <i class="fas fa-file-excel mr-2"></i>
+                <span>Ekspor</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8 flex items-center justify-between">
+        <div>
+            <p class="text-sm font-semibold text-gray-600 uppercase mb-2">Total Saldo Bersih</p>
+            <h2 class="text-5xl font-extrabold text-gray-900 leading-tight">
+                Rp {{ number_format($financialSummary['net_profit'] ?? 0, 0, ',', '.') }}
+            </h2>
+            <div class="flex items-center text-sm mt-3 @if(($financialSummary['profit_margin'] ?? 0) >= 0) text-green-600 @else text-red-600 @endif">
+                <i class="fas fa-{{ ($financialSummary['profit_margin'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' }} mr-1"></i>
+                <span>{{ number_format(abs($financialSummary['profit_margin'] ?? 0), 2) }}% Margin Profit</span>
+            </div>
+        </div>
+        <div class="flex flex-col space-y-3">
+            <button class="btn-success btn-modern py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                <i class="fas fa-plus mr-1"></i>
+                <span>Tambah Pengeluaran</span>
+            </button>
+            <button class="btn-light btn-modern py-2 px-4 text-sm">
+                <i class="fas fa-paper-plane mr-1"></i>
+                <span>Kirim Laporan</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center cursor-pointer"
+             data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
+            <h5 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-filter mr-3 text-orange-600"></i> Opsi Filter
+            </h5>
+            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-300" data-toggle-icon></i>
+        </div>
+        <div class="collapse" id="filterCollapse">
+            <div class="p-6">
+                <form method="GET" action="{{ route('admin.reports.financial') }}" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="col-span-1">
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date', $startDate->format('Y-m-d')) }}">
+                    </div>
+                    <div class="col-span-1">
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date', $endDate->format('Y-m-d')) }}">
+                    </div>
+                    <div class="col-span-1">
+                        <label for="filter_year" class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
+                        <select class="form-select" id="filter_year" name="year">
+                            @foreach($availableYears as $year)
+                                <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>{{ $year }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="filter_month" class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
+                        <select class="form-select" id="filter_month" name="month">
+                            <option value="">Semua Bulan</option>
+                            @for($m = 1; $m <= 12; $m++)
+                                <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-span-4 flex justify-end space-x-3 mt-4">
+                        <button type="reset" class="btn-secondary-custom">
+                            <i class="fas fa-undo mr-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="fas fa-filter mr-2"></i>Terapkan Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-green-600 uppercase mb-1">Total Pendapatan</p>
+                <h2 class="text-3xl font-bold text-gray-900">Rp {{ number_format($financialSummary['total_revenue'] ?? 0, 0, ',', '.') }}</h2>
+                <div class="flex items-center text-sm mt-1 text-green-600">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span>Total Penjualan</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-red-600 uppercase mb-1">Total Pengeluaran</p>
+                <h2 class="text-3xl font-bold text-gray-900">Rp {{ number_format($financialSummary['total_expenses'] ?? 0, 0, ',', '.') }}</h2>
+                <div class="flex items-center text-sm mt-1 text-red-600">
+                    <i class="fas fa-arrow-down mr-1"></i>
+                    <span>Biaya Operasional</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-blue-600 uppercase mb-1">Keuntungan Bersih</p>
+                <h2 class="text-3xl font-bold text-gray-900">Rp {{ number_format($financialSummary['net_profit'] ?? 0, 0, ',', '.') }}</h2>
+                <div class="flex items-center text-sm mt-1 @if(($financialSummary['net_profit'] ?? 0) >= 0) text-green-600 @else text-red-600 @endif">
+                    <i class="fas fa-{{ ($financialSummary['net_profit'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' }} mr-1"></i>
+                    <span>{{ ($financialSummary['net_profit'] ?? 0) >= 0 ? 'Profit' : 'Loss' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-purple-600 uppercase mb-1">Total Transaksi</p>
+                <h2 class="text-3xl font-bold text-gray-900">{{ number_format(collect($paymentMethodAnalysis)->sum('total_transactions') ?? 0) }}</h2>
+                <div class="flex items-center text-sm mt-1 text-purple-600">
+                    <i class="fas fa-receipt mr-1"></i>
+                    <span>Avg: Rp {{ number_format($avgTransaction ?? 0, 0, ',', '.') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-green-600"></i>Pendapatan vs Pengeluaran Bulanan
+                </h3>
+            </div>
+            <div class="relative h-72">
+                <canvas id="monthlyRevenueExpenseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-pie mr-3 text-blue-600"></i>Distribusi Metode Pembayaran
+                </h3>
+            </div>
+            <div class="relative h-72 flex items-center justify-center">
+                <canvas id="paymentMethodDistributionChart"></canvas>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-4">
+                <i class="fas fa-info-circle mr-1"></i> Klik pada legenda untuk filter data
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-chart-bar mr-3 text-orange-600"></i> Ikhtisar Keuangan Bulanan ({{ $selectedYear }})
+            </h3>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+            <div class="col-span-1">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Bulan</label>
+                    <select class="form-select" id="monthSelector">
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>
+                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h6 class="text-xs font-bold text-gray-600 uppercase mb-3" id="selectedMonthLabel">{{ date('F', mktime(0, 0, 0, $selectedMonth, 1)) }} Ringkasan</h6>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-700">Pendapatan:</span>
+                        <span class="text-sm font-bold text-green-600" id="selectedMonthRevenue">
+                            Rp {{ number_format($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-700">Pengeluaran:</span>
+                        <span class="text-sm font-bold text-red-600" id="selectedMonthExpense">
+                            Rp {{ number_format($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <hr class="my-2 border-gray-300">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-700">Laba Bersih:</span>
+                        <span class="text-sm font-bold @if((($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0) - ($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0)) >= 0) text-green-600 @else text-red-600 @endif" id="selectedMonthProfit">
+                            Rp {{ number_format(
+                                (($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0) -
+                                ($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0)),
+                                0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
+                        <h6 class="text-sm font-bold text-gray-700 mb-4">Distribusi Pendapatan</h6>
+                        <div class="relative h-48 w-48 flex items-center justify-center">
+                            <canvas id="revenuePieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
+                        <h6 class="text-sm font-bold text-gray-700 mb-4">Kategori Pengeluaran</h6>
+                        <div class="relative h-48 w-48 flex items-center justify-center">
+                            <canvas id="expensePieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
+                        <h6 class="text-sm font-bold text-gray-700 mb-4">Analisis Laba</h6>
+                        <div class="relative h-48 w-48 flex items-center justify-center">
+                            <canvas id="profitPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-file-invoice-dollar mr-3 text-red-600"></i> Riwayat Pengeluaran
+            </h3>
+            <button class="btn-primary-custom py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                <i class="fas fa-plus mr-2"></i>Tambah Pengeluaran
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Deskripsi</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Catatan</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    @forelse($expenseHistory as $expense)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('d M Y') : date('d M Y', strtotime($expense->expense_date)) }}</div>
+                                <div class="text-xs text-gray-500">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('H:i') : date('H:i', strtotime($expense->expense_date)) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $categoryColor = match($expense->category) {
+                                        'Gaji' => 'blue', 'Sewa' => 'purple', 'Listrik' => 'yellow',
+                                        'Bahan' => 'teal', 'Peralatan' => 'indigo', 'Transportasi' => 'pink',
+                                        'Marketing' => 'green', 'Administrasi' => 'gray', 'Lainnya' => 'red',
+                                        default => 'orange' // Fallback for 'Operational' or other new categories
+                                    };
+                                @endphp
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-{{ $categoryColor }}-100 text-{{ $categoryColor }}-800">
+                                    {{ $expense->category }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->description }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-red-600">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ Str::limit($expense->notes, 50) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                 {{-- Link Edit --}}
+                                <a href="{{ route('admin.expenses.edit', ['expense' => $expense->id]) }}" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {{-- Form Hapus --}}
+                                <form action="{{ route('admin.expenses.destroy', ['expense' => $expense->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?');" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                <div class="py-4">
+                                    <i class="fas fa-receipt text-4xl mb-3 text-gray-300"></i>
+                                    <p class="text-lg font-medium text-gray-900">Tidak ada catatan pengeluaran.</p>
+                                    <button class="btn-primary-custom mt-4 py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                                        <i class="fas fa-plus mr-2"></i>Tambah Pengeluaran Baru
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            {{ $expenseHistory->withQueryString()->links('pagination::tailwind') }}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-credit-card mr-3 text-purple-600"></i> Analisis Metode Pembayaran
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Metode Pembayaran</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah Transaksi</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Jumlah</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Rata-rata per Transaksi</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Persentase</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    @forelse($paymentMethodAnalysis as $method)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    @php
+                                        $methodColor = match($method['method']) {
+                                            'Transfer Bank' => ['bg' => 'blue', 'text' => 'blue', 'icon' => 'fa-university'],
+                                            'QRIS' => ['bg' => 'green', 'text' => 'green', 'icon' => 'fa-qrcode'],
+                                            'E-Wallet' => ['bg' => 'purple', 'text' => 'purple', 'icon' => 'fa-wallet'],
+                                            'Credit Card' => ['bg' => 'indigo', 'text' => 'indigo', 'icon' => 'fa-credit-card'],
+                                            'COD' => ['bg' => 'orange', 'text' => 'orange', 'icon' => 'fa-hand-holding-usd'],
+                                            default => ['bg' => 'gray', 'text' => 'gray', 'icon' => 'fa-credit-card']
+                                        };
+                                    @endphp
+                                    <div class="w-8 h-8 rounded-full bg-{{ $methodColor['bg'] }}-100 flex items-center justify-center mr-3">
+                                        <i class="fas {{ $methodColor['icon'] }} text-{{ $methodColor['text'] }}-600 text-base"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">{{ $method['method'] ?? 'Tidak Diketahui' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                {{ number_format($method['total_transactions']) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
+                                Rp {{ number_format($method['total_amount'], 0, ',', '.') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-700">
+                                Rp {{ $method['total_transactions'] > 0 ? number_format($method['total_amount'] / $method['total_transactions'], 0, ',', '.') : 0 }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <div class="flex items-center justify-end">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="h-2 rounded-full bg-{{ $methodColor['bg'] }}-500 transition-all duration-500" style="width: {{ $method['percentage'] }}%;"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-{{ $methodColor['text'] }}-600">{{ number_format($method['percentage'], 1) }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data metode pembayaran.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-list-alt mr-3 text-blue-600"></i> Detail Transaksi
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID Pesanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pelanggan</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Metode Pembayaran</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    @forelse($transactions as $transaction)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $transaction->id_pesanan }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $transaction->created_at->format('d M Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $transaction->created_at->format('H:i') }} WIB</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $transaction->user->name ?? 'Tidak Diketahui' }}</div>
+                                <div class="text-xs text-gray-500">{{ $transaction->user->email ?? '' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">Rp {{ number_format($transaction->total_harga, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $paymentMethod = $transaction->metode_pembayaran ?? 'Tidak Diketahui'; // Ambil dari pesanan langsung
+                                    $methodBadgeClass = match($paymentMethod) {
+                                        'transfer_bank' => 'bg-blue-100 text-blue-800',
+                                        'qris' => 'bg-green-100 text-green-800',
+                                        'COD' => 'bg-orange-100 text-orange-800',
+                                        default => 'bg-gray-100 text-gray-800'
+                                    };
+                                @endphp
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $methodBadgeClass }}">
+                                    {{ $paymentMethod }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $statusBadgeClass = match($transaction->status_pesanan) {
+                                        'Selesai' => 'bg-green-100 text-green-800',
+                                        'Dikirim' => 'bg-blue-100 text-blue-800',
+                                        'Diproses' => 'bg-yellow-100 text-yellow-800',
+                                        'Menunggu Pembayaran' => 'bg-gray-100 text-gray-800',
+                                        'Dibatalkan' => 'bg-red-100 text-red-800',
+                                        default => 'bg-gray-100 text-gray-800'
+                                    };
+                                @endphp
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusBadgeClass }}">
+                                    {{ $transaction->status_pesanan }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <a href="{{ route('admin.pesanan.show', $transaction->id_pesanan) }}" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada data transaksi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            {{ $transactions->links('pagination::tailwind') }}
+        </div>
+    </div>
+
+    <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addExpenseModalLabel">Tambah Pengeluaran Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('admin.expenses.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="from_financial_report" value="1">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="expense_description" class="form-label">Judul/Deskripsi Pengeluaran</label>
+                            <input type="text" class="form-control" id="expense_description" name="description"
+                                   placeholder="Contoh: Bayar listrik, Pembelian bahan baku, dll" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense_date_modal" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="expense_date_modal" name="expense_date"
+                                   value="{{ now()->format('Y-m-d') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense_amount" class="form-label">Jumlah</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" id="expense_amount" name="amount"
+                                       placeholder="0" min="0" step="1000" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense_category_modal" class="form-label">Kategori</label>
+                            <select class="form-select" id="expense_category_modal" name="category" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="Gaji">Gaji Karyawan</option>
+                                <option value="Sewa">Sewa Toko/Gudang</option>
+                                <option value="Listrik">Listrik & Utilitas</option>
+                                <option value="Bahan">Bahan Baku</option>
+                                <option value="Peralatan">Peralatan</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Marketing">Marketing & Iklan</option>
+                                <option value="Administrasi">Administrasi</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="notes" value="">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Floating Action Menu for Report Actions --}}
+<div class="fixed bottom-8 right-8 z-50">
+    <button id="reportActionsToggle" class="bg-orange-600 hover:bg-orange-700 text-white rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg transition-all duration-300 transform hover:scale-110">
+        <i class="fas fa-chart-bar"></i>
+    </button>
+    <div id="floatingActionMenu" class="absolute bottom-16 right-0 flex flex-col space-y-3 opacity-0 invisible transition-all duration-300">
+        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="window.print()" data-bs-toggle="tooltip" title="Cetak Laporan">
+            <i class="fas fa-print"></i>
+        </button>
+        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="exportToExcel()" data-bs-toggle="tooltip" title="Ekspor ke Excel">
+            <i class="fas fa-file-excel"></i>
+        </button>
+        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" data-bs-toggle="tooltip" title="Kustomisasi Laporan">
+            <i class="fas fa-sliders-h"></i>
+        </button>
+        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="refreshAllCharts()" data-bs-toggle="tooltip" title="Refresh Data">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+</div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    // Helper function for category colors based on your provided colors
+    function getCategoryColorClass(category) {
+        switch(category) {
+            case 'Gaji': return 'blue';
+            case 'Sewa': return 'purple';
+            case 'Listrik': return 'yellow';
+            case 'Bahan': return 'teal';
+            case 'Peralatan': return 'indigo';
+            case 'Transportasi': return 'pink';
+            case 'Marketing': return 'green';
+            case 'Administrasi': return 'gray';
+            case 'Lainnya': return 'red';
+            case 'Operational': return 'orange'; // Added for the quick add expense modal
+            case 'Utilities': return 'yellow';
+            case 'Inventory': return 'teal';
+            case 'Other': return 'red';
+            default: return 'gray';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Init Date Range Picker
+        $('#dateRange').daterangepicker({
+            startDate: moment('{{ $startDate->format('Y-m-d') }}'),
+            endDate: moment('{{ $endDate->format('Y-m-d') }}'),
+            ranges: {
+               'Hari Ini': [moment(), moment()],
+               'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+               '7 Hari Terakhir': [moment().subtract(6, 'days'), moment()],
+               '30 Hari Terakhir': [moment().subtract(29, 'days'), moment()],
+               'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
+               'Bulan Lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: 'DD/MM/YYYY',
+                applyLabel: 'Terapkan',
+                cancelLabel: 'Batal',
+                fromLabel: 'Dari',
+                toLabel: 'Sampai',
+                customRangeLabel: 'Rentang Kustom',
+                weekLabel: 'W',
+                daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                firstDay: 1
+            },
+            opens: 'left'
+        }, function(start, end, label) {
+            // Update the form fields and submit
+            document.getElementById('start_date').value = start.format('YYYY-MM-DD');
+            document.getElementById('end_date').value = end.format('YYYY-MM-DD');
+            document.querySelector('#filterCollapse form').submit();
+        });
+
+
+        // Initialize Monthly Revenue vs Expense Chart
+        const monthlyRevenueExpenseCtx = document.getElementById('monthlyRevenueExpenseChart').getContext('2d');
+        const monthlyRevenueData = @json($monthlyRevenue);
+        const monthlyExpensesData = @json($monthlyExpenses);
+
+        const labels = monthlyRevenueData.map(item => item.month);
+        const revenues = monthlyRevenueData.map(item => item.total_revenue);
+        const expenses = monthlyExpensesData.map(item => item.total_expense);
+
+        new Chart(monthlyRevenueExpenseCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Pendapatan',
+                        data: revenues,
+                        backgroundColor: 'rgba(52, 211, 153, 0.8)', // Tailwind green-400
+                        borderColor: 'rgba(52, 211, 153, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    },
+                    {
+                        label: 'Pengeluaran',
+                        data: expenses,
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)', // Tailwind red-500
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        stacked: false // Not stacked, bars side by side
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+
+        // Initialize Payment Method Distribution Chart
+        const paymentMethodDistributionCtx = document.getElementById('paymentMethodDistributionChart').getContext('2d');
+        const paymentMethodAnalysisData = @json($paymentMethodAnalysis);
+
+        const paymentLabels = paymentMethodAnalysisData.map(item => item.method);
+        const paymentAmounts = paymentMethodAnalysisData.map(item => item.total_amount);
+
+        const paymentColors = [
+            'rgba(59, 130, 246, 0.8)', // Blue
+            'rgba(16, 185, 129, 0.8)', // Green
+            'rgba(168, 85, 247, 0.8)', // Purple
+            'rgba(251, 191, 36, 0.8)', // Yellow
+            'rgba(249, 115, 22, 0.8)', // Orange
+            'rgba(107, 114, 128, 0.8)' // Gray
+        ];
+
+        const paymentDistributionChart = new Chart(paymentMethodDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: paymentLabels,
+                datasets: [{
+                    data: paymentAmounts,
+                    backgroundColor: paymentColors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { size: 12 },
+                            boxWidth: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const percentage = context.dataset.data.reduce((acc, current) => acc + current, 0) > 0
+                                    ? (value / context.dataset.data.reduce((acc, current) => acc + current, 0) * 100).toFixed(1)
+                                    : 0;
+                                return `${context.label}: Rp ${new Intl.NumberFormat('id-ID').format(value)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+
+        // Monthly Overview Charts
+        const revenuePieCtx = document.getElementById('revenuePieChart').getContext('2d');
+        const expensePieCtx = document.getElementById('expensePieChart').getContext('2d');
+        const profitPieCtx = document.getElementById('profitPieChart').getContext('2d');
+
+        // Initial data for Monthly Overview charts based on selectedMonth
+        let currentMonthRevenue = monthlyRevenueData.find(item => item.month_num === {{ $selectedMonth }})?.total_revenue || 0;
+        let currentMonthExpense = monthlyExpensesData.find(item => item.month_num === {{ $selectedMonth }})?.total_expense || 0;
+        let currentMonthProfit = currentMonthRevenue - currentMonthExpense;
+
+        const revenuePieChart = new Chart(revenuePieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Pendapatan Bulanan'], // This chart will just show one segment
+                datasets: [{
+                    data: [currentMonthRevenue],
+                    backgroundColor: ['#f97316'], // Orange
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context){ return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed); } } } },
+                animation: { duration: 1000, easing: 'easeOutQuart' }
+            }
+        });
+
+        // Fetch expense categories for the initial month to populate the expensePieChart
+        function fetchExpenseCategoriesForMonth(month, year) {
+            fetch(`/api/expenses/categories?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(data => {
+                    const categoryLabels = data.map(item => item.category);
+                    const categoryAmounts = data.map(item => item.total);
+                    const categoryColors = data.map(item => {
+                        const baseColor = getCategoryColorClass(item.category);
+                        const tailwindColors = {
+                            'blue': 'rgba(59, 130, 246, 0.8)', 'purple': 'rgba(168, 85, 247, 0.8)',
+                            'yellow': 'rgba(251, 191, 36, 0.8)', 'teal': 'rgba(79, 209, 197, 0.8)',
+                            'indigo': 'rgba(99, 102, 241, 0.8)', 'pink': 'rgba(236, 72, 153, 0.8)',
+                            'green': 'rgba(16, 185, 129, 0.8)', 'gray': 'rgba(107, 114, 128, 0.8)',
+                            'red': 'rgba(239, 68, 68, 0.8)', 'orange': 'rgba(249, 115, 22, 0.8)'
+                        };
+                        return tailwindColors[baseColor] || 'rgba(0,0,0,0.5)';
+                    });
+
+                    expensePieChart.data.labels = categoryLabels;
+                    expensePieChart.data.datasets[0].data = categoryAmounts;
+                    expensePieChart.data.datasets[0].backgroundColor = categoryColors;
+                    expensePieChart.update();
+                })
+                .catch(error => console.error('Error fetching expense categories:', error));
+        }
+
+        fetchExpenseCategoriesForMonth({{ $selectedMonth }}, {{ $selectedYear }}); // Initial fetch
+
+        const expensePieChart = new Chart(expensePieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [], // Will be populated by fetch
+                datasets: [{
+                    data: [], // Will be populated by fetch
+                    backgroundColor: [],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context){ return `${context.label}: Rp ${new Intl.NumberFormat('id-ID').format(context.parsed)}`; } } } },
+                animation: { duration: 1000, easing: 'easeOutQuart' }
+            }
+        });
+
+        const profitPieChart = new Chart(profitPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Laba Bersih', 'Pengeluaran'],
+                datasets: [{
+                    data: [
+                        currentMonthProfit > 0 ? currentMonthProfit : 0,
+                        currentMonthExpense
+                    ],
+                    backgroundColor: ['#10b981', '#f87171'], // Green for profit, Red for expenses
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context){ return `${context.label}: Rp ${new Intl.NumberFormat('id-ID').format(context.parsed)}`; } } } },
+                animation: { duration: 1000, easing: 'easeOutQuart' }
+            }
+        });
+
+        // Month Selector for Monthly Overview Charts
+        document.getElementById('monthSelector').addEventListener('change', function() {
+            const selectedMonthNum = parseInt(this.value);
+            const selectedYearForMonth = document.getElementById('filter_year').value; // Use the filter year
+
+            // Update monthly stats display
+            const monthName = new Date(selectedYearForMonth, selectedMonthNum - 1, 1).toLocaleString('id-ID', { month: 'long' });
+            document.getElementById('selectedMonthLabel').textContent = monthName + ' Ringkasan';
+
+            const revenueForSelectedMonth = monthlyRevenueData.find(item => item.month_num === selectedMonthNum)?.total_revenue || 0;
+            const expenseForSelectedMonth = monthlyExpensesData.find(item => item.month_num === selectedMonthNum)?.total_expense || 0;
+            const profitForSelectedMonth = revenueForSelectedMonth - expenseForSelectedMonth;
+
+            document.getElementById('selectedMonthRevenue').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(revenueForSelectedMonth);
+            document.getElementById('selectedMonthExpense').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(expenseForSelectedMonth);
+            document.getElementById('selectedMonthProfit').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(profitForSelectedMonth);
+
+            // Update Pie Charts
+            revenuePieChart.data.datasets[0].data = [revenueForSelectedMonth];
+            revenuePieChart.update();
+
+            // Fetch and update expense categories for the selected month
+            fetchExpenseCategoriesForMonth(selectedMonthNum, selectedYearForMonth);
+
+            profitPieChart.data.datasets[0].data = [
+                profitForSelectedMonth > 0 ? profitForSelectedMonth : 0,
+                expenseForSelectedMonth
+            ];
+            profitPieChart.update();
+        });
+
+        // Toggle Floating Action Menu
+        const reportActionsToggle = document.getElementById('reportActionsToggle');
+        const floatingActionMenu = document.getElementById('floatingActionMenu');
+
+        reportActionsToggle.addEventListener('click', function() {
+            floatingActionMenu.classList.toggle('opacity-0');
+            floatingActionMenu.classList.toggle('invisible');
+            floatingActionMenu.classList.toggle('translate-y-0');
+        });
+
+        // Close Floating Action Menu if clicked outside
+        document.addEventListener('click', function(event) {
+            if (!reportActionsToggle.contains(event.target) && !floatingActionMenu.contains(event.target)) {
+                floatingActionMenu.classList.add('opacity-0', 'invisible');
+                floatingActionMenu.classList.remove('translate-y-0');
+            }
+        });
+
+        // Initialize tooltips (if using Bootstrap JS or a custom implementation)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Handle filter collapse icon rotation
+        const filterCollapse = document.getElementById('filterCollapse');
+        const toggleIcon = document.querySelector('[data-toggle-icon]');
+
+        if (filterCollapse && toggleIcon) {
+            filterCollapse.addEventListener('show.bs.collapse', function () {
+                toggleIcon.classList.add('rotate-180');
+            });
+            filterCollapse.addEventListener('hide.bs.collapse', function () {
+                toggleIcon.classList.remove('rotate-180');
+            });
+        }
+    });
+
+    // Function to export financial report to excel
+    window.exportToExcel = function() {
+        // Collect filter parameters
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const year = document.getElementById('filter_year').value;
+        const month = document.getElementById('filter_month').value;
+
+        // Construct URL for export (assuming your backend has an export route for financial reports)
+        const exportUrl = `{{ route('admin.expenses.export') }}?start_date=${startDate}&end_date=${endDate}&year=${year}&month=${month}`;
+
+        // In a real application, you would fetch data via AJAX or directly link for download
+        alert('Memulai ekspor laporan keuangan. (Fungsi ekspor aktual perlu diimplementasikan di backend)');
+        // window.location.href = exportUrl; // Uncomment this to trigger actual download if backend is ready
+    };
+
+    // Placeholder for refreshAllCharts - implement actual data fetching/chart re-draw
+    window.refreshAllCharts = function() {
+        alert('Data chart akan di-refresh. (Perlu implementasi API data fetching)');
+        // Example:
+        // monthlyRevenueExpenseChart.update();
+        // paymentDistributionChart.update();
+        // revenuePieChart.update();
+        // expensePieChart.update();
+        // profitPieChart.update();
+    };
+
+    // Helper for getCategoryColor (needed if this is called directly from JS in data fetching)
+    window.getCategoryColorClass = function(category) {
+        switch(category) {
+            case 'Gaji': return 'blue';
+            case 'Sewa': return 'purple';
+            case 'Listrik': return 'yellow';
+            case 'Bahan': return 'teal';
+            case 'Peralatan': return 'indigo';
+            case 'Transportasi': return 'pink';
+            case 'Marketing': return 'green';
+            case 'Administrasi': return 'gray';
+            case 'Lainnya': return 'red';
+            case 'Operational': return 'orange';
+            case 'Utilities': return 'yellow';
+            case 'Inventory': return 'teal';
+            case 'Other': return 'red';
+            default: return 'gray';
+        }
+    };
+</script>
+@endpush
+@endsection

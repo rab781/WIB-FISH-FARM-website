@@ -14,31 +14,69 @@ return new class extends Migration
         // Add quarantine and refund fields to pesanan table
         Schema::table('pesanan', function (Blueprint $table) {
             // Karantina fields
-            $table->timestamp('karantina_mulai')->nullable()->comment('Tanggal mulai karantina 7 hari');
-            $table->timestamp('karantina_selesai')->nullable()->comment('Tanggal selesai karantina');
-            $table->boolean('is_karantina_active')->default(false)->comment('Status karantina aktif');
+            if (!Schema::hasColumn('pesanan', 'karantina_mulai')) {
+                $table->timestamp('karantina_mulai')->nullable()->comment('Tanggal mulai karantina 7 hari');
+            }
+            if (!Schema::hasColumn('pesanan', 'karantina_selesai')) {
+                $table->timestamp('karantina_selesai')->nullable()->comment('Tanggal selesai karantina');
+            }
+            if (!Schema::hasColumn('pesanan', 'is_karantina_active')) {
+                $table->boolean('is_karantina_active')->default(false)->comment('Status karantina aktif');
+            }
 
             // Refund fields
-            $table->enum('status_refund', ['none', 'requested', 'approved', 'rejected', 'processed'])->default('none');
-            $table->text('alasan_refund')->nullable()->comment('Alasan permintaan refund');
-            $table->string('bukti_kerusakan')->nullable()->comment('Upload bukti kerusakan produk');
-            $table->text('catatan_admin_refund')->nullable()->comment('Catatan admin untuk refund');
-            $table->timestamp('tanggal_refund_request')->nullable()->comment('Tanggal permintaan refund');
-            $table->timestamp('tanggal_refund_processed')->nullable()->comment('Tanggal refund diproses');
-            $table->decimal('jumlah_refund', 10, 2)->nullable()->comment('Jumlah refund yang disetujui');
+            if (!Schema::hasColumn('pesanan', 'status_refund')) {
+                $table->enum('status_refund', ['none', 'requested', 'approved', 'rejected', 'processed'])->default('none');
+            }
+            if (!Schema::hasColumn('pesanan', 'alasan_refund')) {
+                $table->text('alasan_refund')->nullable()->comment('Alasan permintaan refund');
+            }
+            if (!Schema::hasColumn('pesanan', 'bukti_kerusakan')) {
+                $table->string('bukti_kerusakan')->nullable()->comment('Upload bukti kerusakan produk');
+            }
+            if (!Schema::hasColumn('pesanan', 'catatan_admin_refund')) {
+                $table->text('catatan_admin_refund')->nullable()->comment('Catatan admin untuk refund');
+            }
+            if (!Schema::hasColumn('pesanan', 'tanggal_refund_request')) {
+                $table->timestamp('tanggal_refund_request')->nullable()->comment('Tanggal permintaan refund');
+            }
+            if (!Schema::hasColumn('pesanan', 'tanggal_refund_processed')) {
+                $table->timestamp('tanggal_refund_processed')->nullable()->comment('Tanggal refund diproses');
+            }
+            if (!Schema::hasColumn('pesanan', 'jumlah_refund')) {
+                $table->decimal('jumlah_refund', 10, 2)->nullable()->comment('Jumlah refund yang disetujui');
+            }
 
             // Order tracking enhancement
-            $table->string('no_resi')->nullable()->comment('Nomor resi pengiriman');
-            $table->timestamp('tanggal_pengiriman')->nullable()->comment('Tanggal pengiriman');
-            $table->timestamp('tanggal_diterima')->nullable()->comment('Tanggal pesanan diterima customer');
-            $table->json('tracking_history')->nullable()->comment('History tracking dari TIKI API');
-            $table->enum('kondisi_diterima', ['baik', 'rusak', 'belum_dikonfirmasi'])->default('belum_dikonfirmasi');
-            $table->text('catatan_penerimaan')->nullable()->comment('Catatan saat penerimaan');
+            if (!Schema::hasColumn('pesanan', 'no_resi')) {
+                $table->string('no_resi')->nullable()->comment('Nomor resi pengiriman');
+            }
+            if (!Schema::hasColumn('pesanan', 'tanggal_pengiriman')) {
+                $table->timestamp('tanggal_pengiriman')->nullable()->comment('Tanggal pengiriman');
+            }
+            if (!Schema::hasColumn('pesanan', 'tanggal_diterima')) {
+                $table->timestamp('tanggal_diterima')->nullable()->comment('Tanggal pesanan diterima customer');
+            }
+            if (!Schema::hasColumn('pesanan', 'tracking_history')) {
+                $table->json('tracking_history')->nullable()->comment('History tracking dari TIKI API');
+            }
+            if (!Schema::hasColumn('pesanan', 'kondisi_diterima')) {
+                $table->enum('kondisi_diterima', ['baik', 'rusak', 'belum_dikonfirmasi'])->default('belum_dikonfirmasi');
+            }
+            if (!Schema::hasColumn('pesanan', 'catatan_penerimaan')) {
+                $table->text('catatan_penerimaan')->nullable()->comment('Catatan saat penerimaan');
+            }
 
             // Additional fields
-            $table->boolean('is_reviewable')->default(false)->comment('Apakah bisa direview');
-            $table->text('alasan_pembatalan')->nullable()->comment('Alasan pembatalan pesanan');
-            $table->decimal('berat_total', 8, 2)->nullable()->comment('Total berat pengiriman dalam gram');
+            if (!Schema::hasColumn('pesanan', 'is_reviewable')) {
+                $table->boolean('is_reviewable')->default(false)->comment('Apakah bisa direview');
+            }
+            if (!Schema::hasColumn('pesanan', 'alasan_pembatalan')) {
+                $table->text('alasan_pembatalan')->nullable()->comment('Alasan pembatalan pesanan');
+            }
+            if (!Schema::hasColumn('pesanan', 'berat_total')) {
+                $table->decimal('berat_total', 8, 2)->nullable()->comment('Total berat pengiriman dalam gram');
+            }
         });
 
         // Update status_pesanan enum to include new statuses
@@ -50,7 +88,6 @@ return new class extends Migration
             $table->enum('status_pesanan', [
                 'Menunggu Pembayaran',
                 'Diproses',
-                'Karantina',
                 'Dikirim',
                 'Selesai',
                 'Dibatalkan',
@@ -84,14 +121,30 @@ return new class extends Migration
 
         // Enhance ulasan table for admin replies
         Schema::table('ulasan', function (Blueprint $table) {
-            $table->text('balasan_admin')->nullable()->comment('Balasan dari admin');
-            $table->timestamp('tanggal_balasan')->nullable()->comment('Tanggal balasan admin');
-            $table->foreignId('admin_reply_by')->nullable()->constrained('users')->comment('Admin yang membalas');
-            $table->boolean('is_verified_purchase')->default(false)->comment('Apakah pembelian terverifikasi');
-            $table->json('foto_review')->nullable()->comment('Foto-foto review produk');
-            $table->enum('status_review', ['pending', 'approved', 'rejected'])->default('approved');
-            $table->boolean('is_helpful')->default(false)->comment('Apakah review membantu');
-            $table->integer('helpful_count')->default(0)->comment('Jumlah yang menganggap helpful');
+            if (!Schema::hasColumn('ulasan', 'balasan_admin')) {
+                $table->text('balasan_admin')->nullable()->comment('Balasan dari admin');
+            }
+            if (!Schema::hasColumn('ulasan', 'tanggal_balasan')) {
+                $table->timestamp('tanggal_balasan')->nullable()->comment('Tanggal balasan admin');
+            }
+            if (!Schema::hasColumn('ulasan', 'admin_reply_by')) {
+                $table->foreignId('admin_reply_by')->nullable()->constrained('users')->comment('Admin yang membalas');
+            }
+            if (!Schema::hasColumn('ulasan', 'is_verified_purchase')) {
+                $table->boolean('is_verified_purchase')->default(false)->comment('Apakah pembelian terverifikasi');
+            }
+            if (!Schema::hasColumn('ulasan', 'foto_review')) {
+                $table->json('foto_review')->nullable()->comment('Foto-foto review produk');
+            }
+            if (!Schema::hasColumn('ulasan', 'status_review')) {
+                $table->enum('status_review', ['pending', 'approved', 'rejected'])->default('approved');
+            }
+            if (!Schema::hasColumn('ulasan', 'is_helpful')) {
+                $table->boolean('is_helpful')->default(false)->comment('Apakah review membantu');
+            }
+            if (!Schema::hasColumn('ulasan', 'helpful_count')) {
+                $table->integer('helpful_count')->default(0)->comment('Jumlah yang menganggap helpful');
+            }
         });
 
         // Create review_interactions table for like/helpful tracking
@@ -115,21 +168,6 @@ return new class extends Migration
             $table->json('metadata')->nullable()->comment('Additional data like tracking info');
             $table->boolean('is_customer_visible')->default(true);
             $table->foreignId('created_by')->nullable()->constrained('users');
-            $table->timestamps();
-
-            $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
-        });
-
-        // Create quarantine_logs table for quarantine tracking
-        Schema::create('quarantine_logs', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_pesanan');
-            $table->timestamp('started_at');
-            $table->timestamp('scheduled_end_at');
-            $table->timestamp('completed_at')->nullable();
-            $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
-            $table->text('notes')->nullable();
-            $table->json('daily_checks')->nullable()->comment('Daily quarantine check logs');
             $table->timestamps();
 
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');

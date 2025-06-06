@@ -66,13 +66,6 @@
                             </div>
                         </a>
 
-                        <a href="{{ route('admin.quarantine.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.quarantine.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
-                            <div class="flex items-center">
-                                <i class="fas fa-shield-alt w-6 mr-3"></i>
-                                <span>Karantina</span>
-                            </div>
-                        </a>
-
                         <a href="{{ route('admin.refunds.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.refunds.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
                                 <i class="fas fa-undo w-6 mr-3"></i>
@@ -92,21 +85,14 @@
                     <div class="py-2">
                         <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Reports</div>
 
-                        <a href="{{ route('admin.pesanan.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.pesanan.dashboard') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
-                            <div class="flex items-center">
-                                <i class="fas fa-chart-line w-6 mr-3"></i>
-                                <span>Dashboard Pesanan</span>
-                            </div>
-                        </a>
-
-                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        <a href="{{ route('admin.reports.sales') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.reports.sales') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
                                 <i class="fas fa-shopping-cart w-6 mr-3"></i>
                                 <span>Laporan Penjualan</span>
                             </div>
                         </a>
 
-                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        <a href="{{ route('admin.reports.financial') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.reports.financial') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
                                 <i class="fas fa-money-bill-wave w-6 mr-3"></i>
                                 <span>Catatan Keuangan</span>
@@ -118,16 +104,9 @@
                     <div class="py-2">
                         <div class="px-4 text-xs uppercase text-gray-400 font-semibold mb-2">Customer</div>
 
-                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
+                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.notifications.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
-                                <i class="fas fa-users w-6 mr-3"></i>
-                                <span>Manajemen User</span>
-                            </div>
-                        </a>
-
-                        <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-                            <div class="flex items-center">
-                                <i class="fas fa-headset w-6 mr-3"></i>
+                                <i class="fas fa-bell w-6 mr-3"></i>
                                 <span>Keluhan</span>
                             </div>
                         </a>
@@ -229,6 +208,9 @@
             </main>
         </div>
     </div>
+
+    <!-- Admin modal system - globally available -->
+    <script src="{{ asset('js/admin-modal.js') }}"></script>
 
     @stack('scripts')
     <script>

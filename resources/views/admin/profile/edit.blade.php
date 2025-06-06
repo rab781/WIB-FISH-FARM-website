@@ -1,5 +1,6 @@
 @extends('admin.layouts.app')
 
+
 @section('content')
 <div class="py-6 px-6">
     <div class="mb-6">

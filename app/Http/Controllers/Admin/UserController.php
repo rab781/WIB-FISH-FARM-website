@@ -16,10 +16,34 @@ class UserController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', '!=', 'admin')
-            ->orderBy('created_at', 'desc')
+        $query = User::query();
+
+        // Filter by role - exclude admin users by default unless specifically requested
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        } else {
+            $query->where('role', '!=', 'admin');
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $isActive = $request->status === 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        $users = $query->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('admin.users.index', compact('users'));
@@ -34,7 +58,7 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-        $pesanan = Pesanan::where('user_id', $id)
+        $pesanan = Pesanan::where('id_user', $id)
             ->orderBy('created_at', 'desc')
             ->get();
 

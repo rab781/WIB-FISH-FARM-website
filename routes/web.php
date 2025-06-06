@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\RajaOngkirController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/produk', [HomeController::class, 'produk'])->name('produk');
+Route::get('/produk', [HomeController::class, 'produk'])->name('produk.index');
 Route::get('/produk/{id}', [HomeController::class, 'detailProduk'])->name('detailProduk');
 Route::get('/produk/{id}/reviews', [App\Http\Controllers\ReviewController::class, 'publicIndex'])->name('produk.reviews');
 Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang-kami');
@@ -63,12 +63,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{pesanan}/refund/create', [App\Http\Controllers\RefundController::class, 'customerCreate'])->name('refunds.create');
     Route::post('/pesanan/{pesanan}/refund', [App\Http\Controllers\RefundController::class, 'store'])->name('refunds.store');
 
-    // Quarantine viewing - Customer
-    Route::get('/pesanan/{pesanan}/quarantine', [App\Http\Controllers\QuarantineController::class, 'customerView'])->name('quarantine.view');
+    // Order timeline view
+    Route::get('/pesanan/{pesanan}/timeline', [App\Http\Controllers\PesananController::class, 'timeline'])->name('pesanan.timeline');
 
     // Review management - Customer
     Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'customerIndex'])->name('reviews.index');
     Route::get('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'customerShow'])->name('reviews.show');
+    Route::get('/pesanan/{pesanan}/reviews/create', [App\Http\Controllers\ReviewController::class, 'create'])->name('reviews.create');
     Route::post('/pesanan/{pesanan}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{review}/interaction', [App\Http\Controllers\ReviewController::class, 'toggleInteraction'])->name('reviews.interaction');
 
@@ -110,10 +111,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         return redirect('admin/dashboard');
     });
 
-    // Admin dashboard route
-    Route::get('dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    // Admin dashboard routes
+    Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('reports/sales', [App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('admin.reports.sales');
+    Route::get('reports/financial', [App\Http\Controllers\Admin\ReportController::class, 'financial'])->name('admin.reports.financial');
+
+    // Expense management routes
+    Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class, ['as' => 'admin']);
 
     // Admin profile routes
     Route::get('profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('admin.profile.show');
@@ -168,15 +172,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('pesanan/{pesanan}/timeline', [App\Http\Controllers\Admin\PesananController::class, 'timeline'])->name('admin.pesanan.timeline');
     Route::post('pesanan/{pesanan}/timeline', [App\Http\Controllers\Admin\PesananController::class, 'addTimeline'])->name('admin.pesanan.timeline.add');
 
-    // Quarantine Management
-    Route::prefix('quarantine')->group(function () {
-        Route::get('/', [App\Http\Controllers\QuarantineController::class, 'adminIndex'])->name('admin.quarantine.index');
-        Route::get('/{quarantine}', [App\Http\Controllers\QuarantineController::class, 'adminShow'])->name('admin.quarantine.show');
-        Route::post('/{quarantine}/update', [App\Http\Controllers\QuarantineController::class, 'update'])->name('admin.quarantine.update');
-        Route::get('/dashboard/stats', [App\Http\Controllers\QuarantineController::class, 'dashboardStats'])->name('admin.quarantine.dashboard');
-        Route::get('/daily/check', [App\Http\Controllers\QuarantineController::class, 'dailyCheck'])->name('admin.quarantine.daily-check');
-    });
-
     // Refund Management
     Route::prefix('refunds')->group(function () {
         Route::get('/', [App\Http\Controllers\RefundController::class, 'adminIndex'])->name('admin.refunds.index');
@@ -199,6 +194,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // Diagnostic Tools
     Route::get('diagnostic/payment-proofs', [App\Http\Controllers\Admin\DiagnosticController::class, 'checkPaymentProofPaths'])->name('admin.diagnostic.payment-proofs');
+
+    // Expense Management (export route only - main resource route is already defined above)
+    Route::get('expenses-export', [App\Http\Controllers\Admin\ExpenseController::class, 'export'])->name('admin.expenses.export');
 });
 
 // Test route to ensure views are working
