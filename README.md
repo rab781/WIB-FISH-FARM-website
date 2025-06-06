@@ -49,18 +49,126 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 - **[byte5](https://byte5.de)**
 - **[OP.GG](https://op.gg)**
 
-## Contributing
+# Project Pribadi - Sistem Manajemen Keuangan dan Pesanan
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Deskripsi Proyek
 
-## Code of Conduct
+Proyek ini adalah sistem manajemen keuangan dan pesanan berbasis web yang dirancang untuk membantu pengguna dalam mengelola pengeluaran, pendapatan, dan pesanan pelanggan. Sistem ini mencakup fitur-fitur seperti laporan keuangan, manajemen pengeluaran, notifikasi otomatis, dan pengelolaan stok produk.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Fitur Utama
 
-## Security Vulnerabilities
+1. **Manajemen Keuangan**
+   - Laporan keuangan dengan filter tanggal, kategori, dan pencarian.
+   - Ringkasan keuangan seperti total pendapatan, pengeluaran, dan laba bersih.
+   - Ekspor laporan keuangan ke format Excel.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Manajemen Pesanan**
+   - Pemrosesan pesanan pelanggan.
+   - Pembatalan otomatis pesanan yang melewati batas waktu pembayaran.
+   - Notifikasi otomatis kepada pelanggan terkait status pesanan.
 
-## License
+3. **Manajemen Pengeluaran**
+   - Tambah, edit, dan hapus pengeluaran.
+   - Kategori pengeluaran yang dapat disesuaikan.
+   - Integrasi dengan laporan keuangan.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Pengelolaan Stok Produk**
+   - Penyesuaian stok produk secara otomatis saat pesanan dibatalkan.
+   - Dukungan untuk produk dengan ukuran yang berbeda.
+
+5. **Notifikasi**
+   - Notifikasi real-time untuk pelanggan terkait status pesanan.
+   - Dukungan untuk berbagai jenis notifikasi (pesanan, pembayaran, dll).
+
+## Struktur Direktori
+
+Berikut adalah struktur direktori utama proyek ini:
+
+```
+app/
+  Console/
+    Commands/          # Perintah Artisan, seperti pemeriksaan pesanan kadaluarsa
+  Http/
+    Controllers/       # Controller untuk menangani logika aplikasi
+    Middleware/        # Middleware untuk pengelolaan request
+  Models/              # Model Eloquent untuk database
+resources/
+  views/               # File Blade untuk tampilan
+routes/
+  web.php              # Definisi rute web
+  api.php              # Definisi rute API
+config/                # Konfigurasi aplikasi
+public/                # Aset publik seperti CSS, JS, dan gambar
+```
+
+## Instalasi
+
+1. Clone repositori ini:
+   ```bash
+   git clone <repository-url>
+   ```
+
+2. Masuk ke direktori proyek:
+   ```bash
+   cd test1
+   ```
+
+3. Instal dependensi menggunakan Composer:
+   ```bash
+   composer install
+   ```
+
+4. Salin file `.env.example` menjadi `.env` dan sesuaikan konfigurasi:
+   ```bash
+   cp .env.example .env
+   ```
+
+5. Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+
+6. Migrasi database:
+   ```bash
+   php artisan migrate
+   ```
+
+7. Jalankan server pengembangan:
+   ```bash
+   php artisan serve
+   ```
+
+## Cara Penggunaan
+
+### Menjalankan Pemeriksaan Pesanan Kadaluarsa
+Gunakan perintah berikut untuk memeriksa dan membatalkan pesanan yang melewati batas waktu pembayaran:
+```bash
+php artisan app:check-expired-orders
+```
+
+### Mengakses Laporan Keuangan
+1. Masuk ke halaman admin.
+2. Navigasikan ke menu "Laporan Keuangan".
+3. Gunakan filter untuk menyesuaikan laporan.
+4. Ekspor laporan ke Excel jika diperlukan.
+
+### Menambahkan Pengeluaran Baru
+1. Masuk ke halaman "Laporan Keuangan".
+2. Klik tombol "Tambah Pengeluaran".
+3. Isi formulir dan simpan.
+
+## Teknologi yang Digunakan
+
+- **Framework**: Laravel
+- **Database**: MySQL
+- **Frontend**: Blade, Tailwind CSS
+- **Notifikasi**: Custom Notification Controller
+- **Manajemen Stok**: Eloquent ORM
+
+## Kontribusi
+
+Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan kirimkan pull request Anda.
+
+## Lisensi
+
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).
