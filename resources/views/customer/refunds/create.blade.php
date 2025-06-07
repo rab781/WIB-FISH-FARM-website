@@ -81,12 +81,40 @@
         border-bottom-color: transparent;
         border-left-color: transparent;
         animation: spin 1s linear infinite;
+        filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.5));
     }
 
     @keyframes spin {
         to {
             transform: rotate(360deg);
         }
+    }
+
+    .form-field-invalid {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+        40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+
+    input[type="radio"]:checked + div {
+        transform: scale(1.03);
+        transition: all 0.2s ease;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 </style>
 @endpush
@@ -97,41 +125,56 @@
 
 <!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <div class="flex flex-col items-center">
-        <div class="loading-spinner mb-4"></div>
-        <p class="text-white text-lg">Memproses pengajuan refund...</p>
+    <div class="flex flex-col items-center bg-white bg-opacity-90 p-8 rounded-xl shadow-2xl">
+        <div class="loading-spinner mb-6"></div>
+        <p class="text-gray-800 text-xl font-medium">Memproses pengajuan refund...</p>
+        <p class="text-gray-600 mt-2">Mohon tunggu sebentar</p>
     </div>
 </div>
 
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-8">
+        <div class="inline-block p-4 rounded-full bg-orange-100 mb-4">
+            <i class="fas fa-undo text-4xl text-orange-600"></i>
+        </div>
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Ajukan Refund</h1>
-        <p class="text-gray-600">Pesanan: {{ $pesanan->nomor_pesanan }}</p>
+        <p class="text-gray-600">Pesanan: <span class="font-medium text-orange-600">{{ $pesanan->nomor_pesanan }}</span></p>
+        <div class="w-24 h-1 bg-orange-500 mx-auto my-4 rounded-full"></div>
     </div>
 
     <!-- Order Info -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pesanan</h3>
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-8 hover:shadow-lg transition-all">
+        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-shopping-bag text-orange-500 mr-2"></i>
+            Informasi Pesanan
+        </h3>
 
-        <div class="flex items-center space-x-4 mb-4">
+        <div class="flex items-center space-x-4 mb-4 p-3 bg-gray-50 rounded-lg">
             @if($pesanan->produk && $pesanan->produk->gambar)
             <img src="{{ asset('storage/' . $pesanan->produk->gambar) }}"
                  alt="{{ $pesanan->produk->nama }}"
-                 class="w-20 h-20 object-cover rounded-lg">
+                 class="w-24 h-24 object-cover rounded-lg shadow-sm">
+            @else
+            <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                <i class="fas fa-fish text-3xl text-gray-400"></i>
+            </div>
             @endif
             <div>
-                <div class="font-medium text-gray-900">{{ $pesanan->produk->nama ?? 'Produk' }}</div>
-                <div class="text-sm text-gray-600">Kuantitas: {{ $pesanan->kuantitas }} ekor</div>
-                <div class="text-sm text-gray-600">Total: Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</div>
-                <div class="text-sm text-gray-600">Status: {{ $pesanan->status_pesanan }}</div>
+                <div class="font-medium text-gray-900 text-lg">{{ $pesanan->produk->nama ?? 'Produk' }}</div>
+                <div class="text-sm text-gray-600">Kuantitas: <span class="font-medium">{{ $pesanan->kuantitas }} ekor</span></div>
+                <div class="text-sm text-gray-600">Total: <span class="font-medium text-orange-600">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span></div>
+                <div class="text-sm text-gray-600">Status: <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{{ $pesanan->status_pesanan }}</span></div>
             </div>
         </div>
     </div>
 
     <!-- Refund Form -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-6">Form Permintaan Refund</h3>
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 hover:shadow-lg transition-all">
+        <h3 class="text-lg font-medium text-gray-900 mb-6 flex items-center border-b border-gray-200 pb-4">
+            <i class="fas fa-file-alt text-orange-500 mr-2"></i>
+            Form Permintaan Refund
+        </h3>
 
         <form id="refundForm" action="{{ route('refunds.store', $pesanan) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -140,76 +183,82 @@
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">Alasan Refund <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="reason" value="defective" required class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="jenis_refund" value="kerusakan" required class="mr-3 accent-orange-500">
                         <div>
                             <div class="font-medium text-gray-900">Produk Rusak/Cacat</div>
                             <div class="text-sm text-gray-600">Ikan yang diterima dalam kondisi rusak atau cacat</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="reason" value="wrong_item" required class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="jenis_refund" value="tidak_sesuai" required class="mr-3 accent-orange-500">
                         <div>
                             <div class="font-medium text-gray-900">Barang yang Diterima Salah</div>
                             <div class="text-sm text-gray-600">Ikan yang diterima tidak sesuai pesanan</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="reason" value="not_as_described" required class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="jenis_refund" value="tidak_sesuai" required class="mr-3 accent-orange-500">
                         <div>
                             <div class="font-medium text-gray-900">Tidak Sesuai Deskripsi</div>
                             <div class="text-sm text-gray-600">Ikan tidak sesuai dengan deskripsi produk</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="reason" value="dead_fish" required class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="jenis_refund" value="kematian_ikan" required class="mr-3 accent-orange-500">
                         <div>
                             <div class="font-medium text-gray-900">Ikan Mati saat Diterima</div>
                             <div class="text-sm text-gray-600">Ikan sudah mati saat paket diterima</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 md:col-span-2">
-                        <input type="radio" name="reason" value="other" required class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm md:col-span-2">
+                        <input type="radio" name="jenis_refund" value="lainnya" required class="mr-3 accent-orange-500">
                         <div>
                             <div class="font-medium text-gray-900">Lainnya</div>
                             <div class="text-sm text-gray-600">Alasan lain (akan dijelaskan di deskripsi)</div>
                         </div>
                     </label>
                 </div>
-                @error('reason')
+                @error('jenis_refund')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Amount -->
             <div class="mb-6">
-                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
+                <label for="jumlah_diminta" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-500 sm:text-sm">Rp</span>
                     </div>
-                    <input type="number" id="amount" name="amount" value="{{ $pesanan->total_harga }}"
+                    <input type="number" id="amount" name="jumlah_diminta" value="{{ $pesanan->total_harga }}"
                            min="1" max="{{ $pesanan->total_harga }}" required
-                           class="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
+                           class="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-orange-300">
                 </div>
-                <div class="mt-1 text-sm text-gray-500">Maksimal: Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</div>
-                @error('amount')
+                <div class="mt-1 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
+                    Maksimal: Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}
+                </div>
+                @error('jumlah_diminta')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Description -->
             <div class="mb-6">
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Masalah <span class="text-red-500">*</span></label>
-                <textarea id="description" name="description" rows="4" required
+                <label for="deskripsi_masalah" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Masalah <span class="text-red-500">*</span></label>
+                <textarea id="description" name="deskripsi_masalah" rows="4" required
                           placeholder="Jelaskan secara detail masalah yang Anda alami dengan produk ini..."
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">{{ old('description') }}</textarea>
-                <div class="mt-1 text-sm text-gray-500">Minimum 20 karakter. Semakin detail, semakin baik untuk proses review.</div>
-                @error('description')
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-orange-300">{{ old('deskripsi_masalah') }}</textarea>
+                <div class="mt-1 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
+                    Minimum 20 karakter. Semakin detail, semakin baik untuk proses review.
+                </div>
+                @error('deskripsi_masalah')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -218,7 +267,7 @@
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto</label>
                 <div class="upload-area" id="uploadArea">
-                    <input type="file" id="photoInput" name="evidence_photos[]" multiple accept="image/*" class="hidden">
+                    <input type="file" id="photoInput" name="bukti_pendukung[]" multiple accept="image/*" class="hidden">
                     <div class="upload-content">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
                         <p class="text-lg font-medium text-gray-700 mb-2">Klik atau seret foto ke sini</p>
@@ -230,59 +279,69 @@
                 <!-- Photo Previews -->
                 <div id="photoPreview" class="mt-4 flex flex-wrap gap-4"></div>
 
-                <div class="mt-2 text-sm text-gray-500">
-                    <i class="fas fa-info-circle mr-1"></i>
+                <div class="mt-2 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
                     Foto bukti akan membantu mempercepat proses review refund Anda
                 </div>
-                @error('evidence_photos')
+                @error('bukti_pendukung')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                @error('evidence_photos.*')
+                @error('bukti_pendukung.*')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Refund Method -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">Metode Refund Pilihan</label>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="preferred_refund_method" value="bank_transfer" class="mr-3">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Metode Refund Pilihan <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="metode_refund" value="bank_transfer" required class="mr-3 accent-orange-500">
                         <div class="text-center w-full">
-                            <i class="fas fa-university text-2xl text-blue-500 mb-2"></i>
+                            <i class="fas fa-university text-3xl text-blue-500 mb-2"></i>
                             <div class="font-medium text-gray-900">Transfer Bank</div>
-                            <div class="text-sm text-gray-600">3-5 hari kerja</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="preferred_refund_method" value="wallet" class="mr-3">
+                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="metode_refund" value="e_wallet" required class="mr-3 accent-orange-500">
                         <div class="text-center w-full">
-                            <i class="fas fa-mobile-alt text-2xl text-green-500 mb-2"></i>
+                            <i class="fas fa-mobile-alt text-3xl text-green-500 mb-2"></i>
                             <div class="font-medium text-gray-900">E-Wallet</div>
                             <div class="text-sm text-gray-600">1-2 hari kerja</div>
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="preferred_refund_method" value="store_credit" class="mr-3">
-                        <div class="text-center w-full">
-                            <i class="fas fa-gift text-2xl text-orange-500 mb-2"></i>
-                            <div class="font-medium text-gray-900">Kredit Toko</div>
-                            <div class="text-sm text-gray-600">Instan</div>
-                        </div>
-                    </label>
+
                 </div>
-                <div class="mt-2 text-sm text-gray-500">
-                    <i class="fas fa-info-circle mr-1"></i>
+                <div class="mt-2 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
                     Metode ini adalah preferensi Anda. Tim kami akan mengonfirmasi metode final saat memproses refund.
                 </div>
+                @error('metode_refund')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Refund Details -->
+            <div class="mb-6">
+                <label for="detail_refund" class="block text-sm font-medium text-gray-700 mb-2">Detail Refund <span class="text-red-500">*</span></label>
+                <textarea id="detail_refund" name="detail_refund" rows="2" required
+                          placeholder="Masukkan detail metode refund (contoh: nomor rekening bank, nomor e-wallet, dll)..."
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-orange-300">{{ old('detail_refund') }}</textarea>
+                <div class="mt-1 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
+                    Untuk transfer bank, masukkan nama bank, nomor rekening, dan nama pemilik rekening.
+                </div>
+                @error('detail_refund')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Terms Agreement -->
             <div class="mb-6">
                 <label class="flex items-start">
-                    <input type="checkbox" name="agree_terms" required class="mt-1 mr-3">
+                    <input type="checkbox" name="agree_terms" required class="mt-1 mr-3 accent-orange-500">
                     <span class="text-sm text-gray-700">
                         Saya menyetujui <a href="#" class="text-orange-600 hover:text-orange-800">syarat dan ketentuan refund</a>
                         dan memahami bahwa informasi yang saya berikan adalah benar dan dapat dipertanggungjawabkan.
@@ -294,15 +353,15 @@
             </div>
 
             <!-- Submit Buttons -->
-            <div class="flex flex-wrap gap-4 justify-end">
+            <div class="flex flex-wrap gap-4 justify-end mt-8 pt-4 border-t border-gray-200">
                 <a href="{{ route('pesanan.show', $pesanan) }}"
-                   class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                   class="inline-flex items-center px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-sm hover:shadow">
                     <i class="fas fa-times mr-2"></i>
                     Batal
                 </a>
                 <button type="submit"
                         id="submitRefund"
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                        class="inline-flex items-center px-6 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 shadow-sm hover:shadow font-medium">
                     <i class="fas fa-paper-plane mr-2"></i>
                     <span>Ajukan Refund</span>
                 </button>
@@ -355,17 +414,32 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFiles(files) {
         for (let file of files) {
             if (selectedFiles.length >= 5) {
-                alert('Maksimal 5 foto yang dapat diunggah');
+                Swal.fire({
+                    title: 'Perhatian',
+                    text: 'Maksimal 5 foto yang dapat diunggah',
+                    icon: 'warning',
+                    confirmButtonColor: '#f97316'
+                });
                 break;
             }
 
             if (!file.type.startsWith('image/')) {
-                alert('Hanya file gambar yang diperbolehkan');
+                Swal.fire({
+                    title: 'Format File Tidak Valid',
+                    text: 'Hanya file gambar yang diperbolehkan (JPG, PNG, JPEG)',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
                 continue;
             }
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('Ukuran file maksimal 5MB');
+                Swal.fire({
+                    title: 'Ukuran File Terlalu Besar',
+                    text: 'Ukuran file maksimal 5MB',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
                 continue;
             }
 
@@ -464,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         // Validate form
-        const reason = document.querySelector('input[name="reason"]:checked');
+        const reason = document.querySelector('input[name="jenis_refund"]:checked');
         if (!reason) {
             Swal.fire({
                 title: 'Error',
@@ -491,6 +565,28 @@ document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 title: 'Error',
                 text: 'Jumlah refund harus lebih dari 0',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+
+        const detailRefund = document.getElementById('detail_refund').value;
+        if (!detailRefund || detailRefund.length < 5) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Detail refund harus diisi dengan lengkap',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+
+        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
+        if (!refundMethod) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Silakan pilih metode refund',
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
@@ -532,37 +628,123 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const formData = new FormData(this);
+
+            // Add CSRF token to form data
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+
+            // Make the fetch request without Content-Type header for multipart/form-data
+            // Important: Don't include Content-Type when sending FormData with files
             const response = await fetch(this.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': token,
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
+                    // Omit Content-Type to let the browser set it with the boundary for multipart/form-data
                 },
                 credentials: 'same-origin'
             });
 
-            const result = await response.json();
+            // Parse the response
+            let result;
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    // Handle non-JSON responses
+                    const text = await response.text();
+
+                    if (text.includes("SQLSTATE[42S02]") || text.includes("Table") || text.includes("doesn't exist")) {
+                        console.error("Database table error:", text);
+                        throw new Error('Terjadi masalah dengan struktur database. Silakan hubungi administrator.');
+                    }
+
+                    try {
+                        result = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Response is not JSON:", text);
+
+                        if (text.includes("<!DOCTYPE html>") || text.includes("<html")) {
+                            // It's an HTML error page, likely a 500 error
+                            throw new Error('Terjadi error pada server. Silakan coba lagi nanti.');
+                        }
+
+                        result = { message: 'Server returned an invalid response format' };
+                    }
+                }
+            } catch (parseError) {
+                console.error("Error parsing response:", parseError);
+                throw new Error('Terjadi kesalahan saat memproses respons dari server');
+            }
 
             if (response.ok) {
                 await Swal.fire({
                     title: 'Sukses',
-                    text: 'Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.',
+                    html: `
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
+                                <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+                            </div>
+                            <p class="mb-4">Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.</p>
+                            <p class="text-sm text-gray-600">Nomor Refund: <span class="font-medium">${result && result.refund_id ? result.refund_id : 'N/A'}</span></p>
+                        </div>
+                    `,
                     icon: 'success',
                     confirmButtonColor: '#f97316'
                 });
                 window.location.href = '{{ route("pesanan.show", $pesanan) }}';
             } else {
-                throw new Error(result.message || 'Terjadi kesalahan saat memproses pengajuan refund');
+                console.error("Response error:", result);
+
+                // Check for validation errors
+                if (result && result.errors) {
+                    const errorMessages = Object.values(result.errors).flat().join('<br>');
+                    throw new Error(errorMessages);
+                }
+                throw new Error((result && result.message) ? result.message : 'Terjadi kesalahan saat memproses pengajuan refund');
             }
         } catch (error) {
+            console.error("Form submission error:", error);
+
+            // Check if it's a database table error
+            let errorMsg = error.message || 'Terjadi kesalahan saat mengirim pengajuan refund';
+            let errorTitle = 'Error';
+            let errorHtml = '';
+
+            if (errorMsg.includes("Table") && errorMsg.includes("doesn't exist")) {
+                errorTitle = 'Database Error';
+                errorHtml = `
+                    <div class="text-left">
+                        <p class="mb-2">Terjadi kesalahan pada database. Silakan hubungi administrator dengan detail berikut:</p>
+                        <div class="bg-gray-100 p-2 rounded text-xs font-mono overflow-auto">
+                            ${errorMsg.substring(0, 150)}...
+                        </div>
+                    </div>
+                `;
+            } else if (errorMsg.includes("<br>")) {
+                // This is a validation error with multiple messages
+                errorTitle = 'Validasi Gagal';
+                errorHtml = `
+                    <div class="text-left">
+                        <p class="mb-2">Silakan perbaiki kesalahan berikut:</p>
+                        <ul class="list-disc pl-4 text-sm">
+                            ${errorMsg.split("<br>").map(msg => `<li>${msg}</li>`).join("")}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                errorHtml = errorMsg;
+            }
+
             Swal.fire({
-                title: 'Error',
-                text: error.message || 'Terjadi kesalahan saat mengirim pengajuan refund',
+                title: errorTitle,
+                html: errorHtml,
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
+
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
         } finally {
@@ -577,6 +759,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (amount > maxAmount) {
             this.value = maxAmount;
+            // Add a subtle highlight animation when correcting the value
+            this.classList.add('form-field-invalid');
+            setTimeout(() => {
+                this.classList.remove('form-field-invalid');
+            }, 800);
         }
     });
 });

@@ -3,6 +3,8 @@
 @section('title', 'Kelola Refund')
 
 @push('styles')
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
     .status-badge {
         @apply px-3 py-1 rounded-full text-sm font-medium;
@@ -21,22 +23,47 @@
         transform: translateY(-2px);
         transition: all 0.3s ease;
     }
+    
+    .evidence-photo {
+        @apply w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer transition-transform hover:scale-105;
+    }
+    
+    .page-header {
+        @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white py-8 rounded-lg shadow-md mb-8;
+    }
+    
+    .dashboard-card {
+        @apply bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+    }
+    
+    .form-card {
+        @apply bg-white rounded-lg shadow-lg p-6;
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Kelola Refund</h1>
-        <p class="text-gray-600">Lihat dan kelola permintaan refund Anda</p>
+    <div class="page-header text-center mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Kelola Refund</h1>
+        <p class="text-orange-100">Lihat dan kelola permintaan refund Anda</p>
+        
+        <div class="mt-6 mx-auto max-w-md">
+            <a href="{{ route('pesanan.index') }}" class="inline-block bg-white text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors mr-2">
+                <i class="fas fa-shopping-bag mr-2"></i>Pesanan Saya
+            </a>
+            <a href="{{ route('refunds.create') }}" class="inline-block bg-orange-700 text-white px-4 py-2 rounded-lg hover:bg-orange-800 transition-colors">
+                <i class="fas fa-plus mr-2"></i>Ajukan Refund
+            </a>
+        </div>
     </div>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg p-6">
+        <div class="dashboard-card bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 p-3 rounded-full bg-white bg-opacity-20">
                     <i class="fas fa-undo text-2xl"></i>
                 </div>
                 <div class="ml-4">
@@ -46,10 +73,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="dashboard-card">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-clock text-xl"></i>
                 </div>
                 <div class="ml-4">
                     <div class="text-2xl font-bold text-gray-900">{{ $stats['pending'] ?? 0 }}</div>
@@ -58,10 +85,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="dashboard-card">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-green-100 text-green-600">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-check-circle text-xl"></i>
                 </div>
                 <div class="ml-4">
                     <div class="text-2xl font-bold text-gray-900">{{ $stats['approved'] ?? 0 }}</div>
@@ -70,10 +97,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="dashboard-card">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                    <i class="fas fa-money-bill-wave"></i>
+                    <i class="fas fa-money-bill-wave text-xl"></i>
                 </div>
                 <div class="ml-4">
                     <div class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_amount'] ?? 0, 0, ',', '.') }}</div>
@@ -84,20 +111,26 @@
     </div>
 
     <!-- Search and Filter -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <div class="form-card mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Filter & Pencarian</h3>
         <form method="GET" class="flex flex-wrap gap-4">
             <div class="flex-1 min-w-64">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Cari Refund</label>
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Nomor pesanan atau ID refund..."
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Nomor pesanan atau ID refund..."
+                           class="w-full border border-gray-300 rounded-lg pl-10 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none">
+                </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
+                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none">
                     <option value="">Semua Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Review</option>
                     <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
                     <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                     <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Diproses</option>
@@ -106,11 +139,11 @@
             </div>
 
             <div class="flex items-end gap-2">
-                <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
                     <i class="fas fa-search mr-2"></i>Filter
                 </button>
-                <a href="{{ route('refunds.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
-                    Reset
+                <a href="{{ route('refunds.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-undo mr-2"></i>Reset
                 </a>
             </div>
         </form>
@@ -209,12 +242,15 @@
                     @foreach(array_slice($refund->evidence_photos, 0, 3) as $photo)
                     <img src="{{ asset('storage/' . $photo) }}"
                          alt="Bukti foto"
-                         class="w-16 h-16 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                         class="evidence-photo"
                          onclick="openPhotoModal('{{ asset('storage/' . $photo) }}')">
                     @endforeach
                     @if(count($refund->evidence_photos) > 3)
-                    <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 text-xs">
-                        +{{ count($refund->evidence_photos) - 3 }} lagi
+                    <div class="w-20 h-20 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 text-sm hover:bg-gray-200 cursor-pointer transition-colors" onclick="openAllPhotosModal()">
+                        <div>
+                            <i class="fas fa-images block mb-1"></i>
+                            +{{ count($refund->evidence_photos) - 3 }} lagi
+                        </div>
                     </div>
                     @endif
                 </div>
@@ -271,12 +307,46 @@
             <div class="bg-white">
                 <div class="flex justify-between items-center p-4 border-b">
                     <h3 class="text-lg font-medium text-gray-900">Bukti Foto</h3>
-                    <button onclick="closePhotoModal()" class="text-gray-400 hover:text-gray-600">
+                    <button onclick="closePhotoModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 <div class="p-4">
-                    <img id="modalPhoto" src="" alt="Bukti foto" class="w-full h-auto max-h-96 object-contain">
+                    <img id="modalPhoto" src="" alt="Bukti foto" class="w-full h-auto max-h-96 object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 px-4 py-3 flex justify-end">
+                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors focus:outline-none" onclick="closePhotoModal()">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Photos Modal -->
+<div id="allPhotosModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-black opacity-75" onclick="closeAllPhotosModal()"></div>
+        </div>
+        <div class="inline-block align-middle bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-3xl w-full">
+            <div class="bg-white">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h3 class="text-lg font-medium text-gray-900">Semua Bukti Foto</h3>
+                    <button onclick="closeAllPhotosModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="allPhotosContainer">
+                        <!-- Photos will be added here by JS -->
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 flex justify-end">
+                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors focus:outline-none" onclick="closeAllPhotosModal()">
+                        Tutup
+                    </button>
                 </div>
             </div>
         </div>
@@ -285,20 +355,70 @@
 @endsection
 
 @push('scripts')
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 <script>
+// Current refund being viewed for all photos modal
+let currentRefundPhotos = [];
+
 function openPhotoModal(photoUrl) {
     document.getElementById('modalPhoto').src = photoUrl;
     document.getElementById('photoModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 }
 
 function closePhotoModal() {
     document.getElementById('photoModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
 }
 
-// Close modal when clicking outside
+function openAllPhotosModal(refundId, photos) {
+    // Store the photos in the global variable
+    if (photos) {
+        currentRefundPhotos = photos;
+    }
+    
+    // Clear the container
+    const container = document.getElementById('allPhotosContainer');
+    container.innerHTML = '';
+    
+    // Populate with all photos
+    currentRefundPhotos.forEach(photo => {
+        const photoElement = document.createElement('div');
+        photoElement.className = 'evidence-photo-container';
+        photoElement.innerHTML = `
+            <img src="${photo}" alt="Bukti foto" class="evidence-photo w-full h-48 cursor-pointer" onclick="openPhotoModal('${photo}')">
+        `;
+        container.appendChild(photoElement);
+    });
+    
+    document.getElementById('allPhotosModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+function closeAllPhotosModal() {
+    document.getElementById('allPhotosModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+// Close modals when clicking outside
 document.getElementById('photoModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closePhotoModal();
+    }
+});
+
+document.getElementById('allPhotosModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAllPhotosModal();
+    }
+});
+
+// Escape key closes modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePhotoModal();
+        closeAllPhotosModal();
     }
 });
 </script>

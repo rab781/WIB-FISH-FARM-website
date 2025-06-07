@@ -118,9 +118,10 @@ class Pesanan extends Model
     }
 
     // Enhanced relationships for new features
+    // Use pengembalian for all refund/return functionality
     public function refundRequests()
     {
-        return $this->hasMany(RefundRequest::class, 'id_pesanan', 'id_pesanan');
+        return $this->hasMany(Pengembalian::class, 'id_pesanan', 'id_pesanan');
     }
 
     public function pengembalian()
@@ -219,7 +220,7 @@ class Pesanan extends Model
             'description' => $description,
             'metadata' => $metadata,
             'is_customer_visible' => $isCustomerVisible,
-            'created_by' => \Illuminate\Support\Facades\Auth::id()
+            'created_by' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::id() : $this->user_id
         ]);
     }
 
@@ -228,10 +229,11 @@ class Pesanan extends Model
     {
         return in_array($this->status_pesanan, ['Dikirim', 'Selesai']) &&
                $this->status_refund === 'none' &&
-               !$this->refundRequests()->where('status', 'pending')->exists();
+               !$this->pengembalian()->where('status_pengembalian', 'Menunggu Review')->exists();
     }
 
-    public function requestRefund(array $data): RefundRequest
+    // Use pengembalian model for all refund/return functionality
+    /* public function requestRefund(array $data): RefundRequest
     {
         $refund = $this->refundRequests()->create($data);
 
@@ -240,11 +242,18 @@ class Pesanan extends Model
             'tanggal_refund_request' => now()
         ]);
 
-        $this->addTimelineEntry('Refund Requested', 'Refund Diminta',
-            'Customer mengajukan permintaan refund: ' . $data['deskripsi_masalah']);
+        // Create timeline entry with user ID explicitly provided
+        $this->timeline()->create([
+            'status' => 'Refund Requested',
+            'title' => 'Refund Diminta',
+            'description' => 'Customer mengajukan permintaan refund: ' . $data['deskripsi_masalah'],
+            'metadata' => [],
+            'is_customer_visible' => true,
+            'created_by' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::id() : $this->user_id
+        ]);
 
         return $refund;
-    }
+    } */
 
     // Tracking and shipping methods
     public function updateTracking(array $trackingData): void

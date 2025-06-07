@@ -1040,7 +1040,7 @@ class PesananController extends Controller
             abort(403);
         }
 
-        $pesanan->load(['timeline', 'quarantineLog', 'refundRequests']);
+        $pesanan->load(['timeline', 'quarantineLog', 'pengembalian']);
 
         return view('pesanan.tracking', compact('pesanan'));
     }

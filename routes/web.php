@@ -64,12 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pesanan/{pesanan}/cancel', [App\Http\Controllers\PesananController::class, 'cancel'])->name('pesanan.cancel');
     Route::get('/pesanan/statistics', [App\Http\Controllers\PesananController::class, 'statistics'])->name('pesanan.statistics');
 
-    // Refund management - Customer
-    Route::get('/refunds', [App\Http\Controllers\RefundController::class, 'customerIndex'])->name('refunds.index');
-    Route::get('/refunds/{refund}', [App\Http\Controllers\RefundController::class, 'customerShow'])->name('refunds.show');
-    Route::get('/pesanan/{pesanan}/refund/create', [App\Http\Controllers\RefundController::class, 'customerCreate'])->name('refunds.create');
-    Route::post('/pesanan/{pesanan}/refund', [App\Http\Controllers\RefundController::class, 'store'])->name('refunds.store');
-
+    // Consolidated pengembalian routes - handles both returns and refunds
     // Order timeline view
     Route::get('/pesanan/{pesanan}/timeline', [App\Http\Controllers\PesananController::class, 'timeline'])->name('pesanan.timeline');
 
@@ -78,6 +73,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengembalian/{id}', [App\Http\Controllers\PengembalianController::class, 'show'])->name('pengembalian.show');
     Route::get('/pesanan/{pesanan}/pengembalian/create', [App\Http\Controllers\PengembalianController::class, 'create'])->name('pengembalian.create');
     Route::post('/pesanan/{pesanan}/pengembalian', [App\Http\Controllers\PengembalianController::class, 'store'])->name('pengembalian.store');
+
+    // Redirect old refund routes to pengembalian routes
+    Route::get('/refunds', function () {
+        return redirect()->route('pengembalian.index');
+    })->name('customer.refunds.index');
+    
+    Route::get('/refunds/{id}', function ($id) {
+        // Convert RefundRequest id to Pengembalian id if needed
+        // For now, just redirect to the pengembalian index
+        return redirect()->route('pengembalian.index');
+    })->name('customer.refunds.show');
+    
+    Route::get('/pesanan/{pesanan}/refunds/create', function ($pesanan) {
+        return redirect()->route('pengembalian.create', ['pesanan' => $pesanan]);
+    })->name('customer.refunds.create');
 
     // Review management - Customer
     Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'customerIndex'])->name('reviews.index');
@@ -203,13 +213,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('pesanan/{pesanan}/timeline', [App\Http\Controllers\Admin\PesananController::class, 'addTimeline'])->name('admin.pesanan.timeline.add');
 
     // Refund Management
-    Route::prefix('refunds')->group(function () {
+    // Refund functionality now consolidated to pengembalian
+    /* Route::prefix('refunds')->group(function () {
         Route::get('/', [App\Http\Controllers\RefundController::class, 'adminIndex'])->name('admin.refunds.index');
         Route::get('/{refund}', [App\Http\Controllers\RefundController::class, 'adminShow'])->name('admin.refunds.show');
         Route::post('/{refund}/process', [App\Http\Controllers\RefundController::class, 'process'])->name('admin.refunds.process');
         Route::get('/dashboard/stats', [App\Http\Controllers\RefundController::class, 'dashboardStats'])->name('admin.refunds.dashboard');
         Route::get('/export', [App\Http\Controllers\RefundController::class, 'export'])->name('admin.refunds.export');
-    });
+    }); */
 
     // Pengembalian (Return) Management - Admin
     Route::prefix('pengembalian')->group(function () {

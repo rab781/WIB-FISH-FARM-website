@@ -212,8 +212,12 @@
         // Delete confirmation for single item
         const deleteBtns = document.querySelectorAll('.delete-btn');
         deleteBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?')) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if(window.confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?', {
+                    confirmButtonText: 'Oke',
+                    cancelButtonText: 'Batal'
+                })) {
                     this.closest('form').submit();
                 }
             });
@@ -228,7 +232,10 @@
                 console.log('Selected items count:', selectedItems.length);
 
                 if (selectedItems.length > 0) {
-                    if (confirm('Apakah Anda yakin ingin menghapus ' + selectedItems.length + ' produk yang terpilih dari keranjang?')) {
+                    if (window.confirm('Apakah Anda yakin ingin menghapus ' + selectedItems.length + ' produk yang terpilih dari keranjang?', {
+                        confirmButtonText: 'Oke',
+                        cancelButtonText: 'Batal'
+                    })) {
                         document.getElementById('bulkDeleteForm').submit();
                     }
                 } else {

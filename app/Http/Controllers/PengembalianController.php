@@ -7,6 +7,7 @@ use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class PengembalianController extends Controller
@@ -159,5 +160,153 @@ class PengembalianController extends Controller
         }
 
         return response()->json(['eligible' => true, 'message' => 'Pesanan dapat diajukan pengembalian.']);
+    }
+
+    /**
+     * Process timeline entries for refund/return status changes
+     */
+    private function addReturnTimeline(Pengembalian $pengembalian, string $status, string $notes = null)
+    {
+        $statusMap = [
+            'approved' => ['Return Approved', 'Pengembalian Disetujui'],
+            'rejected' => ['Return Rejected', 'Pengembalian Ditolak'],
+            'processing' => ['Return Processing', 'Pengembalian Sedang Diproses'],
+            'completed' => ['Return Completed', 'Pengembalian Selesai']
+        ];
+
+        if (isset($statusMap[$status])) {
+            $pengembalian->pesanan->addTimelineEntry(
+                $statusMap[$status][0],
+                $statusMap[$status][1],
+                $notes ?? 'Status pengembalian diperbarui ke ' . $status
+            );
+        }
+    }
+
+    /**
+     * Display list of returns in admin dashboard
+     */
+    public function adminIndex()
+    {
+        $pengembalian = Pengembalian::with(['pesanan.detailPesanan.produk', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Statistics for admin dashboard
+        $stats = [
+            'total' => Pengembalian::count(),
+            'pending' => Pengembalian::where('status_pengembalian', 'Menunggu Review')->count(),
+            'approved' => Pengembalian::whereIn('status_pengembalian', ['Disetujui', 'Dana Dikembalikan'])->count(),
+            'rejected' => Pengembalian::where('status_pengembalian', 'Ditolak')->count(),
+            'processed' => Pengembalian::where('status_pengembalian', 'Dalam Review')->count(),
+            'completed' => Pengembalian::where('status_pengembalian', 'Selesai')->count(),
+        ];
+
+        return view('admin.pengembalian.index', compact('pengembalian', 'stats'));
+    }
+
+    /**
+     * Show details of a return request in admin dashboard
+     */
+    public function adminShow($id)
+    {
+        $pengembalian = Pengembalian::with(['pesanan.detailPesanan.produk', 'user', 'reviewedBy'])
+            ->where('id_pengembalian', $id)
+            ->firstOrFail();
+
+        return view('admin.pengembalian.show', compact('pengembalian'));
+    }
+
+    /**
+     * Approve a return request
+     */
+    public function approve(Request $request, $id)
+    {
+        $pengembalian = Pengembalian::with('pesanan')
+            ->where('id_pengembalian', $id)
+            ->firstOrFail();
+
+        $request->validate([
+            'catatan_admin' => 'nullable|string|max:500',
+        ]);
+
+        // Update return status
+        $pengembalian->update([
+            'status_pengembalian' => 'Disetujui',
+            'catatan_admin' => $request->catatan_admin,
+            'reviewed_by' => Auth::id(),
+            'tanggal_review' => now()
+        ]);
+
+        // Add timeline entry
+        $this->addReturnTimeline($pengembalian, 'approved', $request->catatan_admin);
+
+        return redirect()->route('admin.pengembalian.show', $pengembalian->id_pengembalian)
+            ->with('success', 'Pengembalian berhasil disetujui.');
+    }
+
+    /**
+     * Reject a return request
+     */
+    public function reject(Request $request, $id)
+    {
+        $pengembalian = Pengembalian::with('pesanan')
+            ->where('id_pengembalian', $id)
+            ->firstOrFail();
+
+        $request->validate([
+            'catatan_admin' => 'required|string|max:500',
+        ]);
+
+        // Update return status
+        $pengembalian->update([
+            'status_pengembalian' => 'Ditolak',
+            'catatan_admin' => $request->catatan_admin,
+            'reviewed_by' => Auth::id(),
+            'tanggal_review' => now()
+        ]);
+
+        // Add timeline entry
+        $this->addReturnTimeline($pengembalian, 'rejected', $request->catatan_admin);
+
+        return redirect()->route('admin.pengembalian.show', $pengembalian->id_pengembalian)
+            ->with('success', 'Pengembalian telah ditolak.');
+    }
+
+    /**
+     * Mark a return as refunded
+     */
+    public function markRefunded(Request $request, $id)
+    {
+        $pengembalian = Pengembalian::with('pesanan')
+            ->where('id_pengembalian', $id)
+            ->firstOrFail();
+
+        $request->validate([
+            'nomor_transaksi_pengembalian' => 'required|string|max:100',
+        ]);
+
+        // Update return status
+        $pengembalian->update([
+            'status_pengembalian' => 'Dana Dikembalikan',
+            'nomor_transaksi_pengembalian' => $request->nomor_transaksi_pengembalian,
+            'tanggal_pengembalian_dana' => now(),
+        ]);
+
+        // Update order refund status
+        $pengembalian->pesanan->update([
+            'status_refund' => 'processed',
+            'tanggal_refund_processed' => now()
+        ]);
+
+        // Add timeline entry
+        $this->addReturnTimeline(
+            $pengembalian, 
+            'completed', 
+            'Dana telah dikembalikan. Nomor transaksi: ' . $request->nomor_transaksi_pengembalian
+        );
+
+        return redirect()->route('admin.pengembalian.show', $pengembalian->id_pengembalian)
+            ->with('success', 'Pengembalian dana berhasil dicatat.');
     }
 }

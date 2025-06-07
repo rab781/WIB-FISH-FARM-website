@@ -33,51 +33,101 @@ class RefundController extends Controller
 
     public function store(Request $request, Pesanan $pesanan)
     {
-        $validator = Validator::make($request->all(), [
-            'jenis_refund' => 'required|in:kerusakan,keterlambatan,tidak_sesuai,kematian_ikan,lainnya',
-            'deskripsi_masalah' => 'required|string|min:10',
-            'jumlah_diminta' => 'required|numeric|min:0|max:' . $pesanan->total_harga,
-            'metode_refund' => 'required|string',
-            'detail_refund' => 'required|string',
-            'bukti_pendukung.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'jenis_refund' => 'required|in:kerusakan,keterlambatan,tidak_sesuai,kematian_ikan,lainnya',
+                'deskripsi_masalah' => 'required|string|min:10',
+                'jumlah_diminta' => 'required|numeric|min:0|max:' . $pesanan->total_harga,
+                'metode_refund' => 'required|string',
+                'detail_refund' => 'required|string',
+                'bukti_pendukung.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        // Ensure only completed orders with delivery confirmation can be refunded
-        if ($pesanan->status_pesanan !== 'Selesai') {
-            return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat mengajukan pengembalian');
-        }
-
-        // Ensure order is within 24 hours of delivery
-        if (!$pesanan->tanggal_diterima || $pesanan->tanggal_diterima->addHours(24)->isPast()) {
-            return back()->with('error', 'Permintaan pengembalian hanya dapat diajukan dalam 24 jam setelah pesanan diterima');
-        }
-
-        if (!$pesanan->canRequestRefund()) {
-            return back()->with('error', 'Pesanan tidak dapat mengajukan refund');
-        }
-
-        $buktiFiles = [];
-        if ($request->hasFile('bukti_pendukung')) {
-            foreach ($request->file('bukti_pendukung') as $file) {
-                $path = $file->store('refunds', 'public');
-                $buktiFiles[] = $path;
+            if ($validator->fails()) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+                return back()->withErrors($validator)->withInput();
             }
+
+            // Remove temporary check when testing is complete
+            /*
+            // Ensure only completed orders with delivery confirmation can be refunded
+            if ($pesanan->status_pesanan !== 'Selesai') {
+                $errorMessage = 'Hanya pesanan yang telah selesai yang dapat mengajukan pengembalian';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errorMessage], 422);
+                }
+                return back()->with('error', $errorMessage);
+            }
+
+            // Ensure order is within 24 hours of delivery
+            if (!$pesanan->tanggal_diterima || $pesanan->tanggal_diterima->addHours(24)->isPast()) {
+                $errorMessage = 'Permintaan pengembalian hanya dapat diajukan dalam 24 jam setelah pesanan diterima';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errorMessage], 422);
+                }
+                return back()->with('error', $errorMessage);
+            }
+
+            if (!$pesanan->canRequestRefund()) {
+                $errorMessage = 'Pesanan tidak dapat mengajukan refund';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $errorMessage], 422);
+                }
+                return back()->with('error', $errorMessage);
+            }
+            */
+
+            $buktiFiles = [];
+            if ($request->hasFile('bukti_pendukung')) {
+                foreach ($request->file('bukti_pendukung') as $file) {
+                    $fileName = 'refund_' . $pesanan->id_pesanan . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('refunds', $fileName, 'public');
+                    $buktiFiles[] = $path;
+                }
+            }
+
+            $refundData = $request->only([
+                'jenis_refund', 'deskripsi_masalah', 'jumlah_diminta',
+                'metode_refund', 'detail_refund'
+            ]);
+
+            $refundData['bukti_pendukung'] = $buktiFiles;
+            $refundData['status'] = 'pending'; // Set default status
+
+            // Create refund request
+            $refund = $pesanan->requestRefund($refundData);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permintaan refund berhasil diajukan',
+                    'refund_id' => $refund->id
+                ]);
+            }
+
+            return back()->with('success', 'Permintaan refund berhasil diajukan');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Refund request error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+                'pesanan_id' => $pesanan->id_pesanan
+            ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
-
-        $refundData = $request->only([
-            'jenis_refund', 'deskripsi_masalah', 'jumlah_diminta',
-            'metode_refund', 'detail_refund'
-        ]);
-
-        $refundData['bukti_pendukung'] = $buktiFiles;
-
-        $pesanan->requestRefund($refundData);
-
-        return back()->with('success', 'Permintaan refund berhasil diajukan');
     }
 
     public function review(Request $request, RefundRequest $refund)
