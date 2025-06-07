@@ -93,6 +93,8 @@ Route::middleware('auth')->group(function () {
 
     // Order routes
     Route::get('/pesanan/edit-alamat/{id}', [App\Http\Controllers\PesananController::class, 'editAlamat'])->name('pesanan.editAlamat');
+    Route::put('/pesanan/update-alamat/{id}', [App\Http\Controllers\PesananController::class, 'updateAlamat'])->name('pesanan.update-alamat');
+    Route::get('/checkout/edit-alamat', [App\Http\Controllers\PesananController::class, 'editCheckoutAlamat'])->name('checkout.editAlamat');
 });
 
 // Auth routes - make sure these exist and are properly defined
@@ -123,7 +125,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('reports/financial', [App\Http\Controllers\Admin\ReportController::class, 'financial'])->name('admin.reports.financial');
 
     // Expense management routes
-    Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class, ['as' => 'admin']);
+    Route::get('/expenses', function() {
+        return redirect()->route('admin.reports.financial');
+    })->name('admin.expenses.index');
+
+    Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class, ['as' => 'admin'])->except(['index']);
 
     // Keluhan management routes
     Route::get('keluhan', [App\Http\Controllers\Admin\KeluhanController::class, 'index'])->name('admin.keluhan.index');

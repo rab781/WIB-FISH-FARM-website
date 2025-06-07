@@ -295,4 +295,22 @@ class Pesanan extends Model
     {
         return 'Rp ' . number_format($this->total_harga, 0, ',', '.');
     }
+
+    public function getIsEligibleForReturnAttribute(): bool
+    {
+        // Pesanan dapat diajukan pengembalian jika:
+        // 1. Status pesanan selesai
+        // 2. Belum ada pengajuan pengembalian sebelumnya
+        // 3. Masih dalam waktu yang ditentukan (misal 7 hari setelah diterima)
+        return $this->status_pesanan === 'Selesai' &&
+               !$this->refundRequests()->exists() &&
+               $this->tanggal_diterima &&
+               $this->tanggal_diterima->addDays(7)->isFuture();
+    }
+
+    public function getUlasanAttribute()
+    {
+        // Mengecek apakah pesanan sudah diulas
+        return $this->hasMany(\App\Models\Ulasan::class, 'id_pesanan', 'id_pesanan')->first();
+    }
 }

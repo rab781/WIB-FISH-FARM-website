@@ -33,11 +33,35 @@
                 </div>
                 <div class="p-4">
                     @if($alamatLengkap)
-                        <div class="mb-4">
-                            <p class="font-medium">{{ Auth::user()->name }}</p>
-                            <p class="mt-1 text-gray-600">{{ $alamatLengkap['jalan'] }}</p>
-                            <p class="text-gray-600">{{ $alamatLengkap['kecamatan'] }}, {{ $alamatLengkap['kabupaten'] }}</p>
-                            <p class="text-gray-600">{{ $alamatLengkap['provinsi'] }}</p>
+                        <div class="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ Auth::user()->name }}</p>
+                                    <p class="text-sm text-gray-500">Alamat Pengiriman</p>
+                                </div>
+                                <div>
+                                    <a href="{{ route('checkout.editAlamat', ['selected_items' => request('selected_items')]) }}"
+                                       class="inline-flex items-center px-3 py-1.5 border border-orange-500 text-orange-600 text-sm font-medium rounded-md hover:bg-orange-50 transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                        Edit Alamat
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-gray-700">{{ $alamatLengkap['jalan'] }}</p>
+                                <p class="text-gray-700">{{ $alamatLengkap['kecamatan'] }}, {{ $alamatLengkap['kabupaten'] }}</p>
+                                <p class="text-gray-700">{{ $alamatLengkap['provinsi'] }}</p>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <p class="text-sm text-gray-500">
+                                    <svg class="w-4 h-4 inline mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Pastikan alamat pengiriman sudah benar sebelum melanjutkan pesanan
+                                </p>
+                            </div>
                         </div>
                     @else
                         <div class="text-center py-4">
@@ -161,6 +185,7 @@
                                             <div class="p-3 mt-3 bg-orange-50 border border-orange-200 rounded-lg">
                                                 <p class="text-sm text-orange-800 font-medium mb-1">Informasi Pengiriman Ikan Hias:</p>
                                                 <ul class="list-disc pl-5 text-xs text-orange-700 space-y-1">
+                                                    <li>Setiap sebelum Dikirm, Ikan Akan Dipuasakan selama 7 hari dan akan dikirim setelah nya</li>
                                                     <li>Ikan dikemas dalam box khusus ukuran 40x40x40 cm</li>
                                                     <li>Setiap box dapat memuat maksimal 3 ekor ikan</li>
                                                     <li>Dilengkapi sistem aerasi untuk menjaga kualitas air</li>
@@ -216,9 +241,9 @@
 
                         <div class="mb-6">
                             <h3 class="text-base font-medium text-gray-900 mb-3">Metode Pembayaran</h3>
-                            <div class="space-y-2">
+                            <div class="space-y-2" id="metodePembayaranContainer">
                                 @foreach($metodePembayaran as $key => $value)
-                                <label class="flex items-center p-3 border rounded-lg {{ $loop->first ? 'border-orange-500 bg-orange-50' : 'border-gray-300' }}">
+                                <label class="flex items-center p-3 border rounded-lg transition-colors {{ $loop->first ? 'border-orange-500 bg-orange-50' : 'border-gray-300' }} hover:border-orange-300 hover:bg-orange-50/50">
                                     <input type="radio" name="metode_pembayaran" value="{{ $key }}" class="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500" {{ $loop->first ? 'checked' : '' }}>
                                     <span class="ml-2 text-sm font-medium text-gray-900">{{ $value }}</span>
                                 </label>
@@ -559,6 +584,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const subtotal = {{ $subtotal }};
         const total = subtotal + currentOngkir;
         document.getElementById('totalAmount').textContent = 'Rp ' + numberFormat(total);
+    }
+
+    // Handle payment method selection styling
+    const metodePembayaranContainer = document.getElementById('metodePembayaranContainer');
+    if (metodePembayaranContainer) {
+        const paymentLabels = metodePembayaranContainer.querySelectorAll('label');
+        const paymentInputs = metodePembayaranContainer.querySelectorAll('input[type="radio"]');
+
+        paymentInputs.forEach((input, index) => {
+            input.addEventListener('change', function() {
+                // Reset all labels to default style
+                paymentLabels.forEach(label => {
+                    label.classList.remove('border-orange-500', 'bg-orange-50');
+                    label.classList.add('border-gray-300');
+                });
+
+                // Apply selected style to the chosen payment method
+                if (this.checked) {
+                    const parentLabel = this.closest('label');
+                    if (parentLabel) {
+                        parentLabel.classList.remove('border-gray-300');
+                        parentLabel.classList.add('border-orange-500', 'bg-orange-50');
+                    }
+                }
+            });
+        });
     }
 
     // Format number to Indonesian format - optimized version

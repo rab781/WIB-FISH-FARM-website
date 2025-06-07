@@ -99,9 +99,18 @@ class ExpenseController extends Controller
     /**
      * Menampilkan form untuk membuat pengeluaran baru.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.expenses.create');
+        // Pass any query parameters to the view
+        $queryParams = [];
+        if ($request->has('year')) {
+            $queryParams['year'] = $request->year;
+        }
+        if ($request->has('month')) {
+            $queryParams['month'] = $request->month;
+        }
+        
+        return view('admin.expenses.create', compact('queryParams'));
     }
 
     /**
@@ -134,8 +143,23 @@ class ExpenseController extends Controller
                 'expense' => $expense
             ]);
         }
+        
+        // Preserve query parameters for financial report filtering
+        $queryParams = [];
+        if ($request->has('year')) {
+            $queryParams['year'] = $request->year;
+        }
+        if ($request->has('month')) {
+            $queryParams['month'] = $request->month;
+        }
+        
+        // Check if the request is coming from financial report page
+        $referer = $request->headers->get('referer');
+        if ($referer && strpos($referer, 'reports/financial') !== false) {
+            return redirect()->route('admin.reports.financial', $queryParams)->with('success', 'Pengeluaran berhasil ditambahkan!');
+        }
 
-        return redirect()->route('admin.expenses.index')->with('success', 'Pengeluaran berhasil ditambahkan!');
+        return redirect()->route('admin.expenses.index', $queryParams)->with('success', 'Pengeluaran berhasil ditambahkan!');
     }
 
     /**
@@ -150,10 +174,20 @@ class ExpenseController extends Controller
     /**
      * Menampilkan form untuk mengedit pengeluaran spesifik.
      */
-    public function edit(string $id)
+    public function edit(Request $request, string $id)
     {
         $expense = Expense::findOrFail($id);
-        return view('admin.expenses.edit', compact('expense'));
+        
+        // Pass any query parameters to the view
+        $queryParams = [];
+        if ($request->has('year')) {
+            $queryParams['year'] = $request->year;
+        }
+        if ($request->has('month')) {
+            $queryParams['month'] = $request->month;
+        }
+        
+        return view('admin.expenses.edit', compact('expense', 'queryParams'));
     }
 
     /**
@@ -178,19 +212,49 @@ class ExpenseController extends Controller
             'expense_date' => Carbon::parse($validated['expense_date']),
             'notes' => $validated['notes'] ?? null,
         ]);
+        
+        // Preserve query parameters for financial report filtering
+        $queryParams = [];
+        if ($request->has('year')) {
+            $queryParams['year'] = $request->year;
+        }
+        if ($request->has('month')) {
+            $queryParams['month'] = $request->month;
+        }
 
-        return redirect()->route('admin.expenses.index')->with('success', 'Pengeluaran berhasil diperbarui!');
+        // Check if the request is coming from financial report page
+        $referer = $request->headers->get('referer');
+        if ($referer && strpos($referer, 'reports/financial') !== false) {
+            return redirect()->route('admin.reports.financial', $queryParams)->with('success', 'Pengeluaran berhasil diperbarui!');
+        }
+
+        return redirect()->route('admin.expenses.index', $queryParams)->with('success', 'Pengeluaran berhasil diperbarui!');
     }
 
     /**
      * Menghapus pengeluaran spesifik dari storage (soft delete).
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $expense = Expense::findOrFail($id);
         $expense->delete(); // Ini akan melakukan soft delete karena ada trait SoftDeletes di model
 
-        return redirect()->route('admin.expenses.index')->with('success', 'Pengeluaran berhasil dihapus!');
+        // Preserve query parameters for financial report filtering
+        $queryParams = [];
+        if ($request->has('year')) {
+            $queryParams['year'] = $request->year;
+        }
+        if ($request->has('month')) {
+            $queryParams['month'] = $request->month;
+        }
+        
+        // Check if the request is coming from financial report page
+        $referer = $request->headers->get('referer');
+        if ($referer && strpos($referer, 'reports/financial') !== false) {
+            return redirect()->route('admin.reports.financial', $queryParams)->with('success', 'Pengeluaran berhasil dihapus!');
+        }
+        
+        return redirect()->route('admin.expenses.index', $queryParams)->with('success', 'Pengeluaran berhasil dihapus!');
     }
 
     /**

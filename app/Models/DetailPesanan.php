@@ -37,4 +37,10 @@ class DetailPesanan extends Model
     {
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
     }
+
+    // Relasi ke produk ukuran
+    public function produk_ukuran()
+    {
+        return $this->belongsTo(ProdukUkuran::class, 'ukuran_id', 'id');
+    }
 }

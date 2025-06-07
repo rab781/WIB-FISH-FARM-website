@@ -56,48 +56,12 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['pending'] ?? 0 }}</p>
-                    <p class="text-gray-600">Pending</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['verified'] ?? 0 }}</p>
-                    <p class="text-gray-600">Terverifikasi</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
                 <div class="p-3 rounded-full bg-orange-100 text-orange-600">
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="ml-4">
                     <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['avg_rating'] ?? 0, 1) }}</p>
                     <p class="text-gray-600">Rating Rata-rata</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 text-red-600">
-                    <i class="fas fa-eye-slash"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['hidden'] ?? 0 }}</p>
-                    <p class="text-gray-600">Disembunyikan</p>
                 </div>
             </div>
         </div>
@@ -131,17 +95,6 @@
                     <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
                         <option value="">Semua Status</option>
                         <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
-                        <option value="hidden" {{ request('status') == 'hidden' ? 'selected' : '' }}>Hidden</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Verifikasi</label>
-                    <select name="verified" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">Semua</option>
-                        <option value="1" {{ request('verified') == '1' ? 'selected' : '' }}>Terverifikasi</option>
-                        <option value="0" {{ request('verified') == '0' ? 'selected' : '' }}>Belum Verifikasi</option>
                     </select>
                 </div>
 

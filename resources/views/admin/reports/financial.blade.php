@@ -167,14 +167,7 @@
             <p class="text-gray-700 mb-0">Lacak performa dan analisis keuangan Anda</p>
         </div>
         <div class="flex items-center space-x-3">
-            <div class="relative inline-flex items-center bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 cursor-pointer text-sm font-medium transition-all hover:border-orange-500">
-                <i class="fas fa-calendar mr-2 text-orange-600"></i>
-                <span class="font-medium">{{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }}</span>
-                <i class="fas fa-chevron-down ml-2 text-gray-500"></i>
-                {{-- Date range picker actual input will be initialized by JS library --}}
-                <input type="text" id="dateRange" class="absolute inset-0 opacity-0 cursor-pointer">
-            </div>
-            <form id="yearFilterForm" action="{{ route('admin.reports.financial') }}" method="GET" class="inline-flex">
+            <form id="yearFilterForm" action="{{ route('admin.reports.financial') }}" method="GET" class="inline-flex mx-2">
                 <select id="yearFilter" name="year" class="form-select form-select-sm text-sm font-medium border-gray-300 rounded-lg" onchange="this.form.submit()">
                     @foreach($availableYears as $year)
                         <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
@@ -183,14 +176,16 @@
                     @endforeach
                 </select>
             </form>
-            <button class="btn-light-custom" onclick="window.print()">
-                <i class="fas fa-print mr-2"></i>
-                <span>Cetak</span>
-            </button>
-            <button class="btn-primary-custom" onclick="exportToExcel()">
-                <i class="fas fa-file-excel mr-2"></i>
-                <span>Ekspor</span>
-            </button>
+            <form id="monthFilterForm" action="{{ route('admin.reports.financial') }}" method="GET" class="inline-flex">
+                <select id="monthFilter" name="month" class="form-select form-select-sm text-sm font-medium border-gray-300 rounded-lg" onchange="this.form.submit()">
+                    @php $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']; @endphp
+                    @foreach($months as $index => $month)
+                        <option value="{{ $index + 1 }}" {{ ($selectedMonth ?? date('n')) == ($index + 1) ? 'selected' : '' }}>
+                            {{ $month }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
     </div>
 
@@ -206,67 +201,14 @@
             </div>
         </div>
         <div class="flex flex-col space-y-3">
-            <button class="btn-success btn-modern py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+            <a href="{{ route('admin.expenses.create', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" class="btn-success btn-modern py-2 px-4 text-sm">
                 <i class="fas fa-plus mr-1"></i>
                 <span>Tambah Pengeluaran</span>
-            </button>
-            <button class="btn-light btn-modern py-2 px-4 text-sm">
-                <i class="fas fa-paper-plane mr-1"></i>
-                <span>Kirim Laporan</span>
-            </button>
+            </a>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
-        <div class="p-6 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-             data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
-            <h5 class="text-lg font-bold text-gray-800 flex items-center">
-                <i class="fas fa-filter mr-3 text-orange-600"></i> Opsi Filter
-            </h5>
-            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-300" data-toggle-icon></i>
-        </div>
-        <div class="collapse" id="filterCollapse">
-            <div class="p-6">
-                <form method="GET" action="{{ route('admin.reports.financial') }}" class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="col-span-1">
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date', $startDate->format('Y-m-d')) }}">
-                    </div>
-                    <div class="col-span-1">
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date', $endDate->format('Y-m-d')) }}">
-                    </div>
-                    <div class="col-span-1">
-                        <label for="filter_year" class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
-                        <select class="form-select" id="filter_year" name="year">
-                            @foreach($availableYears as $year)
-                                <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>{{ $year }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-span-1">
-                        <label for="filter_month" class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
-                        <select class="form-select" id="filter_month" name="month">
-                            <option value="">Semua Bulan</option>
-                            @for($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="col-span-4 flex justify-end space-x-3 mt-4">
-                        <button type="reset" class="btn-secondary-custom">
-                            <i class="fas fa-undo mr-2"></i>Reset
-                        </button>
-                        <button type="submit" class="btn-primary-custom">
-                            <i class="fas fa-filter mr-2"></i>Terapkan Filter
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
             <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
                 <i class="fas fa-coins"></i>
@@ -308,127 +250,17 @@
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex items-center space-x-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-purple-600 uppercase mb-1">Total Transaksi</p>
-                <h2 class="text-3xl font-bold text-gray-900">{{ number_format(collect($paymentMethodAnalysis)->sum('total_transactions') ?? 0) }}</h2>
-                <div class="flex items-center text-sm mt-1 text-purple-600">
-                    <i class="fas fa-receipt mr-1"></i>
-                    <span>Avg: Rp {{ number_format($avgTransaction ?? 0, 0, ',', '.') }}</span>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-chart-line mr-3 text-green-600"></i>Pendapatan vs Pengeluaran Bulanan
-                </h3>
-            </div>
-            <div class="relative h-72">
-                <canvas id="monthlyRevenueExpenseChart"></canvas>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-chart-pie mr-3 text-blue-600"></i>Distribusi Metode Pembayaran
-                </h3>
-            </div>
-            <div class="relative h-72 flex items-center justify-center">
-                <canvas id="paymentMethodDistributionChart"></canvas>
-            </div>
-            <p class="text-center text-sm text-gray-500 mt-4">
-                <i class="fas fa-info-circle mr-1"></i> Klik pada legenda untuk filter data
-            </p>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                <i class="fas fa-chart-bar mr-3 text-orange-600"></i> Ikhtisar Keuangan Bulanan ({{ $selectedYear }})
-            </h3>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
-            <div class="col-span-1">
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Bulan</label>
-                    <select class="form-select" id="monthSelector">
-                        @for($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>
-                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
-                            </option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="bg-gray-100 p-4 rounded-lg">
-                    <h6 class="text-xs font-bold text-gray-600 uppercase mb-3" id="selectedMonthLabel">{{ date('F', mktime(0, 0, 0, $selectedMonth, 1)) }} Ringkasan</h6>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-700">Pendapatan:</span>
-                        <span class="text-sm font-bold text-green-600" id="selectedMonthRevenue">
-                            Rp {{ number_format($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0, 0, ',', '.') }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-700">Pengeluaran:</span>
-                        <span class="text-sm font-bold text-red-600" id="selectedMonthExpense">
-                            Rp {{ number_format($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0, 0, ',', '.') }}
-                        </span>
-                    </div>
-                    <hr class="my-2 border-gray-300">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-700">Laba Bersih:</span>
-                        <span class="text-sm font-bold @if((($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0) - ($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0)) >= 0) text-green-600 @else text-red-600 @endif" id="selectedMonthProfit">
-                            Rp {{ number_format(
-                                (($monthlyRevenue->where('month_num', $selectedMonth)->first()['total_revenue'] ?? 0) -
-                                ($monthlyExpenses->where('month_num', $selectedMonth)->first()['total_expense'] ?? 0)),
-                                0, ',', '.') }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-span-3">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
-                        <h6 class="text-sm font-bold text-gray-700 mb-4">Distribusi Pendapatan</h6>
-                        <div class="relative h-48 w-48 flex items-center justify-center">
-                            <canvas id="revenuePieChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
-                        <h6 class="text-sm font-bold text-gray-700 mb-4">Kategori Pengeluaran</h6>
-                        <div class="relative h-48 w-48 flex items-center justify-center">
-                            <canvas id="expensePieChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col items-center">
-                        <h6 class="text-sm font-bold text-gray-700 mb-4">Analisis Laba</h6>
-                        <div class="relative h-48 w-48 flex items-center justify-center">
-                            <canvas id="profitPieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
         <div class="p-6 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800 flex items-center">
                 <i class="fas fa-file-invoice-dollar mr-3 text-red-600"></i> Riwayat Pengeluaran
             </h3>
-            <button class="btn-primary-custom py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+            <a href="{{ route('admin.expenses.create', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" class="btn-primary-custom py-2 px-4 text-sm">
                 <i class="fas fa-plus mr-2"></i>Tambah Pengeluaran
-            </button>
+            </a>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -446,8 +278,8 @@
                     @forelse($expenseHistory as $expense)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('d M Y') : date('d M Y', strtotime($expense->expense_date)) }}</div>
-                                <div class="text-xs text-gray-500">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('H:i') : date('H:i', strtotime($expense->expense_date)) }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('d M Y') : \Carbon\Carbon::parse($expense->expense_date)->format('d M Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('H:i') : \Carbon\Carbon::parse($expense->expense_date)->format('H:i') }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
@@ -467,13 +299,15 @@
                             <td class="px-6 py-4 text-sm text-gray-700">{{ Str::limit($expense->notes, 50) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                  {{-- Link Edit --}}
-                                <a href="{{ route('admin.expenses.edit', ['expense' => $expense->id]) }}" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="Edit">
+                                <a href="{{ route('admin.expenses.edit', ['expense' => $expense->id, 'year' => $selectedYear, 'month' => $selectedMonth]) }}" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 {{-- Form Hapus --}}
                                 <form action="{{ route('admin.expenses.destroy', ['expense' => $expense->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?');" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="year" value="{{ $selectedYear }}">
+                                    <input type="hidden" name="month" value="{{ $selectedMonth }}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -486,9 +320,9 @@
                                 <div class="py-4">
                                     <i class="fas fa-receipt text-4xl mb-3 text-gray-300"></i>
                                     <p class="text-lg font-medium text-gray-900">Tidak ada catatan pengeluaran.</p>
-                                    <button class="btn-primary-custom mt-4 py-2 px-4 text-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                                    <a href="{{ route('admin.expenses.create', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" class="btn-primary-custom mt-4 py-2 px-4 text-sm inline-flex items-center">
                                         <i class="fas fa-plus mr-2"></i>Tambah Pengeluaran Baru
-                                    </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -501,226 +335,27 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                <i class="fas fa-credit-card mr-3 text-purple-600"></i> Analisis Metode Pembayaran
-            </h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Metode Pembayaran</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah Transaksi</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Jumlah</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Rata-rata per Transaksi</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Persentase</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse($paymentMethodAnalysis as $method)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    @php
-                                        $methodColor = match($method['method']) {
-                                            'Transfer Bank' => ['bg' => 'blue', 'text' => 'blue', 'icon' => 'fa-university'],
-                                            'QRIS' => ['bg' => 'green', 'text' => 'green', 'icon' => 'fa-qrcode'],
-                                            'E-Wallet' => ['bg' => 'purple', 'text' => 'purple', 'icon' => 'fa-wallet'],
-                                            'Credit Card' => ['bg' => 'indigo', 'text' => 'indigo', 'icon' => 'fa-credit-card'],
-                                            'COD' => ['bg' => 'orange', 'text' => 'orange', 'icon' => 'fa-hand-holding-usd'],
-                                            default => ['bg' => 'gray', 'text' => 'gray', 'icon' => 'fa-credit-card']
-                                        };
-                                    @endphp
-                                    <div class="w-8 h-8 rounded-full bg-{{ $methodColor['bg'] }}-100 flex items-center justify-center mr-3">
-                                        <i class="fas {{ $methodColor['icon'] }} text-{{ $methodColor['text'] }}-600 text-base"></i>
-                                    </div>
-                                    <span class="text-sm font-medium text-gray-900">{{ $method['method'] ?? 'Tidak Diketahui' }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ number_format($method['total_transactions']) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
-                                Rp {{ number_format($method['total_amount'], 0, ',', '.') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-700">
-                                Rp {{ $method['total_transactions'] > 0 ? number_format($method['total_amount'] / $method['total_transactions'], 0, ',', '.') : 0 }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <div class="flex items-center justify-end">
-                                    <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="h-2 rounded-full bg-{{ $methodColor['bg'] }}-500 transition-all duration-500" style="width: {{ $method['percentage'] }}%;"></div>
-                                    </div>
-                                    <span class="text-xs font-semibold text-{{ $methodColor['text'] }}-600">{{ number_format($method['percentage'], 1) }}%</span>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data metode pembayaran.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                <i class="fas fa-list-alt mr-3 text-blue-600"></i> Detail Transaksi
-            </h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID Pesanan</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pelanggan</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Metode Pembayaran</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse($transactions as $transaction)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $transaction->id_pesanan }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $transaction->created_at->format('d M Y') }}</div>
-                                <div class="text-xs text-gray-500">{{ $transaction->created_at->format('H:i') }} WIB</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $transaction->user->name ?? 'Tidak Diketahui' }}</div>
-                                <div class="text-xs text-gray-500">{{ $transaction->user->email ?? '' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">Rp {{ number_format($transaction->total_harga, 0, ',', '.') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $paymentMethod = $transaction->metode_pembayaran ?? 'Tidak Diketahui'; // Ambil dari pesanan langsung
-                                    $methodBadgeClass = match($paymentMethod) {
-                                        'transfer_bank' => 'bg-blue-100 text-blue-800',
-                                        'qris' => 'bg-green-100 text-green-800',
-                                        'COD' => 'bg-orange-100 text-orange-800',
-                                        default => 'bg-gray-100 text-gray-800'
-                                    };
-                                @endphp
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $methodBadgeClass }}">
-                                    {{ $paymentMethod }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $statusBadgeClass = match($transaction->status_pesanan) {
-                                        'Selesai' => 'bg-green-100 text-green-800',
-                                        'Dikirim' => 'bg-blue-100 text-blue-800',
-                                        'Diproses' => 'bg-yellow-100 text-yellow-800',
-                                        'Menunggu Pembayaran' => 'bg-gray-100 text-gray-800',
-                                        'Dibatalkan' => 'bg-red-100 text-red-800',
-                                        default => 'bg-gray-100 text-gray-800'
-                                    };
-                                @endphp
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusBadgeClass }}">
-                                    {{ $transaction->status_pesanan }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <a href="{{ route('admin.pesanan.show', $transaction->id_pesanan) }}" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada data transaksi.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-            {{ $transactions->links('pagination::tailwind') }}
-        </div>
-    </div>
 
-    <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addExpenseModalLabel">Tambah Pengeluaran Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('admin.expenses.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="from_financial_report" value="1">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="expense_description" class="form-label">Judul/Deskripsi Pengeluaran</label>
-                            <input type="text" class="form-control" id="expense_description" name="description"
-                                   placeholder="Contoh: Bayar listrik, Pembelian bahan baku, dll" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense_date_modal" class="form-label">Tanggal</label>
-                            <input type="date" class="form-control" id="expense_date_modal" name="expense_date"
-                                   value="{{ now()->format('Y-m-d') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense_amount" class="form-label">Jumlah</label>
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control" id="expense_amount" name="amount"
-                                       placeholder="0" min="0" step="1000" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense_category_modal" class="form-label">Kategori</label>
-                            <select class="form-select" id="expense_category_modal" name="category" required>
-                                <option value="">Pilih Kategori</option>
-                                <option value="Gaji">Gaji Karyawan</option>
-                                <option value="Sewa">Sewa Toko/Gudang</option>
-                                <option value="Listrik">Listrik & Utilitas</option>
-                                <option value="Bahan">Bahan Baku</option>
-                                <option value="Peralatan">Peralatan</option>
-                                <option value="Transportasi">Transportasi</option>
-                                <option value="Marketing">Marketing & Iklan</option>
-                                <option value="Administrasi">Administrasi</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="notes" value="">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
-            </div>
+    {{-- Floating Action Menu for Report Actions --}}
+    <div class="fixed bottom-8 right-8 z-50">
+        <button id="reportActionsToggle" class="bg-orange-600 hover:bg-orange-700 text-white rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg transition-all duration-300 transform hover:scale-110">
+            <i class="fas fa-chart-bar"></i>
+        </button>
+        <div id="floatingActionMenu" class="absolute bottom-16 right-0 flex flex-col space-y-3 opacity-0 invisible transition-all duration-300">
+            <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="window.print()" data-bs-toggle="tooltip" title="Cetak Laporan">
+                <i class="fas fa-print"></i>
+            </button>
+            <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="exportToExcel()" data-bs-toggle="tooltip" title="Ekspor ke Excel">
+                <i class="fas fa-file-excel"></i>
+            </button>
+            <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" data-bs-toggle="tooltip" title="Kustomisasi Laporan">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+            <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="refreshAllCharts()" data-bs-toggle="tooltip" title="Refresh Data">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
-    </div>
-</div>
-
-{{-- Floating Action Menu for Report Actions --}}
-<div class="fixed bottom-8 right-8 z-50">
-    <button id="reportActionsToggle" class="bg-orange-600 hover:bg-orange-700 text-white rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg transition-all duration-300 transform hover:scale-110">
-        <i class="fas fa-chart-bar"></i>
-    </button>
-    <div id="floatingActionMenu" class="absolute bottom-16 right-0 flex flex-col space-y-3 opacity-0 invisible transition-all duration-300">
-        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="window.print()" data-bs-toggle="tooltip" title="Cetak Laporan">
-            <i class="fas fa-print"></i>
-        </button>
-        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="exportToExcel()" data-bs-toggle="tooltip" title="Ekspor ke Excel">
-            <i class="fas fa-file-excel"></i>
-        </button>
-        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" data-bs-toggle="tooltip" title="Kustomisasi Laporan">
-            <i class="fas fa-sliders-h"></i>
-        </button>
-        <button class="bg-white text-gray-700 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-md hover:bg-gray-100" onclick="refreshAllCharts()" data-bs-toggle="tooltip" title="Refresh Data">
-            <i class="fas fa-sync-alt"></i>
-        </button>
     </div>
 </div>
 
@@ -777,10 +412,43 @@
             },
             opens: 'left'
         }, function(start, end, label) {
-            // Update the form fields and submit
+            // Update the form fields
             document.getElementById('start_date').value = start.format('YYYY-MM-DD');
             document.getElementById('end_date').value = end.format('YYYY-MM-DD');
-            document.querySelector('#filterCollapse form').submit();
+
+            // Get the current selected year and month
+            const selectedYear = document.getElementById('yearFilter').value;
+            const selectedMonth = document.getElementById('monthFilter').value;
+
+            // Add the current year as hidden field to preserve selection
+            const yearInputHidden = document.createElement('input');
+            yearInputHidden.type = 'hidden';
+            yearInputHidden.name = 'year';
+            yearInputHidden.value = selectedYear;
+
+            // Remove any existing hidden inputs first
+            const existingYearInput = document.querySelector('#dateRangeForm input[name="year"]');
+            if (existingYearInput) {
+                existingYearInput.remove();
+            }
+
+            document.getElementById('dateRangeForm').appendChild(yearInputHidden);
+
+            // Also add month if needed
+            const monthInputHidden = document.createElement('input');
+            monthInputHidden.type = 'hidden';
+            monthInputHidden.name = 'month';
+            monthInputHidden.value = selectedMonth;
+
+            const existingMonthInput = document.querySelector('#dateRangeForm input[name="month"]');
+            if (existingMonthInput) {
+                existingMonthInput.remove();
+            }
+
+            document.getElementById('dateRangeForm').appendChild(monthInputHidden);
+
+            // Submit the form
+            document.getElementById('dateRangeForm').submit();
         });
 
 
@@ -1014,36 +682,77 @@
             }
         });
 
-        // Month Selector for Monthly Overview Charts
-        document.getElementById('monthSelector').addEventListener('change', function() {
-            const selectedMonthNum = parseInt(this.value);
-            const selectedYearForMonth = document.getElementById('filter_year').value; // Use the filter year
+        // Sync forms - ensure monthly filter keeps the selected year
+        document.getElementById('yearFilter').addEventListener('change', function() {
+            // Add the current year to the month filter form before submitting
+            const yearInputHidden = document.createElement('input');
+            yearInputHidden.type = 'hidden';
+            yearInputHidden.name = 'year';
+            yearInputHidden.value = this.value;
 
-            // Update monthly stats display
-            const monthName = new Date(selectedYearForMonth, selectedMonthNum - 1, 1).toLocaleString('id-ID', { month: 'long' });
-            document.getElementById('selectedMonthLabel').textContent = monthName + ' Ringkasan';
+            // Remove any existing hidden year input first
+            const existingYearInput = document.querySelector('#monthFilterForm input[name="year"]');
+            if (existingYearInput) {
+                existingYearInput.remove();
+            }
 
-            const revenueForSelectedMonth = monthlyRevenueData.find(item => item.month_num === selectedMonthNum)?.total_revenue || 0;
-            const expenseForSelectedMonth = monthlyExpensesData.find(item => item.month_num === selectedMonthNum)?.total_expense || 0;
-            const profitForSelectedMonth = revenueForSelectedMonth - expenseForSelectedMonth;
-
-            document.getElementById('selectedMonthRevenue').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(revenueForSelectedMonth);
-            document.getElementById('selectedMonthExpense').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(expenseForSelectedMonth);
-            document.getElementById('selectedMonthProfit').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(profitForSelectedMonth);
-
-            // Update Pie Charts
-            revenuePieChart.data.datasets[0].data = [revenueForSelectedMonth];
-            revenuePieChart.update();
-
-            // Fetch and update expense categories for the selected month
-            fetchExpenseCategoriesForMonth(selectedMonthNum, selectedYearForMonth);
-
-            profitPieChart.data.datasets[0].data = [
-                profitForSelectedMonth > 0 ? profitForSelectedMonth : 0,
-                expenseForSelectedMonth
-            ];
-            profitPieChart.update();
+            document.getElementById('monthFilterForm').appendChild(yearInputHidden);
+            // Form submission is handled by the default onchange behavior
         });
+
+        // When month filter changes, also include the current selected year
+        document.getElementById('monthFilter').addEventListener('change', function() {
+            // Get the current selected year
+            const selectedYear = document.getElementById('yearFilter').value;
+
+            // Add the current year to the month filter form before submitting
+            const yearInputHidden = document.createElement('input');
+            yearInputHidden.type = 'hidden';
+            yearInputHidden.name = 'year';
+            yearInputHidden.value = selectedYear;
+
+            // Remove any existing hidden year input first
+            const existingYearInput = document.querySelector('#monthFilterForm input[name="year"]');
+            if (existingYearInput) {
+                existingYearInput.remove();
+            }
+
+            document.getElementById('monthFilterForm').appendChild(yearInputHidden);
+            // Form submission is handled by the default onchange behavior
+        });
+
+        // For chart updates on monthly report page (if available)
+        if (document.getElementById('monthSelector')) {
+            document.getElementById('monthSelector').addEventListener('change', function() {
+                const selectedMonthNum = parseInt(this.value);
+                const selectedYearForMonth = document.getElementById('yearFilter').value; // Use the filter year
+
+                // Update monthly stats display
+                const monthName = new Date(selectedYearForMonth, selectedMonthNum - 1, 1).toLocaleString('id-ID', { month: 'long' });
+                document.getElementById('selectedMonthLabel').textContent = monthName + ' Ringkasan';
+
+                const revenueForSelectedMonth = monthlyRevenueData.find(item => item.month_num === selectedMonthNum)?.total_revenue || 0;
+                const expenseForSelectedMonth = monthlyExpensesData.find(item => item.month_num === selectedMonthNum)?.total_expense || 0;
+                const profitForSelectedMonth = revenueForSelectedMonth - expenseForSelectedMonth;
+
+                document.getElementById('selectedMonthRevenue').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(revenueForSelectedMonth);
+                document.getElementById('selectedMonthExpense').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(expenseForSelectedMonth);
+                document.getElementById('selectedMonthProfit').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(profitForSelectedMonth);
+
+                // Update Pie Charts
+                revenuePieChart.data.datasets[0].data = [revenueForSelectedMonth];
+                revenuePieChart.update();
+
+                // Fetch and update expense categories for the selected month
+                fetchExpenseCategoriesForMonth(selectedMonthNum, selectedYearForMonth);
+
+                profitPieChart.data.datasets[0].data = [
+                    profitForSelectedMonth > 0 ? profitForSelectedMonth : 0,
+                    expenseForSelectedMonth
+                ];
+                profitPieChart.update();
+            });
+        }
 
         // Toggle Floating Action Menu
         const reportActionsToggle = document.getElementById('reportActionsToggle');
@@ -1129,6 +838,22 @@
             default: return 'gray';
         }
     };
+
+    function openModal() {
+        document.getElementById('filterModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('filterModal').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        let modal = document.getElementById('filterModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
 </script>
 @endpush
 @endsection

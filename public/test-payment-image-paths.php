@@ -13,11 +13,6 @@ $response = $kernel->handle(
 
 // Authentication
 // Remove this if you want to test without auth
-if (!auth()->check()) {
-    echo "Not authenticated. This test requires authentication.<br>";
-    echo "Please login first at <a href='/login'>/login</a>";
-    exit;
-}
 
 echo "<h1>Payment Image Path Tester</h1>";
 echo "<p>This script checks all the paths where payment proof images might be stored.</p>";

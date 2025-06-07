@@ -100,27 +100,74 @@ use Carbon\Carbon;
                         </div>
                         @else
                             <div class="relative flex items-center justify-between w-full">
+                                <!-- Container untuk garis penghubung - adjusted positioning -->
+                                <div class="absolute left-0 w-full" style="top: 28px; z-index: 0;">
+                                    <div class="relative h-1">
+                                        <!-- Background line -->
+                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+                                        <!-- Progress line -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500 ease-in-out"
+                                             style="width: {{ ($currentIndex / (count($statuses) - 1)) * 100 }}%"></div>
+                                    </div>
+                                </div>
+                                <!-- Container untuk garis penghubung - adjusted z-index and positioning -->
+                                <div class="absolute top-6 left-0 w-full" style="z-index: -1;">
+                                    <div class="relative h-2">
+                                        <!-- Background line -->
+                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+                                        <!-- Progress line -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500 ease-in-out"
+                                             style="width: {{ ($currentIndex / (count($statuses) - 1)) * 100 }}%"></div>
+                                    </div>
+                                </div>
+
                                 @foreach($statuses as $index => $status)
-                                    <div class="flex flex-col items-center relative {{ $index > 0 ? 'flex-1' : '' }}">
-                                        <!-- Status Circle -->
-                                        <div class="{{ $index <= $currentIndex ? 'bg-green-500' : 'bg-gray-200' }} rounded-full h-12 w-12 flex items-center justify-center relative z-10">
+                                    <div class="flex flex-col items-center relative z-10 {{ $index > 0 ? 'flex-1' : '' }}">
+                                        <!-- Status Circle with Animation -->
+                                        <div class="{{ $index <= $currentIndex ? 'bg-gradient-to-r from-green-500 to-emerald-500 animate-pulse-slow shadow-lg' : 'bg-gray-200' }}
+                                             rounded-full h-14 w-14 flex items-center justify-center relative z-10
+                                             transform transition-all duration-500 ease-in-out hover:scale-110
+                                             {{ $index <= $currentIndex ? 'hover:shadow-green-300' : 'hover:shadow-gray-300' }}
+                                             border-4 {{ $index <= $currentIndex ? 'border-green-200' : 'border-gray-100' }}">
                                             @if ($index <= $currentIndex)
-                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                <svg class="w-7 h-7 text-white transform transition-transform duration-500 ease-in-out hover:rotate-12"
+                                                     fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                          clip-rule="evenodd">
+                                                    </path>
                                                 </svg>
                                             @else
-                                                <span class="text-gray-500 font-medium">{{ $index + 1 }}</span>
+                                                <span class="text-gray-500 font-bold text-lg">{{ $index + 1 }}</span>
                                             @endif
                                         </div>
 
-                                        <!-- Connecting Line -->
-                                        @if ($index < count($statuses) - 1)
-                                            <div class="absolute left-1/2 top-6 w-full h-1 {{ $index < $currentIndex ? 'bg-green-500' : 'bg-gray-200' }} transform translate-x-1/2"></div>
-                                        @endif
+                                        <!-- Removed old connecting line code as it's now handled by the container above -->
 
-                                        <!-- Status Label -->
-                                        <div class="text-xs mt-3 text-center {{ $index <= $currentIndex ? 'text-green-700 font-medium' : 'text-gray-500' }}">
-                                            {{ $status }}
+                                        <!-- Status Label with Animation -->
+                                        <div class="mt-4 text-center group relative">
+                                            <div class="text-sm font-semibold transition-all duration-300
+                                                {{ $index <= $currentIndex ? 'text-green-700 group-hover:text-green-800' : 'text-gray-500 group-hover:text-gray-700' }}">
+                                                {{ $status }}
+                                            </div>
+                                            @if ($index <= $currentIndex)
+                                                <div class="mt-1 text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                    @switch($index)
+                                                        @case(0)
+                                                            {{ $pesanan->created_at->format('d M Y H:i') }}
+                                                            @break
+                                                        @case(1)
+                                                            Diproses admin
+                                                            @break
+                                                        @case(2)
+                                                            {{ $pesanan->tanggal_pengiriman ?? 'Sedang dikirim' }}
+                                                            @break
+                                                        @case(3)
+                                                            {{ $pesanan->tanggal_selesai ?? 'Pesanan selesai' }}
+                                                            @break
+                                                    @endswitch
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach
@@ -224,8 +271,8 @@ use Carbon\Carbon;
                         @foreach($pesanan->detailPesanan as $detail)
                             <div class="p-4 flex {{ !$loop->last ? 'border-b border-gray-100' : '' }}">
                                 <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded overflow-hidden">
-                                    @if($detail->produk && $detail->produk->image)
-                                        <img src="{{ asset($detail->produk->image) }}" alt="{{ $detail->produk->name }}" class="w-full h-full object-cover">
+                                    @if($detail->produk && $detail->produk->gambar)
+                                        <img src="{{ asset($detail->produk->gambar) }}" alt="{{ $detail->produk->nama_ikan }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-400">
                                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -235,17 +282,15 @@ use Carbon\Carbon;
                                     @endif
                                 </div>
                                 <div class="ml-3 flex-grow">
-                                    <h4 class="text-sm text-gray-800 line-clamp-2">
-                                        @if($detail->produk)
-                                            {{ $detail->produk->name }}
-                                        @else
-                                            Produk tidak tersedia
-                                        @endif
+                                    <h4 class="text-sm font-medium text-gray-900 line-clamp-2">
+                                        {{ $detail->produk ? $detail->produk->nama_ikan : 'Produk tidak tersedia' }}
                                     </h4>
                                     <div class="mt-1 text-xs text-gray-500">
-                                        @if($detail->ukuran_id && isset($detail->ukuran))
-                                            <span>Variasi: {{ $detail->ukuran->ukuran }}</span>
+                                        @if($detail->produk_ukuran)
+                                            <span>Ukuran: {{ $detail->produk_ukuran->ukuran }}</span>
+                                            <span class="mx-1">·</span>
                                         @endif
+                                        <span>{{ number_format($detail->kuantitas, 0, ',', '.') }} item</span>
                                     </div>
                                 </div>
                                 <div class="ml-3 text-right">
@@ -328,13 +373,13 @@ use Carbon\Carbon;
 
 
         <!-- Payment Section - Moved to bottom for better UX -->
-        @if($pesanan->status_pesanan == 'Menunggu Pembayaran')
+        @if($pesanan->status_pesanan == 'Menunggu Pembayaran' && !$pesanan->bukti_pembayaran)
             <!-- Payment Details Section -->
             <div class="bg-white shadow-sm mb-4">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900">Pembayaran</h3>
-                    <span class="px-2.5 py-1 {{ $pesanan->bukti_pembayaran ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800' }} text-xs font-medium rounded-full">
-                        {{ $pesanan->bukti_pembayaran ? 'Menunggu Konfirmasi' : 'Belum Bayar' }}
+                    <span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                        Belum Bayar
                     </span>
                 </div>
                 <div class="p-4">
@@ -457,12 +502,12 @@ use Carbon\Carbon;
             </div>
         @endif
 
-        @if($pesanan->bukti_pembayaran)
+        @if($pesanan->status_pesanan == 'Menunggu Pembayaran' && $pesanan->bukti_pembayaran)
             <!-- Payment Confirmation Waiting Section -->
             <div class="bg-white shadow-sm mb-4">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="text-lg font-medium text-gray-900">Pembayaran</h3>
-                    <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                    <h3 class="text-lg font-medium text-gray-900">Konfirmasi Pembayaran</h3>
+                    <span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
                         Menunggu Konfirmasi
                     </span>
                 </div>
@@ -711,3 +756,49 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+
+@push('styles')
+<style>
+    @keyframes pulse-slow {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes progress-line {
+        0% {
+            background: linear-gradient(to right, #22c55e 0%, rgb(229, 231, 235) 0%);
+        }
+        100% {
+            background: linear-gradient(to right, #22c55e 100%, rgb(229, 231, 235) 0%);
+        }
+    }
+
+    .animate-pulse-slow {
+        animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .animate-progress-line {
+        animation: progress-line 1.5s ease-in-out forwards;
+    }
+
+    /* Hover effects for status items */
+    .status-item {
+        transition: transform 0.3s ease;
+    }
+
+    .status-item:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Custom shadow for completed status */
+    .status-completed {
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+    }
+</style>
+@endpush

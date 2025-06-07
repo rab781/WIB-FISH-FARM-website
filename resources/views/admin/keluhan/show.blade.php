@@ -3,118 +3,154 @@
 @section('title', 'Detail Keluhan')
 
 @section('content')
-<div class="min-h-screen bg-dark-bg text-light-text p-6">
-    <div class="container mx-auto max-w-4xl">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-primary-orange">Detail Keluhan #{{ $keluhan->id }}</h1>
-            <a href="{{ route('admin.keluhan.index') }}" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                Kembali ke Daftar
-            </a>
-        </div>
-
-        <div class="bg-dark-gray-secondary rounded-lg shadow-xl p-8 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <p class="text-soft-white text-sm">Pengirim:</p>
-                    <p class="text-lg font-semibold text-primary-orange">{{ $keluhan->user->name ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <p class="text-soft-white text-sm">Email Pengirim:</p>
-                    <p class="text-lg font-semibold text-primary-orange">{{ $keluhan->user->email ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <p class="text-soft-white text-sm">Jenis Keluhan:</p>
-                    <p class="text-xl font-bold text-light-text">{{ $keluhan->jenis_keluhan }}</p>
-                </div>
-                <div>
-                    <p class="text-soft-white text-sm">Status:</p>
-                    <span class="relative inline-block px-3 py-1 font-semibold leading-tight text-white">
-                        @php
-                            $statusClass = '';
-                            switch($keluhan->status) {
-                                case 'Belum Diproses': $statusClass = 'bg-yellow-500'; break;
-                                case 'Sedang Diproses': $statusClass = 'bg-blue-500'; break;
-                                case 'Selesai': $statusClass = 'bg-green-500'; break;
-                                default: $statusClass = 'bg-gray-400'; // Fallback
-                            }
-                        @endphp
-                        <span aria-hidden="true" class="absolute inset-0 opacity-50 rounded-full {{ $statusClass }}"></span>
-                        <span class="relative">{{ ucfirst($keluhan->status) }}</span>
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="md:flex md:items-center md:justify-between mb-8">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                        Detail Keluhan #{{ $keluhan->id }}
+                    </h2>
+                    <span class="ml-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {{ $keluhan->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' :
+                           ($keluhan->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' :
+                           ($keluhan->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                        {{ $keluhan->status }}
                     </span>
                 </div>
-                <div>
-                    <p class="text-soft-white text-sm">Tanggal Dibuat:</p>
-                    <p class="text-light-text">{{ $keluhan->created_at->format('d M Y H:i') }}</p>
+                <nav class="flex mt-2" aria-label="Breadcrumb">
+                    <ol role="list" class="flex items-center space-x-4">
+                        <li>
+                            <a href="{{ route('admin.keluhan.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Semua Keluhan</a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="ml-4 text-sm font-medium text-gray-500">Detail Keluhan</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <a href="{{ route('admin.keluhan.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Kembali
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <!-- Customer Info -->
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Pelanggan</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Detail pengirim keluhan.</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Dibuat pada</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $keluhan->created_at->format('d M Y, H:i') }}</p>
+                    </div>
                 </div>
-                @if ($keluhan->respon_at)
-                <div>
-                    <p class="text-soft-white text-sm">Tanggal Ditanggapi:</p>
-                    <p class="text-light-text">{{ $keluhan->respon_at->format('d M Y H:i') }}</p>
-                </div>
-                @endif
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Nama Lengkap</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $keluhan->user->name ?? 'N/A' }}</dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $keluhan->user->email ?? 'N/A' }}</dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Jenis Keluhan</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $keluhan->jenis_keluhan }}</dd>
+                    </div>
+                </dl>
             </div>
 
-            <hr class="border-t border-primary-orange my-6">
-
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold text-primary-orange mb-3">Detail Keluhan:</h3>
-                <p class="bg-soft-white text-dark-bg p-4 rounded-lg shadow-inner leading-relaxed">
+            <!-- Complaint Details -->
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Detail Keluhan</h3>
+                <div class="mt-4 prose prose-sm max-w-none text-gray-900">
                     {{ $keluhan->keluhan }}
-                </p>
+                </div>
             </div>
 
-            @if ($keluhan->gambar)
-                <div class="mb-6">
-                    <h3 class="text-xl font-semibold text-primary-orange mb-3">Lampiran:</h3>
-                    <a href="{{ Storage::url('keluhan/' . $keluhan->gambar) }}" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-.758l-.208.208A5.002 5.002 0 0113.828 10.172zm-7.536 7.536l-.208.208A5.002 5.002 0 0110.172 13.828l.208-.208m5.656-5.656a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-.758l-.208.208A5.002 5.002 0 0113.828 10.172z"></path></svg>
-                        Lihat Lampiran
+            <!-- Attachments -->
+            @if($keluhan->gambar)
+            <div class="px-4 py-5 sm:px-6 border-t border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Lampiran</h3>
+                <div class="mt-4">
+                    <a href="{{ Storage::url('keluhan/' . $keluhan->gambar) }}"
+                       target="_blank"
+                       class="inline-block group">
+                        <img src="{{ Storage::url('keluhan/' . $keluhan->gambar) }}"
+                             alt="Bukti Keluhan"
+                             class="h-48 w-auto object-cover rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
+                        <span class="mt-2 inline-flex items-center text-sm text-orange-600 group-hover:text-orange-700">
+                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                            </svg>
+                            Buka di tab baru
+                        </span>
                     </a>
                 </div>
+            </div>
             @endif
 
-            <hr class="border-t border-primary-orange my-6">
-
-            <h3 class="text-xl font-semibold text-primary-orange mb-3">Tanggapan Admin:</h3>
-            @if ($keluhan->respon_admin)
-                <div class="bg-light-text text-dark-bg p-4 rounded-lg shadow-md mb-4">
-                    <p class="font-bold mb-2">Admin:</p>
-                    <p class="leading-relaxed">{{ $keluhan->respon_admin }}</p>
-                </div>
-            @else
-                <p class="text-soft-white mb-4">Belum ada tanggapan dari admin.</p>
-            @endif
-
-            <div class="mt-6">
-                <h3 class="text-xl font-semibold text-primary-orange mb-3">Berikan Tanggapan / Ubah Status:</h3>
-                <form action="{{ route('admin.keluhan.respond', $keluhan->id) }}" method="POST">
+            <!-- Admin Response Form -->
+            <div class="px-4 py-5 sm:px-6 border-t border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Tanggapan Admin</h3>
+                <form action="{{ route('admin.keluhan.respond', $keluhan->id) }}" method="POST" class="mt-4">
                     @csrf
                     @method('PUT')
 
-                    <div class="mb-4">
-                        <label for="respon_admin" class="block text-light-text text-sm font-bold mb-2">Tanggapan Admin:</label>
-                        <textarea name="respon_admin" id="respon_admin" rows="5" class="shadow-sm appearance-none border rounded w-full py-3 px-4 text-dark-bg leading-tight focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent bg-soft-white">{{ old('respon_admin', $keluhan->respon_admin) }}</textarea>
-                        @error('respon_admin')
-                            <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="respon_admin" class="block text-sm font-medium text-gray-700">Isi Tanggapan</label>
+                            <div class="mt-1">
+                                <textarea id="respon_admin"
+                                          name="respon_admin"
+                                          rows="4"
+                                          class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                          placeholder="Tulis tanggapan untuk keluhan ini...">{{ old('respon_admin', $keluhan->respon_admin) }}</textarea>
+                            </div>
+                            @error('respon_admin')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    <div class="mb-6">
-                        <label for="status" class="block text-light-text text-sm font-bold mb-2">Ubah Status:</label>
-                        <select name="status" id="status" class="shadow-sm appearance-none border rounded w-full py-3 px-4 text-dark-bg leading-tight focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent bg-soft-white">
-                            <option value="Belum Diproses" {{ $keluhan->status == 'Belum Diproses' ? 'selected' : '' }}>Belum Diproses</option>
-                            <option value="Sedang Diproses" {{ $keluhan->status == 'Sedang Diproses' ? 'selected' : '' }}>Sedang Diproses</option>
-                            <option value="Selesai" {{ $keluhan->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                        </select>
-                        @error('status')
-                            <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700">Status Keluhan</label>
+                            <select id="status"
+                                    name="status"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
+                                <option value="Belum Diproses" {{ $keluhan->status == 'Belum Diproses' ? 'selected' : '' }}>Belum Diproses</option>
+                                <option value="Sedang Diproses" {{ $keluhan->status == 'Sedang Diproses' ? 'selected' : '' }}>Sedang Diproses</option>
+                                <option value="Selesai" {{ $keluhan->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                            </select>
+                            @error('status')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    <div class="flex items-center justify-end">
-                        <button type="submit" class="bg-primary-orange hover:bg-accent-orange text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
-                            Perbarui Keluhan
-                        </button>
+                        <div class="flex justify-end">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Simpan Tanggapan
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

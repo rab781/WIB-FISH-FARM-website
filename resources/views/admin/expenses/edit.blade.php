@@ -76,9 +76,15 @@
                 <p class="mb-0">Perbarui data pengeluaran bisnis Anda</p>
             </div>
             <div>
-                <a href="{{ route('admin.expenses.index') }}" class="btn btn-light">
-                    <i class="fas fa-arrow-left me-1"></i> Kembali
-                </a>
+                @if(isset($queryParams) && !empty($queryParams))
+                    <a href="{{ route('admin.reports.financial', $queryParams) }}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali ke Laporan
+                    </a>
+                @else
+                    <a href="{{ route('admin.expenses.index') }}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali
+                    </a>
+                @endif
             </div>
         </div>
 
@@ -87,6 +93,14 @@
             <form action="{{ route('admin.expenses.update', $expense->id) }}" method="POST">
                 @csrf
                 @method('PUT')
+                @if(isset($queryParams))
+                    @if(isset($queryParams['year']))
+                        <input type="hidden" name="year" value="{{ $queryParams['year'] }}">
+                    @endif
+                    @if(isset($queryParams['month']))
+                        <input type="hidden" name="month" value="{{ $queryParams['month'] }}">
+                    @endif
+                @endif
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
@@ -129,7 +143,7 @@
 
                     <div class="col-md-12 mb-3">
                         <label for="expense_date" class="form-label">Tanggal <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control @error('expense_date') is-invalid @enderror" id="expense_date" name="expense_date" value="{{ old('expense_date', $expense->expense_date->format('Y-m-d')) }}" required>
+                        <input type="date" class="form-control @error('expense_date') is-invalid @enderror" id="expense_date" name="expense_date" value="{{ old('expense_date', $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('Y-m-d') : \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d')) }}" required>
                         @error('expense_date')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

@@ -1212,4 +1212,103 @@ class PesananController extends Controller
         return redirect()->route('pesanan.index')
                         ->with('success', 'Pesanan berhasil dibatalkan');
     }
+
+    /**
+     * Show form for editing order shipping address
+     */
+    public function editAlamat(string $id)
+    {
+        $pesanan = Pesanan::where('id_pesanan', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Only allow editing address if order is still in initial stages
+        if (!in_array($pesanan->status_pesanan, ['Menunggu Pembayaran', 'Pembayaran Dikonfirmasi', 'Diproses'])) {
+            return redirect()->route('pesanan.show', $id)
+                ->with('error', 'Alamat pengiriman tidak dapat diubah karena status pesanan sudah ' . $pesanan->status_pesanan);
+        }
+
+        return view('pesanan.edit_alamat', compact('pesanan'));
+    }
+
+    /**
+     * Update order shipping address
+     */
+    public function updateAlamat(Request $request, string $id)
+    {
+        $pesanan = Pesanan::where('id_pesanan', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Only allow editing address if order is still in initial stages
+        if (!in_array($pesanan->status_pesanan, ['Menunggu Pembayaran', 'Pembayaran Dikonfirmasi', 'Diproses'])) {
+            return redirect()->route('pesanan.show', $id)
+                ->with('error', 'Alamat pengiriman tidak dapat diubah karena status pesanan sudah ' . $pesanan->status_pesanan);
+        }
+
+        $request->validate([
+            'alamat_id' => 'required|exists:alamat,id',
+            'alamat_jalan' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15'
+        ]);
+
+        // Get full address details
+        $alamat = \App\Models\Alamat::find($request->alamat_id);
+        $alamatPengiriman = $request->alamat_jalan . ', ' .
+            $alamat->kecamatan . ', ' .
+            $alamat->kabupaten . ', ' .
+            $alamat->provinsi . ' ' .
+            $alamat->kode_pos;
+
+        // Update pesanan with new address
+        $pesanan->update([
+            'alamat_pengiriman' => $alamatPengiriman,
+            'alamat_id' => $request->alamat_id,
+            'no_hp' => $request->no_hp
+        ]);
+
+        // Log the address change in timeline
+        $pesanan->addTimelineEntry(
+            'alamat_diubah',
+            'Alamat Pengiriman Diubah',
+            'Alamat pengiriman telah diperbarui'
+        );
+
+        // Notify admin about address change
+        NotificationController::notifyAdmins([
+            'type' => 'order',
+            'title' => 'Alamat Pengiriman Diubah',
+            'message' => 'Alamat pengiriman untuk pesanan #' . $pesanan->id_pesanan . ' telah diubah oleh pelanggan.',
+            'data' => [
+                'order_id' => $pesanan->id_pesanan,
+                'url' => route('admin.pesanan.show', $pesanan->id_pesanan)
+            ]
+        ]);
+
+        return redirect()->route('pesanan.show', $id)
+            ->with('success', 'Alamat pengiriman berhasil diperbarui.');
+    }
+
+    /**
+     * Show form for editing shipping address during checkout
+     */
+    public function editCheckoutAlamat()
+    {
+        // Get user with address details
+        $user = User::with(['alamat'])
+            ->where('id', Auth::id())
+            ->first();
+
+        // Get the current address if it exists
+        $alamat = null;
+        if ($user->alamat_id) {
+            $alamat = \App\Models\Alamat::find($user->alamat_id);
+        }
+
+        return view('pesanan.tambah_alamat', [
+            'user' => $user,
+            'alamat' => $alamat,
+            'selected_items' => request('selected_items', [])
+        ]);
+    }
 }

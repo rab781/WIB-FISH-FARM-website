@@ -183,15 +183,18 @@
                     </div>
                     <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end">
                         <div class="flex flex-wrap gap-2">
+                            <!-- Detail Pesanan selalu ditampilkan -->
                             <a href="{{ route('pesanan.show', $p->id_pesanan) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                 Detail Pesanan
                             </a>
 
-                            @if($p->status_pesanan == 'Menunggu Pembayaran')
+                            @if($p->status_pesanan == 'Menunggu Pembayaran' && !$p->bukti_pembayaran)
+                                <!-- Tampilkan tombol Bayar hanya jika belum ada bukti pembayaran -->
                                 <a href="{{ route('pesanan.show', $p->id_pesanan) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
                                     Bayar Sekarang
                                 </a>
                             @elseif($p->status_pesanan == 'Dikirim')
+                                <!-- Tombol konfirmasi penerimaan -->
                                 <form action="{{ route('pesanan.konfirmasi', $p->id_pesanan) }}" method="POST" class="inline-block">
                                     @csrf
                                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
@@ -199,12 +202,22 @@
                                     </button>
                                 </form>
                             @elseif($p->status_pesanan == 'Selesai')
-                                <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
-                                    Beli Lagi
-                                </a>
-                                <a href="{{ route('pesanan.review', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                    Beri Ulasan
-                                </a>
+                                <!-- Opsi setelah pesanan selesai -->
+                                <div class="flex gap-2">
+                                    @if(!$p->ulasan)
+                                        <a href="{{ route('pesanan.review', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
+                                            Beri Ulasan
+                                        </a>
+                                    @endif
+                                    @if($p->is_eligible_for_return)
+                                        <a href="{{ route('pesanan.return', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Ajukan Pengembalian
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('produk.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                        Beli Lagi
+                                    </a>
+                                </div>
                             @elseif($p->status_pesanan == 'Karantina')
                                 <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-sm">
                                     Dalam Karantina

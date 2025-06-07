@@ -226,9 +226,10 @@ class PesananController extends Controller
                 return redirect()->back()->with('error', 'Hanya pesanan dengan status Pembayaran Dikonfirmasi yang dapat diproses.');
             }
 
-            // Update status
-            $pesanan->status_pesanan = 'Diproses';
-            $pesanan->save();
+            // Update status using proper quote encapsulation
+            $pesanan->update([
+                'status_pesanan' => 'Diproses'
+            ]);
 
             // Return JSON response for AJAX requests
             if (request()->ajax()) {
@@ -275,11 +276,12 @@ class PesananController extends Controller
                 return redirect()->back()->with('error', 'Hanya pesanan dengan status Diproses yang dapat dikirim.');
             }
 
-            // Update status and tracking number
-            $pesanan->status_pesanan = 'Dikirim';
-            $pesanan->nomor_resi = $request->resi;
-            $pesanan->tanggal_pengiriman = now();
-            $pesanan->save();
+            // Update status and tracking number using proper quote encapsulation
+            $pesanan->update([
+                'status_pesanan' => 'Dikirim',
+                'nomor_resi' => $request->resi,
+                'tanggal_pengiriman' => now()
+            ]);
 
             // Return JSON response for AJAX requests
             if (request()->ajax()) {
@@ -405,9 +407,10 @@ class PesananController extends Controller
             $oldStatus = $pesanan->status_pesanan;
             $newStatus = $request->status_pesanan;
 
-            // Update status
-            $pesanan->status_pesanan = $newStatus;
-            $pesanan->save();
+            // Update status using proper quote encapsulation
+            $pesanan->update([
+                'status_pesanan' => $newStatus
+            ]);
 
             // Notify customer about status change
             NotificationController::notifyCustomer($pesanan->user_id, [
@@ -745,5 +748,5 @@ class PesananController extends Controller
             return back()->with('error', 'Gagal bulk update: ' . $e->getMessage());
         }
     }
-    
+
 }

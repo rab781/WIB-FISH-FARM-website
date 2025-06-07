@@ -34,9 +34,9 @@
 
             <!-- Cart items -->
             @foreach($keranjang as $item)
-            <div class="flex flex-col md:flex-row border-b border-gray-200 hover:bg-gray-50">
+            <div class="flex flex-col md:flex-row border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200" data-price="{{ $item->ukuran && $item->ukuran->harga ? $item->ukuran->harga : $item->produk->harga }}" data-total="{{ $item->total_harga }}">
                 <div class="md:w-6 p-4 flex items-center justify-center">
-                    <input type="checkbox" name="selected_items[]" value="{{ $item->id_keranjang }}" class="cart-item-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                    <input type="checkbox" name="selected_items[]" value="{{ $item->id_keranjang }}" class="cart-item-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500" onchange="updateCartItem(this)">
                 </div>
 
                 <div class="flex-1 p-4">
@@ -124,9 +124,17 @@
 
             <!-- Summary section -->
             <div class="p-4">
-                <div class="flex justify-between items-center">
-                    <p class="text-base font-medium">Total ({{ $keranjang->count() }} produk):</p>
-                    <p class="text-xl font-bold text-orange-600">Rp {{ number_format($totalHarga, 0, ',', '.') }}</p>
+                <div class="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-4">
+                    <div class="flex items-center text-orange-700 mb-2">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-sm">Pilih produk yang ingin Anda pesan dengan mencentang kotak di sebelah kiri produk.</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
+                    <p class="text-base font-medium">Total Produk Terpilih: <span id="selectedItemCount">0</span></p>
+                    <p class="text-xl font-bold text-orange-600">Rp <span id="selectedTotal">0</span></p>
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-4">
@@ -148,7 +156,7 @@
         </div>
         <h2 class="text-xl font-medium text-gray-900 mb-2">Keranjang Belanja Kosong</h2>
         <p class="text-gray-500 mb-6">Anda belum memiliki produk di keranjang belanja.</p>
-        <a href="{{ route('produk') }}" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+        <a href="{{ route('produk.index') }}" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
             Mulai Belanja
         </a>
     </div>
@@ -196,6 +204,7 @@
             selectAllCheckbox.addEventListener('change', function() {
                 document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
                     checkbox.checked = selectAllCheckbox.checked;
+                    updateCartItem(checkbox);
                 });
             });
         }
@@ -228,17 +237,46 @@
             });
         }
 
-        // Enable/disable 'Lanjut ke Pembayaran' button
+        // Manage cart item selection and total calculation
         const lanjutBtn = document.getElementById('lanjutPembayaranBtn');
         const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+        const selectedTotalDisplay = document.getElementById('selectedTotal');
+        const selectedCountDisplay = document.getElementById('selectedItemCount');
 
-        function updateLanjutBtn() {
-            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-            lanjutBtn.disabled = !anyChecked;
+        function updateCartItem(checkbox) {
+            const row = checkbox.closest('.flex.flex-col.md\\:flex-row');
+
+            // Toggle selected state visual
+            if (checkbox.checked) {
+                row.classList.add('bg-orange-50');
+                row.classList.add('border-l-4');
+                row.classList.add('border-l-orange-500');
+            } else {
+                row.classList.remove('bg-orange-50');
+                row.classList.remove('border-l-4');
+                row.classList.remove('border-l-orange-500');
+            }
+
+            updateTotalAndCount();
         }
 
+        function updateTotalAndCount() {
+            const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
+            let total = 0;
+
+            selectedItems.forEach(item => {
+                const row = item.closest('.flex.flex-col.md\\:flex-row');
+                total += parseFloat(row.dataset.total);
+            });
+
+            selectedTotalDisplay.textContent = total.toLocaleString('id-ID');
+            selectedCountDisplay.textContent = selectedItems.length;
+            lanjutBtn.disabled = selectedItems.length === 0;
+        }
+
+        // Initialize checkboxes
         checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateLanjutBtn);
+            cb.addEventListener('change', () => updateCartItem(cb));
         });
 
         // Handle checkout button click
