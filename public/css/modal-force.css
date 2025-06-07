@@ -1,0 +1,171 @@
+/* Modal Force Display CSS - Overrides all conflicts */
+
+/* CRITICAL: Force display properties with highest specificity and !important */
+#orderActionModal.show,
+#paymentProofModal.show {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    overflow-y: auto !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+/* Force hide when hidden class is present */
+#orderActionModal.hidden,
+#paymentProofModal.hidden,
+#orderActionModal:not(.show),
+#paymentProofModal:not(.show) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Modal content styling with force */
+#orderActionModal .modal-content,
+#paymentProofModal .modal-content {
+    background: white !important;
+    border-radius: 8px !important;
+    max-width: 600px !important;
+    width: 90% !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+    margin: auto !important;
+    transform: scale(1) !important;
+    z-index: 100000 !important;
+    pointer-events: auto !important;
+}
+
+/* Backdrop force styling */
+#orderActionModal,
+#paymentProofModal {
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+}
+
+/* Override any framework conflicts */
+.modal-backdrop,
+.modal-overlay {
+    z-index: 99998 !important;
+}
+
+/* Force modal content visibility */
+#orderActionModal.show .modal-content,
+#paymentProofModal.show .modal-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Animation overrides */
+#orderActionModal.show,
+#paymentProofModal.show {
+    animation: modalFadeIn 0.2s ease forwards !important;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0 !important;
+        transform: scale(0.9) !important;
+    }
+    to {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+    }
+}
+
+/* Bootstrap/Tailwind/Framework conflict overrides */
+.modal.show {
+    display: flex !important;
+}
+
+.fade:not(.show) {
+    opacity: 0 !important;
+}
+
+.fade.show {
+    opacity: 1 !important;
+}
+
+/* Prevent any parent containers from hiding modals */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Force all child elements to be visible */
+#orderActionModal.show *,
+#paymentProofModal.show * {
+    visibility: visible !important;
+}
+
+/* Override any CSS grid or flexbox issues */
+#orderActionModal.show,
+#paymentProofModal.show {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Force modal dialog positioning */
+#orderActionModal .modal-dialog,
+#paymentProofModal .modal-dialog {
+    margin: auto !important;
+    position: relative !important;
+    z-index: 100001 !important;
+}
+
+/* Critical: Ensure no transform or transition conflicts */
+#orderActionModal.show .modal-content,
+#paymentProofModal.show .modal-content {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Debug: Add a visible border to confirm modal is there */
+#orderActionModal.show {
+    border: 3px solid red !important;
+}
+
+#paymentProofModal.show {
+    border: 3px solid blue !important;
+}
+
+/* Force font and text to be visible */
+#orderActionModal.show *,
+#paymentProofModal.show * {
+    color: #000 !important;
+    font-size: inherit !important;
+}
+
+/* Override any parent element that might be causing issues */
+.container,
+.container-fluid,
+.wrapper,
+.main-content,
+.content-wrapper {
+    position: relative !important;
+}
+
+/* Prevent any layout issues */
+#orderActionModal.show,
+#paymentProofModal.show {
+    position: fixed !important;
+    inset: 0 !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+}

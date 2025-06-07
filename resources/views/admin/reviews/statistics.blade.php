@@ -29,9 +29,6 @@
 <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold text-gray-900">Statistik Ulasan</h1>
     <div class="flex space-x-3">
-        <a href="{{ route('admin.reviews.moderate') }}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg">
-            <i class="fas fa-gavel mr-2"></i>Moderasi
-        </a>
         <a href="{{ route('admin.reviews.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
             <i class="fas fa-list mr-2"></i>Semua Ulasan
         </a>
@@ -56,56 +53,62 @@
             </div>
         </div>
 
-        <!-- Pending Reviews -->
-        <div class="stat-card">
-            <div class="flex items-center">
-                <div class="stat-icon bg-yellow-500">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['pending_reviews']) }}</p>
-                    <p class="text-gray-600">Menunggu Moderasi</p>
-                    @if($stats['total_reviews'] > 0)
-                        <p class="text-xs text-gray-500">
-                            {{ number_format(($stats['pending_reviews'] / $stats['total_reviews']) * 100, 1) }}%
-                        </p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Approved Reviews -->
+        <!-- Reviews With Reply -->
         <div class="stat-card">
             <div class="flex items-center">
                 <div class="stat-icon bg-green-500">
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-reply"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['approved_reviews']) }}</p>
-                    <p class="text-gray-600">Disetujui</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['reviews_with_admin_reply']) }}</p>
+                    <p class="text-gray-600">Sudah Dibalas</p>
                     @if($stats['total_reviews'] > 0)
                         <p class="text-xs text-gray-500">
-                            {{ number_format(($stats['approved_reviews'] / $stats['total_reviews']) * 100, 1) }}%
+                            {{ number_format(($stats['reviews_with_admin_reply'] / $stats['total_reviews']) * 100, 1) }}%
                         </p>
                     @endif
                 </div>
             </div>
         </div>
 
-        <!-- Rejected Reviews -->
+        <!-- Reviews Without Reply -->
         <div class="stat-card">
             <div class="flex items-center">
-                <div class="stat-icon bg-red-500">
-                    <i class="fas fa-times"></i>
+                <div class="stat-icon bg-yellow-500">
+                    <i class="fas fa-comment-slash"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['rejected_reviews']) }}</p>
-                    <p class="text-gray-600">Ditolak</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['reviews_without_reply']) }}</p>
+                    <p class="text-gray-600">Belum Dibalas</p>
                     @if($stats['total_reviews'] > 0)
                         <p class="text-xs text-gray-500">
-                            {{ number_format(($stats['rejected_reviews'] / $stats['total_reviews']) * 100, 1) }}%
+                            {{ number_format(($stats['reviews_without_reply'] / $stats['total_reviews']) * 100, 1) }}%
                         </p>
                     @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Rating -->
+        <div class="stat-card">
+            <div class="flex items-center">
+                <div class="stat-icon bg-blue-500">
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['average_rating'], 1) }}</p>
+                    <p class="text-gray-600">Rating Rata-rata</p>
+                    <div class="flex text-yellow-400 text-xs mt-1">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= $stats['average_rating'])
+                                <i class="fas fa-star"></i>
+                            @elseif ($i - 0.5 <= $stats['average_rating'])
+                                <i class="fas fa-star-half-alt"></i>
+                            @else
+                                <i class="far fa-star"></i>
+                            @endif
+                        @endfor
+                    </div>
                 </div>
             </div>
         </div>

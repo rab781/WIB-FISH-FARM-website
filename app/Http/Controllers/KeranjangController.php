@@ -6,6 +6,15 @@ use App\Models\Keranjang;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+// Global Laravel helper functions
+use function view;
+use function redirect;
+use function response;
+use function request;
+use function route;
 
 class KeranjangController extends Controller
 {

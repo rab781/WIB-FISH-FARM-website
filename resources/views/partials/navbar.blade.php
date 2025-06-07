@@ -14,6 +14,7 @@
                 <a href="{{ route('tentang-kami') }}" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
                 @auth
                     <a href="/pesanan" class="text-gray-700 hover:text-orange-600 font-medium">Pesanan Saya</a>
+                    <a href="{{ route('pengembalian.index') }}" class="text-gray-700 hover:text-orange-600 font-medium">Pengembalian</a>
                     <a href="{{ route('keluhan.index') }}" class="text-gray-700 hover:text-orange-600 font-medium">Keluhan</a>
                 @endauth
             </nav>
@@ -114,6 +115,7 @@
             <a href="/tentang-kami" class="block py-2 text-gray-700 hover:text-orange-600">Tentang Kami</a>
             @auth
                 <a href="/pesanan" class="block py-2 text-gray-700 hover:text-orange-600">Pesanan Saya</a>
+                <a href="{{ route('pengembalian.index') }}" class="block py-2 text-gray-700 hover:text-orange-600">Pengembalian</a>
                 <a href="{{ route('keluhan.index') }}" class="block py-2 text-gray-700 hover:text-orange-600">Keluhan</a>
             @endauth
         </div>

@@ -7,6 +7,12 @@ use App\Models\Ulasan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+// Global Laravel helper functions
+use function view;
+use function redirect;
+use function response;
+use function route;
+
 class HomeController extends Controller
 {
     public function index()

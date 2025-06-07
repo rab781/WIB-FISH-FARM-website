@@ -37,7 +37,6 @@ class Pesanan extends Model
         'tanggal_diterima' => 'datetime',
         'tracking_history' => 'array',
         'is_karantina_active' => 'boolean',
-        'is_reviewable' => 'boolean',
         'total_harga' => 'decimal:2',
         'ongkir_biaya' => 'decimal:2',
         'jumlah_refund' => 'decimal:2',
@@ -83,7 +82,6 @@ class Pesanan extends Model
         'tracking_history',
         'kondisi_diterima',
         'catatan_penerimaan',
-        'is_reviewable',
         'alasan_pembatalan',
         'bukti_pembayaran',
         'tanggal_pembayaran',
@@ -123,6 +121,11 @@ class Pesanan extends Model
     public function refundRequests()
     {
         return $this->hasMany(RefundRequest::class, 'id_pesanan', 'id_pesanan');
+    }
+
+    public function pengembalian()
+    {
+        return $this->hasMany(Pengembalian::class, 'id_pesanan', 'id_pesanan');
     }
 
     public function timeline()
@@ -286,6 +289,12 @@ class Pesanan extends Model
         return $this->detailPesanan->sum('kuantitas');
     }
 
+    // Accessor for backward compatibility with views that use nomor_resi
+    public function getNomorResiAttribute()
+    {
+        return $this->no_resi;
+    }
+
     public function getIsTrackableAttribute(): bool
     {
         return !empty($this->no_resi) && in_array($this->status_pesanan, ['Dikirim']);
@@ -301,16 +310,50 @@ class Pesanan extends Model
         // Pesanan dapat diajukan pengembalian jika:
         // 1. Status pesanan selesai
         // 2. Belum ada pengajuan pengembalian sebelumnya
-        // 3. Masih dalam waktu yang ditentukan (misal 7 hari setelah diterima)
+        // 3. Masih dalam waktu yang ditentukan (24 jam setelah diterima)
         return $this->status_pesanan === 'Selesai' &&
                !$this->refundRequests()->exists() &&
                $this->tanggal_diterima &&
-               $this->tanggal_diterima->addDays(7)->isFuture();
+               $this->tanggal_diterima->copy()->addHours(24)->isFuture();
     }
 
     public function getUlasanAttribute()
     {
-        // Mengecek apakah pesanan sudah diulas
-        return $this->hasMany(\App\Models\Ulasan::class, 'id_pesanan', 'id_pesanan')->first();
+        // Get all reviews for products in this order
+        $productIds = $this->detailPesanan->pluck('id_Produk');
+        return \App\Models\Ulasan::where('user_id', $this->user_id)
+            ->whereIn('id_Produk', $productIds)
+            ->get();
+    }
+
+    public function getReviewableProductsAttribute()
+    {
+        // Get all product IDs from this order that haven't been reviewed yet
+        $productIds = $this->detailPesanan->pluck('id_Produk')->toArray();
+
+        // Get already reviewed product IDs
+        $reviewedProductIds = \App\Models\Ulasan::where('user_id', $this->user_id)
+            ->whereIn('id_Produk', $productIds)
+            ->pluck('id_Produk')
+            ->toArray();
+
+        // Calculate products that can be reviewed
+        $reviewableProductIds = array_diff($productIds, $reviewedProductIds);
+
+        // Return corresponding detail pesanan items for these products
+        return $this->detailPesanan->filter(function($detail) use ($reviewableProductIds) {
+            return in_array($detail->id_Produk, $reviewableProductIds);
+        });
+    }
+
+    public function getIsReviewableAttribute(): bool
+    {
+        // Pesanan dapat direview jika:
+        // 1. Status pesanan selesai
+        // 2. Pesanan telah diterima
+        // 3. Masih ada produk yang belum direview
+        return $this->status_pesanan === 'Selesai' &&
+               $this->tanggal_diterima &&
+               $this->reviewable_products->isNotEmpty();
     }
 }

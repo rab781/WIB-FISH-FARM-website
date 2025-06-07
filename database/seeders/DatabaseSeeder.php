@@ -3,6 +3,19 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\ProdukSeeder;
+use Database\Seeders\LokasiSeeder;
+use Database\Seeders\OngkirSeeder;
+use Database\Seeders\KeranjangSeeder;
+use Database\Seeders\PesananSeeder;
+use Database\Seeders\DetailPesananSeeder;
+use Database\Seeders\PembayaranSeeder;
+use Database\Seeders\UlasanSeeder;
+use Database\Seeders\RefundRequestSeeder;
+use Database\Seeders\KeluhanSeeder;
+use Database\Seeders\SalesReportSeeder;
+use Database\Seeders\ExpenseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +37,8 @@ class DatabaseSeeder extends Seeder
             DetailPesananSeeder::class, // 7. Detail Pesanan (membutuhkan Pesanan dan Produk)
             PembayaranSeeder::class,    // 8. Pembayaran (membutuhkan Pesanan)
             UlasanSeeder::class,        // 9. Ulasan (membutuhkan User dan Produk)
+            RefundRequestSeeder::class,  // 10. Refund Requests (membutuhkan Pesanan)
+            KeluhanSeeder::class,        // 11. Keluhan (membutuhkan User)
         ]);
 
         // Jalankan seeder untuk data laporan

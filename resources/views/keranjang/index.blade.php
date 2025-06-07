@@ -143,7 +143,7 @@
                     </button>
 
                     <button type="button" id="lanjutPembayaranBtn" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Lanjut ke Pembayaran
+                        Buat Pesanan
                     </button>
                 </div>
             </div>

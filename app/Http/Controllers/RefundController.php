@@ -46,6 +46,16 @@ class RefundController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Ensure only completed orders with delivery confirmation can be refunded
+        if ($pesanan->status_pesanan !== 'Selesai') {
+            return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat mengajukan pengembalian');
+        }
+
+        // Ensure order is within 24 hours of delivery
+        if (!$pesanan->tanggal_diterima || $pesanan->tanggal_diterima->addHours(24)->isPast()) {
+            return back()->with('error', 'Permintaan pengembalian hanya dapat diajukan dalam 24 jam setelah pesanan diterima');
+        }
+
         if (!$pesanan->canRequestRefund()) {
             return back()->with('error', 'Pesanan tidak dapat mengajukan refund');
         }
@@ -113,7 +123,7 @@ class RefundController extends Controller
     {
         $status = $request->input('status');
         $allowedStatuses = ['approved', 'processing', 'completed'];
-        
+
         if (!in_array($status, $allowedStatuses)) {
             return back()->with('error', 'Status tidak valid');
         }
@@ -127,7 +137,7 @@ class RefundController extends Controller
         }
 
         $updateData = ['status' => $status];
-        
+
         if ($status === 'processing') {
             $updateData['processed_at'] = now();
         } else if ($status === 'completed') {
@@ -175,6 +185,11 @@ class RefundController extends Controller
         // Ensure user can only create refund for their own orders
         if ($pesanan->user_id !== \Illuminate\Support\Facades\Auth::id()) {
             abort(403);
+        }
+
+        // Check if the order is eligible for return (within 24 hours of delivery)
+        if (!$pesanan->is_eligible_for_return) {
+            return back()->with('error', 'Permintaan pengembalian hanya dapat diajukan dalam 24 jam setelah pesanan diterima');
         }
 
         if (!$pesanan->canRequestRefund()) {

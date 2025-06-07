@@ -71,5 +71,39 @@ class DetailPesananSeeder extends Seeder
             'harga' => 25000,
             'subtotal' => 25000, // 1 * 25000
         ]);
+
+        // Detail pesanan untuk pesanan ID 5 (Completed order)
+        DetailPesanan::create([
+            'id_pesanan' => 5,
+            'id_Produk' => 2, // Ikan Nila
+            'kuantitas' => 1,
+            'harga' => 35000,
+            'subtotal' => 35000,
+        ]);
+        DetailPesanan::create([
+            'id_pesanan' => 5,
+            'id_Produk' => 3, // Ikan Gurame
+            'kuantitas' => 2,
+            'harga' => 75000,
+            'subtotal' => 150000,
+        ]);
+
+        // Detail pesanan untuk pesanan ID 6 (Shipped order)
+        DetailPesanan::create([
+            'id_pesanan' => 6,
+            'id_Produk' => 5, // Ikan Tongkol
+            'kuantitas' => 2,
+            'harga' => 45000,
+            'subtotal' => 90000,
+        ]);
+
+        // Detail pesanan untuk pesanan ID 7 (Return in process)
+        DetailPesanan::create([
+            'id_pesanan' => 7,
+            'id_Produk' => 6, // Ikan Salmon
+            'kuantitas' => 1,
+            'harga' => 150000,
+            'subtotal' => 150000,
+        ]);
     }
 }

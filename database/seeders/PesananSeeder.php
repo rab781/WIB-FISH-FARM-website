@@ -43,5 +43,32 @@ class PesananSeeder extends Seeder
             'total_harga' => 91000, // 75000 (produk) + 16000 (ongkir)
             'status_pesanan' => 'Dibatalkan',
         ]);
+
+        // Additional orders for testing
+        Pesanan::create([
+            'user_id' => 2,
+            'id_ongkir' => 4, // Yogyakarta
+            'total_harga' => 200000,
+            'status_pesanan' => 'Selesai',
+            'tanggal_pengiriman' => now()->subDays(1),
+            'tanggal_diterima' => now()->subHours(5),
+        ]);
+
+        Pesanan::create([
+            'user_id' => 3,
+            'id_ongkir' => 3, // Surabaya
+            'total_harga' => 120000,
+            'status_pesanan' => 'Dikirim',
+            'tanggal_pengiriman' => now()->subHours(2),
+        ]);
+
+        Pesanan::create([
+            'user_id' => 4,
+            'id_ongkir' => 2, // Bandung
+            'total_harga' => 300000,
+            'status_pesanan' => 'Pengembalian',
+            'tanggal_pengiriman' => now()->subDays(2),
+            'tanggal_diterima' => now()->subDays(1)->subHours(2),
+        ]);
     }
 }

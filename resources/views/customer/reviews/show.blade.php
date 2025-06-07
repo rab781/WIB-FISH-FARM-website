@@ -63,7 +63,7 @@
                 <h1 class="text-2xl font-bold text-gray-800 mb-2">Detail Review</h1>
                 <p class="text-gray-600">Review untuk pesanan #{{ $review->pesanan ? $review->pesanan->id : 'N/A' }}</p>
             </div>
-            <a href="{{ route('customer.reviews.index') }}"
+            <a href="{{ route('reviews.index') }}"
                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -234,7 +234,7 @@
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-gray-200">
-                        <a href="{{ route('customer.products.show', $review->produk->id) }}"
+                        <a href="{{ route('detailProduk', $review->produk->id_Produk) }}"
                            class="text-orange-600 hover:text-orange-700 text-sm font-medium transition-colors duration-200">
                             Lihat Detail Produk →
                         </a>

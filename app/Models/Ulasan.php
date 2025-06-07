@@ -71,12 +71,8 @@ class Ulasan extends Model
     // Review status methods
     public function getStatusBadgeAttribute(): string
     {
-        return match($this->status_review) {
-            'pending' => '<span class="badge bg-warning text-dark">Menunggu Review</span>',
-            'approved' => '<span class="badge bg-success">Disetujui</span>',
-            'rejected' => '<span class="badge bg-danger">Ditolak</span>',
-            default => '<span class="badge bg-secondary">Unknown</span>'
-        };
+        // All reviews are now automatically approved
+        return '<span class="badge bg-success">Dipublikasi</span>';
     }
 
     public function getRatingStarsAttribute(): string

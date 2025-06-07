@@ -252,7 +252,7 @@
                         </div>
 
                         <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 text-base font-medium" {{ $alamatLengkap ? '' : 'disabled' }}>
-                            Buat Pesanan
+                            Lanjut ke Pembayaran
                         </button>
                     </form>
                 </div>

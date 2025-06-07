@@ -66,10 +66,10 @@
                             </div>
                         </a>
 
-                        <a href="{{ route('admin.refunds.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.refunds.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
+                        <a href="{{ route('admin.pengembalian.index') }}" class="block py-2.5 px-4 rounded transition duration-200 {{ request()->routeIs('admin.pengembalian.*') ? 'bg-gray-900' : 'hover:bg-gray-700' }}">
                             <div class="flex items-center">
                                 <i class="fas fa-undo w-6 mr-3"></i>
-                                <span>Refund</span>
+                                <span>Pengembalian</span>
                             </div>
                         </a>
 

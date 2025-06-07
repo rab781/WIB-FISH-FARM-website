@@ -81,42 +81,11 @@
                         {{ ucfirst($review->status_review) }}
                     </span>
 
-                    <!-- Actions Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                        <div x-show="open" @click.away="open = false"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-                            <div class="py-1">
-                                @if($review->status_review === 'pending')
-                                    <form action="{{ route('admin.reviews.updateStatus', $review) }}" method="POST" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="status_review" value="approved">
-                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50">
-                                            <i class="fas fa-check mr-2"></i>Setujui
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.reviews.updateStatus', $review) }}" method="POST" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="status_review" value="rejected">
-                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">
-                                            <i class="fas fa-times mr-2"></i>Tolak
-                                        </button>
-                                    </form>
-                                @endif
-                                @if($review->status_review === 'approved')
-                                    <form action="{{ route('admin.reviews.updateStatus', $review) }}" method="POST" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="status_review" value="pending">
-                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-yellow-700 hover:bg-yellow-50">
-                                            <i class="fas fa-clock mr-2"></i>Ubah ke Pending
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Admin Actions Button -->
+                    <a href="#replySection" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg inline-flex items-center">
+                        <i class="fas fa-reply mr-2"></i>
+                        Balas Ulasan
+                    </a>
                 </div>
             </div>
 
@@ -216,7 +185,7 @@
 
             <!-- Add Admin Reply Form -->
             @if(!$review->hasAdminReply())
-                <div class="border-t border-gray-200 pt-6">
+                <div id="replySection" class="border-t border-gray-200 pt-6 mt-6 bg-orange-50 p-4 rounded-lg">
                     <h4 class="text-md font-semibold text-gray-900 mb-3">Tambah Balasan Admin:</h4>
                     <form action="{{ route('admin.reviews.addAdminReply', $review) }}" method="POST">
                         @csrf

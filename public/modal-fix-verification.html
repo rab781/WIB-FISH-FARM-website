@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Fix Verification</title>
+    <link rel="stylesheet" href="/css/modal-force.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button-test {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 14px;
+        }
+        .button-test:hover {
+            background-color: #e55a2b;
+        }
+        .status-indicator {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-success { background-color: #d4edda; color: #155724; }
+        .status-error { background-color: #f8d7da; color: #721c24; }
+        .status-info { background-color: #d1ecf1; color: #0c5460; }
+
+        /* Modal styles matching the actual implementation */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+        }
+        .modal-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 51;
+        }
+        #orderActionModal {
+            display: none;
+        }
+        #orderActionModal.show {
+            display: flex !important;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Admin Modal Fix Verification</h1>
+        <p>This page tests the complete modal and form submission flow for admin order actions.</p>
+
+        <div class="status-indicator status-info">
+            <strong>Status:</strong> Testing modal display and form submission fixes
+        </div>
+
+        <h2>Test Order Action Buttons</h2>
+        <p>These buttons simulate the actual admin order page buttons:</p>
+
+        <button type="button" class="button-test confirm-payment" data-id="1474">
+            🟢 Konfirmasi Pembayaran
+        </button>
+
+        <button type="button" class="button-test process-order" data-id="1474">
+            🔄 Proses Pesanan
+        </button>
+
+        <button type="button" class="button-test ship-order" data-id="1474">
+            🚚 Kirim Pesanan
+        </button>
+
+        <button type="button" class="button-test cancel-order" data-id="1474">
+            ❌ Batalkan Pesanan
+        </button>
+
+        <button type="button" class="button-test complete-order" data-id="1474">
+            ✅ Selesaikan Pesanan
+        </button>
+
+        <h2>Test Results</h2>
+        <div id="testResults">
+            <div class="status-indicator status-info">Click buttons above to test modal functionality</div>
+        </div>
+
+        <h2>Console Output</h2>
+        <p>Check the browser console for detailed debugging information.</p>
+        <div id="consoleOutput" style="background: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace; height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+            Console output will appear here...
+        </div>
+    </div>
+
+    <!-- Modal HTML (matches the actual admin implementation) -->
+    <div id="orderActionModal" class="hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-content max-w-2xl w-full mx-auto">
+                <div class="bg-orange-600 px-4 py-3 flex justify-between items-center">
+                    <h3 class="text-lg leading-6 font-medium text-white" id="orderActionModalLabel">Update Status Pesanan</h3>
+                    <button type="button" class="text-white hover:text-gray-200 modal-close">
+                        <i class="fas fa-times">×</i>
+                    </button>
+                </div>
+                <form id="orderActionForm" method="POST">
+                    <!-- CSRF token would be here in actual Laravel app -->
+                    <input type="hidden" name="_token" value="dummy-csrf-token-for-testing">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <p id="orderActionText" class="text-gray-700 mb-4">Apakah Anda yakin ingin mengubah status pesanan ini?</p>
+
+                        <div id="orderCancelReasonContainer" class="mb-4 hidden">
+                            <label for="alasan_pembatalan" class="block text-sm font-medium text-gray-700 mb-1">Alasan Pembatalan</label>
+                            <textarea id="alasan_pembatalan" name="alasan_pembatalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan alasan pembatalan pesanan"></textarea>
+                        </div>
+
+                        <div id="orderShippingContainer" class="mb-4 hidden">
+                            <label for="nomor_resi" class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi Pengiriman</label>
+                            <input type="text" id="nomor_resi" name="resi" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan nomor resi pengiriman">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm" id="orderActionButton">
+                            Konfirmasi
+                        </button>
+                        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/admin-modal.js"></script>
+    <script>
+        // Enhanced console logging for testing
+        const consoleOutputDiv = document.getElementById('consoleOutput');
+        const testResultsDiv = document.getElementById('testResults');
+
+        function logToPage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            consoleOutputDiv.textContent += logEntry;
+            consoleOutputDiv.scrollTop = consoleOutputDiv.scrollHeight;
+        }
+
+        function addTestResult(message, type = 'info') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status-indicator status-${type}`;
+            resultDiv.textContent = message;
+            testResultsDiv.appendChild(resultDiv);
+        }
+
+        // Override console methods to capture output
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToPage('LOG: ' + args.join(' '));
+        };
+
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToPage('ERROR: ' + args.join(' '));
+        };
+
+        // Test the modal system when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            logToPage('Page loaded, testing modal system...');
+
+            // Test 1: Check if admin-modal.js functions are available
+            if (typeof setupAdminOrderAction === 'function') {
+                addTestResult('✅ setupAdminOrderAction function loaded successfully', 'success');
+                logToPage('setupAdminOrderAction function is available');
+            } else {
+                addTestResult('❌ setupAdminOrderAction function not found', 'error');
+                logToPage('setupAdminOrderAction function is NOT available');
+            }
+
+            // Test 2: Check if modal element exists
+            const modal = document.getElementById('orderActionModal');
+            if (modal) {
+                addTestResult('✅ Modal element found in DOM', 'success');
+                logToPage('Modal element found');
+            } else {
+                addTestResult('❌ Modal element not found', 'error');
+                logToPage('Modal element NOT found');
+            }
+
+            // Test 3: Check if form element exists
+            const form = document.getElementById('orderActionForm');
+            if (form) {
+                addTestResult('✅ Form element found in DOM', 'success');
+                logToPage('Form element found');
+            } else {
+                addTestResult('❌ Form element not found', 'error');
+                logToPage('Form element NOT found');
+            }
+
+            // Test 4: Check if event listeners are attached
+            const buttons = document.querySelectorAll('.confirm-payment, .process-order, .ship-order, .cancel-order, .complete-order');
+            if (buttons.length > 0) {
+                addTestResult(`✅ Found ${buttons.length} action buttons`, 'success');
+                logToPage(`Found ${buttons.length} action buttons`);
+            } else {
+                addTestResult('❌ No action buttons found', 'error');
+                logToPage('No action buttons found');
+            }
+        });
+
+        // Add form submission interception for testing
+        document.addEventListener('submit', function(e) {
+            if (e.target.id === 'orderActionForm') {
+                e.preventDefault(); // Prevent actual submission for testing
+                logToPage('FORM SUBMISSION INTERCEPTED (prevented for testing)');
+                addTestResult('🔄 Form submission triggered - action: ' + e.target.action, 'info');
+            }
+        });
+    </script>
+</body>
+</html>

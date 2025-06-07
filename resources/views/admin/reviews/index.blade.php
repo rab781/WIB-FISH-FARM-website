@@ -41,7 +41,7 @@
 @section('content')
 <div class="p-6">
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-green-100 text-green-600">
@@ -91,10 +91,11 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">Semua Status</option>
-                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Balasan</label>
+                    <select name="replied" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">Semua</option>
+                        <option value="yes" {{ request('replied') == 'yes' ? 'selected' : '' }}>Sudah Dibalas</option>
+                        <option value="no" {{ request('replied') == 'no' ? 'selected' : '' }}>Belum Dibalas</option>
                     </select>
                 </div>
 

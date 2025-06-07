@@ -3,6 +3,8 @@
 @section('title', 'Ajukan Refund')
 
 @push('styles')
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
     .upload-area {
         border: 2px dashed #d1d5db;
@@ -51,10 +53,56 @@
         cursor: pointer;
         font-size: 12px;
     }
+
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    .loading-overlay.active {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #fff;
+        border-radius: 50%;
+        border-top-color: #f97316;
+        border-right-color: #f97316;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 @endpush
 
 @section('content')
+<!-- CSRF Meta Tag -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="flex flex-col items-center">
+        <div class="loading-spinner mb-4"></div>
+        <p class="text-white text-lg">Memproses pengajuan refund...</p>
+    </div>
+</div>
+
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-8">
@@ -248,26 +296,32 @@
             <!-- Submit Buttons -->
             <div class="flex flex-wrap gap-4 justify-end">
                 <a href="{{ route('pesanan.show', $pesanan) }}"
-                   class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                   class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
                     Batal
                 </a>
                 <button type="submit"
-                        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors">
+                        id="submitRefund"
+                        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
                     <i class="fas fa-paper-plane mr-2"></i>
-                    Ajukan Refund
+                    <span>Ajukan Refund</span>
                 </button>
             </div>
+
         </form>
     </div>
 </div>
 @endsection
 
 @push('scripts')
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const uploadArea = document.getElementById('uploadArea');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
+    const loadingOverlay = document.getElementById('loadingOverlay');
     let selectedFiles = [];
 
     // Click to upload
@@ -356,34 +410,164 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Form validation
-    document.getElementById('refundForm').addEventListener('submit', function(e) {
-        const description = document.getElementById('description').value;
-        if (description.length < 20) {
-            e.preventDefault();
-            alert('Deskripsi masalah harus minimal 20 karakter');
+    // Initialize modal
+    function showModal(title, message, type = 'info') {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+        modal.innerHTML = `
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="relative bg-white rounded-lg max-w-md w-full">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">${title}</h3>
+                            <button type="button" class="modal-close text-gray-400 hover:text-gray-500">
+                                <span class="sr-only">Close</span>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600">${message}</p>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" class="modal-close px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close modal handlers
+        modal.querySelectorAll('.modal-close').forEach(button => {
+            button.addEventListener('click', () => {
+                modal.remove();
+            });
+        });
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    const refundForm = document.getElementById('refundForm');
+    const submitBtn = document.getElementById('submitRefund');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    refundForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Validate form
+        const reason = document.querySelector('input[name="reason"]:checked');
+        if (!reason) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Silakan pilih alasan refund',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
             return;
         }
 
-        const reason = document.querySelector('input[name="reason"]:checked');
-        if (!reason) {
-            e.preventDefault();
-            alert('Silakan pilih alasan refund');
+        const description = document.getElementById('description').value;
+        if (description.length < 20) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Deskripsi masalah harus minimal 20 karakter',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
             return;
         }
 
         const amount = document.getElementById('amount').value;
-        const maxAmount = {{ $pesanan->total_harga }};
-        if (amount > maxAmount) {
-            e.preventDefault();
-            alert('Jumlah refund tidak boleh melebihi total pesanan');
+        if (!amount || amount <= 0) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Jumlah refund harus lebih dari 0',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+
+        const agreeTerms = document.querySelector('input[name="agree_terms"]:checked');
+        if (!agreeTerms) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Anda harus menyetujui syarat dan ketentuan',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+
+        // Show confirmation
+        const result = await Swal.fire({
+            title: 'Konfirmasi Pengajuan Refund',
+            text: 'Apakah Anda yakin ingin mengajukan refund untuk pesanan ini? Pastikan semua informasi yang Anda berikan sudah benar.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f97316',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Ajukan Refund',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
+        loadingOverlay.style.display = 'flex';
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+
+        try {
+            const formData = new FormData(this);
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    title: 'Sukses',
+                    text: 'Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.',
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+                window.location.href = '{{ route("pesanan.show", $pesanan) }}';
+            } else {
+                throw new Error(result.message || 'Terjadi kesalahan saat memproses pengajuan refund');
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: error.message || 'Terjadi kesalahan saat mengirim pengajuan refund',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
     });
 
     // Update amount display

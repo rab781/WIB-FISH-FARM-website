@@ -10,20 +10,60 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\NotificationController;
+
+// Global Laravel helper functions
+use function view;
+use function redirect;
+use function response;
+use function request;
+use function route;
+use function public_path;
+use function storage_path;
+use function env;
+use function now;
+use function abort;
+use function back;
 
 class PesananController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pesanan = Pesanan::with(['detailPesanan.produk'])
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Pesanan::with(['detailPesanan.produk'])
+            ->where('user_id', Auth::id());
 
+        // Status filter
+        if ($request->status) {
+            if ($request->status == 'Sedang Diproses') {
+                $query->whereIn('status_pesanan', ['Sedang Diproses', 'Diproses', 'Karantina']);
+            } elseif ($request->status == 'Dikirim') {
+                $query->whereIn('status_pesanan', ['Sedang Dikirim', 'Dikirim']);
+            } else {
+                $query->where('status_pesanan', $request->status);
+            }
+        }
+
+        // Search filter for product name or order number
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('id_pesanan', 'like', '%' . $search . '%')
+                  ->orWhereHas('detailPesanan.produk', function($pq) use ($search) {
+                      $pq->where('nama_ikan', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Order by latest first
+        $query->orderBy('created_at', 'desc');
+
+        $pesanan = $query->paginate(10);
         return view('pesanan.index', compact('pesanan'));
     }
 
@@ -1106,13 +1146,8 @@ class PesananController extends Controller
             abort(403);
         }
 
-        if (!$pesanan->is_reviewable) {
-            return back()->with('error', 'Pesanan belum dapat direview');
-        }
-
-        $pesanan->load(['detailPesanan.produk']);
-
-        return view('pesanan.review', compact('pesanan'));
+        // Redirect to the ReviewController's create method
+        return redirect()->route('reviews.create', $pesanan);
     }
 
     /**

@@ -204,13 +204,16 @@
                             @elseif($p->status_pesanan == 'Selesai')
                                 <!-- Opsi setelah pesanan selesai -->
                                 <div class="flex gap-2">
-                                    @if(!$p->ulasan)
-                                        <a href="{{ route('pesanan.review', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
+                                    @if($p->is_reviewable)
+                                        <a href="{{ route('reviews.create', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700">
                                             Beri Ulasan
                                         </a>
                                     @endif
                                     @if($p->is_eligible_for_return)
-                                        <a href="{{ route('pesanan.return', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                        <a href="{{ route('refunds.create', ['pesanan' => $p->id_pesanan]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"></path>
+                                            </svg>
                                             Ajukan Pengembalian
                                         </a>
                                     @endif
@@ -218,10 +221,6 @@
                                         Beli Lagi
                                     </a>
                                 </div>
-                            @elseif($p->status_pesanan == 'Karantina')
-                                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-sm">
-                                    Dalam Karantina
-                                </span>
                             @elseif($p->status_pesanan == 'Pengembalian')
                                 <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-700 bg-orange-100 rounded-sm">
                                     Proses Pengembalian

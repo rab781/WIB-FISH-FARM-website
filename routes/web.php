@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{id}/payment/upload', [App\Http\Controllers\PesananController::class, 'showPaymentUpload'])->name('pembayaran.upload');
     Route::post('/pesanan/{id}/payment', [App\Http\Controllers\PesananController::class, 'submitPayment'])->name('pesanan.payment');
     Route::post('/pesanan/{id}/konfirmasi', [App\Http\Controllers\PesananController::class, 'konfirmasiPesanan'])->name('pesanan.konfirmasi');
+    Route::get('/pesanan/{pesanan}/review', [App\Http\Controllers\PesananController::class, 'review'])->name('pesanan.review');
 
     // Direct payment proof viewing route
     Route::get('/pesanan/{id}/payment-proof', [App\Http\Controllers\PesananController::class, 'viewPaymentProof'])->name('pesanan.payment-proof');
@@ -71,6 +72,12 @@ Route::middleware('auth')->group(function () {
 
     // Order timeline view
     Route::get('/pesanan/{pesanan}/timeline', [App\Http\Controllers\PesananController::class, 'timeline'])->name('pesanan.timeline');
+
+    // Pengembalian (Return) management - Customer
+    Route::get('/pengembalian', [App\Http\Controllers\PengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::get('/pengembalian/{id}', [App\Http\Controllers\PengembalianController::class, 'show'])->name('pengembalian.show');
+    Route::get('/pesanan/{pesanan}/pengembalian/create', [App\Http\Controllers\PengembalianController::class, 'create'])->name('pengembalian.create');
+    Route::post('/pesanan/{pesanan}/pengembalian', [App\Http\Controllers\PengembalianController::class, 'store'])->name('pengembalian.store');
 
     // Review management - Customer
     Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'customerIndex'])->name('reviews.index');
@@ -161,6 +168,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('pesanan/{id}/ship', [App\Http\Controllers\Admin\PesananController::class, 'ship'])->name('admin.pesanan.ship');
     Route::post('pesanan/{id}/confirm-payment', [App\Http\Controllers\Admin\PesananController::class, 'confirmPayment'])->name('admin.pesanan.confirm-payment');
     Route::post('pesanan/{id}/cancel', [App\Http\Controllers\Admin\PesananController::class, 'cancel'])->name('admin.pesanan.cancel');
+    Route::post('pesanan/{id}/complete', [App\Http\Controllers\Admin\PesananController::class, 'complete'])->name('admin.pesanan.complete');
     Route::get('pesanan/{id}/payment-proof', [App\Http\Controllers\Admin\PesananController::class, 'viewPaymentProof'])->name('admin.pesanan.payment-proof');
 
     // Admin users routes
@@ -203,15 +211,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         Route::get('/export', [App\Http\Controllers\RefundController::class, 'export'])->name('admin.refunds.export');
     });
 
+    // Pengembalian (Return) Management - Admin
+    Route::prefix('pengembalian')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\PengembalianController::class, 'index'])->name('admin.pengembalian.index');
+        Route::get('/{id}', [App\Http\Controllers\Admin\PengembalianController::class, 'show'])->name('admin.pengembalian.show');
+        Route::post('/{id}/update-status', [App\Http\Controllers\Admin\PengembalianController::class, 'updateStatus'])->name('admin.pengembalian.updateStatus');
+        Route::post('/{id}/approve', [App\Http\Controllers\Admin\PengembalianController::class, 'approve'])->name('admin.pengembalian.approve');
+        Route::post('/{id}/reject', [App\Http\Controllers\Admin\PengembalianController::class, 'reject'])->name('admin.pengembalian.reject');
+        Route::post('/{id}/mark-refunded', [App\Http\Controllers\Admin\PengembalianController::class, 'markRefunded'])->name('admin.pengembalian.markRefunded');
+    });
+
     // Review Management
     Route::prefix('reviews')->group(function () {
-        Route::get('/', [App\Http\Controllers\ReviewController::class, 'adminIndex'])->name('admin.reviews.index');
-        Route::get('/moderate', [App\Http\Controllers\ReviewController::class, 'moderate'])->name('admin.reviews.moderate');
-        Route::get('/statistics', [App\Http\Controllers\ReviewController::class, 'statistics'])->name('admin.reviews.statistics');
-        Route::get('/{review}', [App\Http\Controllers\ReviewController::class, 'adminShow'])->name('admin.reviews.show');
-        Route::post('/{review}/reply', [App\Http\Controllers\ReviewController::class, 'addAdminReply'])->name('admin.reviews.addAdminReply');
-        Route::post('/{review}/update-status', [App\Http\Controllers\ReviewController::class, 'updateStatus'])->name('admin.reviews.updateStatus');
-        Route::post('/bulk-moderate', [App\Http\Controllers\ReviewController::class, 'bulkModerate'])->name('admin.reviews.bulkModerate');
+        Route::get('/', [App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('admin.reviews.index');
+        Route::get('/statistics', [App\Http\Controllers\Admin\ReviewController::class, 'statistics'])->name('admin.reviews.statistics');
+        Route::get('/{review}', [App\Http\Controllers\Admin\ReviewController::class, 'show'])->name('admin.reviews.show');
+        Route::post('/{review}/reply', [App\Http\Controllers\Admin\ReviewController::class, 'addReply'])->name('admin.reviews.addAdminReply');
     });
 
     // Diagnostic Tools

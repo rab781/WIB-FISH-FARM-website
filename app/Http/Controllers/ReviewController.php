@@ -42,8 +42,14 @@ class ReviewController extends Controller
             abort(403);
         }
 
-        if (!$pesanan->is_reviewable) {
-            return back()->with('error', 'Pesanan belum dapat direview');
+        // Validate that the order is completed and can be reviewed
+        if ($pesanan->status_pesanan !== 'Selesai') {
+            return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat direview');
+        }
+
+        // Check if there are still reviewable products
+        if ($pesanan->reviewable_products->isEmpty()) {
+            return back()->with('error', 'Semua produk dalam pesanan ini sudah direview');
         }
 
         $validator = Validator::make($request->all(), [
@@ -58,14 +64,20 @@ class ReviewController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        foreach ($request->reviews as $reviewData) {
-            // Check if user has ordered this product
-            $hasOrdered = $pesanan->detailPesanan()
-                                 ->where('id_Produk', $reviewData['id_produk'])
-                                 ->exists();
+        // Keep track of how many reviews were created
+        $reviewCount = 0;
 
-            if (!$hasOrdered) {
-                continue; // Skip products not in this order
+        foreach ($request->reviews as $reviewData) {
+            // Check if user has ordered this product and it hasn't been reviewed yet
+            $productId = $reviewData['id_produk'];
+
+            // Check if this product is in the reviewable products list
+            $canReview = $pesanan->reviewable_products
+                ->where('id_Produk', $productId)
+                ->isNotEmpty();
+
+            if (!$canReview) {
+                continue; // Skip products that can't be reviewed
             }
 
             // Handle photo uploads
@@ -77,17 +89,21 @@ class ReviewController extends Controller
                 }
             }
 
+            // Create the review with auto-approval
             Ulasan::create([
                 'user_id' => Auth::id(),
-                'id_Produk' => $reviewData['id_produk'],
+                'id_Produk' => $productId,
                 'rating' => $reviewData['rating'],
                 'komentar' => $reviewData['komentar'],
                 'foto_review' => $fotoReview,
-                'is_verified_purchase' => true
+                'is_verified_purchase' => true,
+                'status_review' => 'approved' // Auto-approve all reviews
             ]);
+
+            $reviewCount++;
         }
 
-        return back()->with('success', 'Review berhasil ditambahkan');
+        return redirect()->route('reviews.index')->with('success', "{$reviewCount} review berhasil ditambahkan");
     }
 
     public function addAdminReply(Request $request, Ulasan $review)
@@ -169,7 +185,6 @@ class ReviewController extends Controller
     public function productReviews(Produk $produk)
     {
         $reviews = $produk->ulasan()
-                         ->where('status_review', 'approved')
                          ->with(['user', 'adminReplier', 'interactions'])
                          ->orderBy('helpful_count', 'desc')
                          ->orderBy('created_at', 'desc')
@@ -293,11 +308,26 @@ class ReviewController extends Controller
             abort(403);
         }
 
-        if (!$pesanan->is_reviewable) {
-            return back()->with('error', 'Pesanan belum dapat direview');
+        // Validate that the order is completed
+        if ($pesanan->status_pesanan !== 'Selesai') {
+            return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat direview');
         }
 
+        // Make sure the pesanan has tanggal_diterima set
+        if (!$pesanan->tanggal_diterima) {
+            return back()->with('error', 'Pesanan belum dapat direview karena belum dikonfirmasi sebagai diterima');
+        }
+
+        // Load the order details including products
         $pesanan->load(['detailPesanan.produk']);
-        return view('customer.reviews.create', compact('pesanan'));
+
+        // Check if there are any reviewable products using our new logic
+        if ($pesanan->reviewable_products->isEmpty()) {
+            return redirect()->route('pesanan.show', $pesanan->id_pesanan)
+                ->with('info', 'Semua produk dalam pesanan ini sudah direview');
+        }
+
+        // Use our updated template
+        return view('customer.reviews.create_updated', compact('pesanan'));
     }
 }

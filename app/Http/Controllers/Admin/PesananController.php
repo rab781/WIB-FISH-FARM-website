@@ -279,7 +279,7 @@ class PesananController extends Controller
             // Update status and tracking number using proper quote encapsulation
             $pesanan->update([
                 'status_pesanan' => 'Dikirim',
-                'nomor_resi' => $request->resi,
+                'no_resi' => $request->resi,
                 'tanggal_pengiriman' => now()
             ]);
 
@@ -746,6 +746,60 @@ class PesananController extends Controller
 
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal bulk update: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Mark an order as completed
+     */
+    public function complete(string $id)
+    {
+        try {
+            $pesanan = Pesanan::findOrFail($id);
+
+            // Only allow completion for shipped orders
+            if ($pesanan->status_pesanan !== 'Dikirim') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya pesanan yang sudah dikirim yang dapat diselesaikan.'
+                ], 400);
+            }
+
+            // Update status to completed
+            $pesanan->status_pesanan = 'Selesai';
+            $pesanan->tanggal_selesai = now();
+            $pesanan->save();
+
+            // Notify customer about completion
+            NotificationController::notifyCustomer($pesanan->user_id, [
+                'type' => 'order',
+                'title' => 'Pesanan Selesai',
+                'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah selesai.',
+                'data' => [
+                    'order_id' => $pesanan->id_pesanan,
+                    'status' => 'Selesai'
+                ]
+            ]);
+
+            // Return JSON response for AJAX requests
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil diselesaikan.'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Pesanan berhasil diselesaikan.');
+
+        } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menyelesaikan pesanan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Gagal menyelesaikan pesanan: ' . $e->getMessage());
         }
     }
 

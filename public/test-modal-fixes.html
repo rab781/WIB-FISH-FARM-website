@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; }
+        .btn { padding: 8px 16px; margin: 5px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .hidden { display: none !important; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Modal System Fix Test</h1>
+
+    <div class="test-section">
+        <h3>Order Action Buttons</h3>
+        <button class="btn btn-primary confirm-payment" data-id="123">Konfirmasi Pembayaran</button>
+        <button class="btn btn-warning process-order" data-id="123">Proses Pesanan</button>
+        <button class="btn btn-primary ship-order" data-id="123">Kirim Pesanan</button>
+        <button class="btn btn-danger cancel-order" data-id="123">Batalkan Pesanan</button>
+        <button class="btn btn-success complete-order" data-id="123">Selesaikan Pesanan</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Payment Proof Button</h3>
+        <button class="btn btn-warning trigger-payment-proof-modal">Lihat Bukti Pembayaran</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Log</h3>
+        <div id="testLog" class="log"></div>
+        <button onclick="clearLog()" class="btn">Clear Log</button>
+    </div>
+
+    <!-- Order Action Modal -->
+    <div id="orderActionModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="orderActionModalLabel">Order Action</h3>
+            <p id="orderActionText">Action description</p>
+            <form id="orderActionForm" method="POST">
+                <input type="hidden" name="_token" value="test-token">
+                <div id="orderShippingContainer" class="hidden">
+                    <label>Nomor Resi:</label>
+                    <input type="text" name="nomor_resi" required>
+                </div>
+                <div id="orderCancelReasonContainer" class="hidden">
+                    <label>Alasan Pembatalan:</label>
+                    <textarea name="alasan_pembatalan" required></textarea>
+                </div>
+                <button type="submit" id="orderActionButton" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn modal-close">Close</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Proof Modal -->
+    <div id="paymentProofModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Bukti Pembayaran</h3>
+            <p>Payment proof content would go here...</p>
+            <button type="button" class="btn modal-close">Close</button>
+        </div>
+    </div>
+
+    <!-- Load Scripts -->
+    <script src="js/admin-modal.js"></script>
+    <script src="js/admin-modal-fixed.js"></script>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        // Test logging
+        log('Modal test page loaded');
+
+        // Override console.log to capture modal script output
+        const originalLog = console.log;
+        console.log = function(...args) {
+            log(args.join(' '));
+            originalLog.apply(console, args);
+        };
+
+        // Test buttons after page load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                log('=== TESTING MODAL FUNCTIONALITY ===');
+
+                // Test if modal functions are available
+                log('showModal function available: ' + (typeof window.showModal === 'function'));
+                log('setupOrderAction function available: ' + (typeof window.setupOrderAction === 'function'));
+                log('ultimateModalFix function available: ' + (typeof window.ultimateModalFix === 'function'));
+
+                // Count event listeners
+                const actionButtons = document.querySelectorAll('.confirm-payment, .process-order, .ship-order, .cancel-order, .complete-order');
+                const paymentButtons = document.querySelectorAll('.trigger-payment-proof-modal');
+
+                log(`Found ${actionButtons.length} action buttons`);
+                log(`Found ${paymentButtons.length} payment proof buttons`);
+
+                log('=== TEST READY ===');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -10,6 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\NotificationController;
 
+// Global Laravel helper functions
+use function view;
+use function redirect;
+use function response;
+use function route;
+use function back;
+
 class UlasanController extends Controller
 {
     /**
