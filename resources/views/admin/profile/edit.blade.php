@@ -21,7 +21,7 @@
     </div>
     @endif
 
-    <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white shadow-md rounded-lg overflow-hidden">
+    <form id="profileUpdateForm" action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white shadow-md rounded-lg overflow-hidden">
         @csrf
         @method('PUT')
 
@@ -139,6 +139,73 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    function validatePasswordBeforeSave() {
+        const password = document.getElementById('password').value;
+        if (!password) {
+            Swal.fire({
+                title: 'Password Diperlukan',
+                text: 'Masukkan password untuk menyimpan perubahan.',
+                icon: 'warning',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+            return false;
+        }
+        return true;
+    }
+
+    // Handle form submission with SweetAlert2 confirmation
+    document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Konfirmasi Perubahan',
+            text: 'Apakah Anda yakin ingin menyimpan perubahan data profil?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md'
+            },
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return new Promise((resolve) => {
+                    // Add a small delay for better UX
+                    setTimeout(() => {
+                        resolve();
+                    }, 500);
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Menyimpan...',
+                    text: 'Sedang memproses perubahan profil.',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Submit the form
+                this.submit();
+            }
+        });
+    });
 </script>
 @endpush
 

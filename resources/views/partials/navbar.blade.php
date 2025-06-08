@@ -10,7 +10,7 @@
                     </a>
                 </div>
                 <a href="/" class="text-gray-700 hover:text-orange-600 font-medium">Beranda</a>
-                <a href="/produk" class="text-gray-700 hover:text-orange-600 font-medium">Produk</a>
+                <a href="/produk" class="text-gray-700 hover:text-orange-600 font-medium">Katalog</a>
                 <a href="{{ route('tentang-kami') }}" class="text-gray-700 hover:text-orange-600 font-medium">Tentang Kami</a>
                 @auth
                     <a href="/pesanan" class="text-gray-700 hover:text-orange-600 font-medium">Pesanan Saya</a>

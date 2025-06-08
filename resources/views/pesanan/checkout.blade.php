@@ -105,19 +105,12 @@
                                         Rp {{ number_format($item->total_harga, 0, ',', '.') }}
                                     </p>
                                 </div>
-                                @if($item->ukuran)
-                                <p class="mt-1 text-sm text-gray-500">Ukuran: {{ $item->ukuran->ukuran }}</p>
-                                @endif
                             </div>
 
                             <div class="flex-1 flex items-end justify-between text-sm">
                                 <p class="text-gray-500">Qty {{ $item->jumlah }}</p>
                                 <p class="text-gray-500">
-                                    @if($item->ukuran && $item->ukuran->harga)
-                                        Rp {{ number_format($item->ukuran->harga, 0, ',', '.') }} x {{ $item->jumlah }}
-                                    @else
-                                        Rp {{ number_format($item->produk->harga, 0, ',', '.') }} x {{ $item->jumlah }}
-                                    @endif
+                                    Rp {{ number_format($item->produk->harga, 0, ',', '.') }} x {{ $item->jumlah }}
                                 </p>
                             </div>
                         </div>
@@ -283,14 +276,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Validate courier selection
             if (!courierField || courierField.value !== 'tiki') {
                 e.preventDefault();
-                alert('Pengiriman ikan hias hanya dapat menggunakan kurir TIKI untuk menjaga keamanan dan kualitas ikan.');
+                Swal.fire({
+                    title: 'Kurir Tidak Valid',
+                    text: 'Pengiriman ikan hias hanya dapat menggunakan kurir TIKI untuk menjaga keamanan dan kualitas ikan.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 return false;
             }
 
             // Validate shipping cost
             if (!currentOngkir || currentOngkir === 0) {
                 e.preventDefault();
-                alert('Mohon tunggu kalkulasi biaya pengiriman selesai.');
+                Swal.fire({
+                    title: 'Kalkulasi Belum Selesai',
+                    text: 'Mohon tunggu kalkulasi biaya pengiriman selesai.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 return false;
             }
 

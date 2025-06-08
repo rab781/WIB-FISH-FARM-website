@@ -31,7 +31,7 @@
     <form action="{{ route('refund.store', $pesanan->id_pesanan) }}" method="POST" enctype="multipart/form-data" id="refundForm">
         @csrf
         <input type="hidden" name="id_pesanan" value="{{ $pesanan->id_pesanan }}">
-        
+
         <div class="row">
             <!-- Informasi Pesanan -->
             <div class="col-md-4 mb-4">
@@ -71,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Form Refund -->
             <div class="col-md-8 mb-4">
                 <div class="card shadow-sm">
@@ -88,7 +88,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
                                 <label for="jenis_refund" class="form-label">Jenis Refund <span class="text-danger">*</span></label>
@@ -104,7 +104,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            
+
                             <div class="col-md-6 mb-3">
                                 <label for="jumlah_diminta" class="form-label">Jumlah Refund <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -117,7 +117,7 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="mb-4">
                             <label for="deskripsi_masalah" class="form-label">Deskripsi Masalah <span class="text-danger">*</span></label>
                             <textarea name="deskripsi_masalah" id="deskripsi_masalah" rows="4" class="form-control @error('deskripsi_masalah') is-invalid @enderror" placeholder="Jelaskan secara detail masalah yang Anda alami..." required>{{ old('deskripsi_masalah') }}</textarea>
@@ -126,7 +126,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        
+
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
                                 <label for="metode_refund" class="form-label">Metode Refund <span class="text-danger">*</span></label>
@@ -140,7 +140,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            
+
                             <div class="col-md-6 mb-3">
                                 <label for="detail_refund" class="form-label">Detail Metode Refund <span class="text-danger">*</span></label>
                                 <input type="text" name="detail_refund" id="detail_refund" class="form-control @error('detail_refund') is-invalid @enderror" value="{{ old('detail_refund') }}" placeholder="Contoh: BCA - 1234567890 - John Doe" required>
@@ -150,7 +150,7 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="mb-4">
                             <label for="bukti_pendukung" class="form-label">Bukti Pendukung <span class="text-muted">(Opsional)</span></label>
                             <input type="file" name="bukti_pendukung[]" id="bukti_pendukung" class="form-control @error('bukti_pendukung.*') is-invalid @enderror" multiple accept="image/jpeg,image/png,image/jpg">
@@ -159,9 +159,9 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        
+
                         <div class="preview-images row mb-3" id="imagePreviewContainer"></div>
-                        
+
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i> Ajukan Refund
@@ -181,63 +181,73 @@
         // Handle file preview
         const input = document.getElementById('bukti_pendukung');
         const previewContainer = document.getElementById('imagePreviewContainer');
-        
+
         input.addEventListener('change', function() {
             previewContainer.innerHTML = '';
-            
+
             if (this.files.length > 5) {
-                alert('Maksimal 5 file yang dapat diunggah');
+                Swal.fire({
+                    title: 'File Terlalu Banyak',
+                    text: 'Maksimal 5 file yang dapat diunggah',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 this.value = '';
                 return;
             }
-            
+
             for (let i = 0; i < this.files.length; i++) {
                 const file = this.files[i];
-                
+
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Ukuran file melebihi batas 2MB');
+                    Swal.fire({
+                        title: 'File Terlalu Besar',
+                        text: 'Ukuran file melebihi batas 2MB',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
                     this.value = '';
                     previewContainer.innerHTML = '';
                     return;
                 }
-                
+
                 const reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     const col = document.createElement('div');
                     col.className = 'col-md-3 col-6 mb-3';
-                    
+
                     const card = document.createElement('div');
                     card.className = 'card h-100';
-                    
+
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.className = 'card-img-top';
                     img.style = 'height: 120px; object-fit: cover;';
-                    
+
                     const cardBody = document.createElement('div');
                     cardBody.className = 'card-body p-2';
-                    
+
                     const fileName = document.createElement('p');
                     fileName.className = 'card-text small text-truncate mb-0';
                     fileName.textContent = file.name;
-                    
+
                     cardBody.appendChild(fileName);
                     card.appendChild(img);
                     card.appendChild(cardBody);
                     col.appendChild(card);
-                    
+
                     previewContainer.appendChild(col);
                 };
-                
+
                 reader.readAsDataURL(file);
             }
         });
-        
+
         // Update detail refund help text based on selected method
         const metodeRefund = document.getElementById('metode_refund');
         const detailRefundHelp = document.getElementById('detail_refund_help');
-        
+
         metodeRefund.addEventListener('change', function() {
             switch(this.value) {
                 case 'transfer_bank':
@@ -257,7 +267,7 @@
                     document.getElementById('detail_refund').placeholder = '';
             }
         });
-        
+
         // Form validation
         const form = document.getElementById('refundForm');
         form.addEventListener('submit', function(event) {
@@ -265,32 +275,37 @@
             const deskripsiMasalah = document.getElementById('deskripsi_masalah').value;
             const metodeRefund = document.getElementById('metode_refund').value;
             const detailRefund = document.getElementById('detail_refund').value;
-            
+
             let hasError = false;
-            
+
             if (!jenisRefund) {
                 document.getElementById('jenis_refund').classList.add('is-invalid');
                 hasError = true;
             }
-            
+
             if (deskripsiMasalah.length < 10) {
                 document.getElementById('deskripsi_masalah').classList.add('is-invalid');
                 hasError = true;
             }
-            
+
             if (!metodeRefund) {
                 document.getElementById('metode_refund').classList.add('is-invalid');
                 hasError = true;
             }
-            
+
             if (!detailRefund) {
                 document.getElementById('detail_refund').classList.add('is-invalid');
                 hasError = true;
             }
-            
+
             if (hasError) {
                 event.preventDefault();
-                alert('Mohon lengkapi semua field yang wajib diisi dengan benar!');
+                Swal.fire({
+                    title: 'Form Belum Lengkap',
+                    text: 'Mohon lengkapi semua field yang wajib diisi dengan benar!',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });

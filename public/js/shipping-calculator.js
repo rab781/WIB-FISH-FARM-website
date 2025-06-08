@@ -4,7 +4,7 @@
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Fixed origin address for Sumbersari, Jember, Jawa Timur
-    const ORIGIN_ID = 114; // ID untuk Sumbersari, Jember (sesuaikan dengan ID yang benar)
+    const ORIGIN_ID = 30957; // ID untuk Sumbersari, Jember (sesuaikan dengan ID yang benar)
     const COURIER = 'tiki'; // Hanya menggunakan TIKI
 
     // Calculate weight based on number of fish

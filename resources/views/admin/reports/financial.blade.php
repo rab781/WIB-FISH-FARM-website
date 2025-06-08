@@ -303,12 +303,12 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 {{-- Form Hapus --}}
-                                <form action="{{ route('admin.expenses.destroy', ['expense' => $expense->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?');" style="display:inline;">
+                                <form class="delete-expense-form" action="{{ route('admin.expenses.destroy', ['expense' => $expense->id]) }}" method="POST" style="display:inline;" data-expense-name="{{ $expense->deskripsi }}">
                                     @csrf
                                     @method('DELETE')
                                     <input type="hidden" name="year" value="{{ $selectedYear }}">
                                     <input type="hidden" name="month" value="{{ $selectedMonth }}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="Hapus">
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete-expense-btn" data-bs-toggle="tooltip" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -803,14 +803,58 @@
         // Construct URL for export (assuming your backend has an export route for financial reports)
         const exportUrl = `{{ route('admin.expenses.export') }}?start_date=${startDate}&end_date=${endDate}&year=${year}&month=${month}`;
 
-        // In a real application, you would fetch data via AJAX or directly link for download
-        alert('Memulai ekspor laporan keuangan. (Fungsi ekspor aktual perlu diimplementasikan di backend)');
-        // window.location.href = exportUrl; // Uncomment this to trigger actual download if backend is ready
+        // Show SweetAlert2 for export
+        Swal.fire({
+            title: 'Ekspor Laporan Keuangan',
+            text: 'Memulai ekspor laporan keuangan...',
+            icon: 'info',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'rounded-lg'
+            }
+        }).then(() => {
+            // window.location.href = exportUrl; // Uncomment this to trigger actual download if backend is ready
+            Swal.fire({
+                title: 'Fungsi Belum Tersedia',
+                text: 'Fungsi ekspor aktual perlu diimplementasikan di backend.',
+                icon: 'warning',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
     };
 
     // Placeholder for refreshAllCharts - implement actual data fetching/chart re-draw
     window.refreshAllCharts = function() {
-        alert('Data chart akan di-refresh. (Perlu implementasi API data fetching)');
+        Swal.fire({
+            title: 'Refresh Data Chart',
+            text: 'Data chart akan di-refresh...',
+            icon: 'info',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'rounded-lg'
+            }
+        }).then(() => {
+            Swal.fire({
+                title: 'Fungsi Belum Tersedia',
+                text: 'Perlu implementasi API data fetching untuk refresh chart.',
+                icon: 'warning',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
         // Example:
         // monthlyRevenueExpenseChart.update();
         // paymentDistributionChart.update();
@@ -854,6 +898,56 @@
             closeModal();
         }
     }
+
+    // Handle delete expense confirmations
+    document.querySelectorAll('.delete-expense-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const form = this.closest('.delete-expense-form');
+            const expenseName = form.getAttribute('data-expense-name');
+
+            Swal.fire({
+                title: 'Hapus Pengeluaran?',
+                html: `<div class="text-center"><p class="text-red-600 font-semibold mb-2">⚠️ PERINGATAN ⚠️</p><p>Pengeluaran "${expenseName}" akan dihapus secara permanen dan <strong>tidak dapat dibatalkan</strong>!</p></div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve();
+                        }, 500);
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        text: 'Sedang memproses penghapusan pengeluaran.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    });
 </script>
 @endpush
 @endsection

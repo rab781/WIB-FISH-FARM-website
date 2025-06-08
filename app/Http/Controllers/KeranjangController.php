@@ -31,7 +31,7 @@ class KeranjangController extends Controller
         // Menghitung total harga keranjang
         $totalHarga = $keranjang->sum('total_harga');
 
-        return view('keranjang.index', compact('keranjang', 'totalHarga'));
+        return view('customer.keranjang.index', compact('keranjang', 'totalHarga'));
     }
 
     /**
@@ -47,25 +47,31 @@ class KeranjangController extends Controller
         // Ambil data produk
         $produk = Produk::findOrFail($request->id_produk);
 
-        // Cek stok
-        if ($produk->stok < $request->jumlah) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stok tidak mencukupi'
-                ]);
-            }
-            return redirect()->back()->with('error', 'Stok tidak mencukupi');
-        }
-
         // Cek apakah produk sudah ada di keranjang
         $keranjang = Keranjang::where('user_id', Auth::id())
                     ->where('id_Produk', $request->id_produk)
                     ->first();
 
+        // Hitung total quantity yang akan ada di keranjang
+        $totalQuantityDiKeranjang = $keranjang ? $keranjang->jumlah + $request->jumlah : $request->jumlah;
+
+        // Cek stok dengan mempertimbangkan yang sudah ada di keranjang
+        if ($produk->stok < $totalQuantityDiKeranjang) {
+            $stokTersisa = $produk->stok - ($keranjang ? $keranjang->jumlah : 0);
+            $errorMessage = "Stok tidak mencukupi. Stok tersedia: {$produk->stok}, yang sudah di keranjang: " . ($keranjang ? $keranjang->jumlah : 0) . ", maksimal dapat ditambahkan: {$stokTersisa}";
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ]);
+            }
+            return redirect()->back()->with('error', $errorMessage);
+        }
+
         // Jika sudah ada, update jumlah dan total harga
         if ($keranjang) {
-            $keranjang->jumlah += $request->jumlah;
+            $keranjang->jumlah = $totalQuantityDiKeranjang;
             $keranjang->total_harga = $keranjang->jumlah * $produk->harga;
             $keranjang->save();
         } else {
@@ -98,83 +104,53 @@ class KeranjangController extends Controller
         // Validasi input
         $request->validate([
             'product_id' => 'required|exists:produk,id_Produk',
-            'quantity' => 'required|integer|min:1',
-            'size_id' => 'nullable|exists:produk_ukuran,id',
+            'quantity' => 'required|integer|min:1|max:10',
         ]);
 
         // Ambil data produk
         $produk = Produk::findOrFail($request->product_id);
 
-        // Variabel untuk menyimpan harga dan stok yang akan digunakan
-        $hargaProduk = $produk->harga;
-        $stokTersedia = $produk->stok;
-        $ukuranId = null;
-
-        // Jika ukuran dipilih, gunakan data ukuran
-        if ($request->has('size_id') && $request->size_id) {
-            $ukuran = \App\Models\ProdukUkuran::findOrFail($request->size_id);
-
-            // Pastikan ukuran ini milik produk yang dipilih
-            if ($ukuran->id_produk != $produk->id_Produk) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ukuran yang dipilih tidak valid untuk produk ini'
-                ], 400);
-            }
-
-            // Gunakan stok ukuran untuk validasi
-            $stokTersedia = $ukuran->stok;
-
-            // Gunakan harga ukuran jika tersedia, jika tidak, gunakan harga produk
-            $hargaProduk = $ukuran->harga ?: $produk->harga;
-
-            // Simpan ukuran_id untuk disimpan ke keranjang
-            $ukuranId = $ukuran->id;
-        }
-
-        // Cek stok
-        if ($stokTersedia < $request->quantity) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stok tidak mencukupi'
-                ]);
-            }
-            return redirect()->back()->with('error', 'Stok tidak mencukupi');
-        }
-
-        // Cek apakah produk dengan ukuran yang sama sudah ada di keranjang
+        // Cek apakah produk sudah ada di keranjang
         $keranjang = Keranjang::where('user_id', Auth::id())
                    ->where('id_Produk', $request->product_id)
-                   ->where('ukuran_id', $ukuranId)
                    ->first();
+
+        // Hitung total quantity yang akan ada di keranjang
+        $totalQuantityDiKeranjang = $keranjang ? $keranjang->jumlah + $request->quantity : $request->quantity;
+
+        // Cek stok dengan mempertimbangkan yang sudah ada di keranjang
+        if ($produk->stok < $totalQuantityDiKeranjang) {
+            $stokTersisa = $produk->stok - ($keranjang ? $keranjang->jumlah : 0);
+            return response()->json([
+                'success' => false,
+                'message' => 'Stok tidak mencukupi. Stok tersisa: ' . max(0, $stokTersisa),
+                'available_stock' => max(0, $stokTersisa)
+            ], 400);
+        }
+
+        $hargaSatuan = $produk->harga;
+        $totalHarga = $hargaSatuan * $request->quantity;
 
         // Jika sudah ada, update jumlah dan total harga
         if ($keranjang) {
-            $keranjang->jumlah += $request->quantity;
-            $keranjang->total_harga = $keranjang->jumlah * $hargaProduk;
+            $keranjang->jumlah = $totalQuantityDiKeranjang;
+            $keranjang->total_harga = $keranjang->jumlah * $hargaSatuan;
             $keranjang->save();
         } else {
             // Jika belum ada, buat baru
             Keranjang::create([
                 'user_id' => Auth::id(),
                 'id_Produk' => $request->product_id,
-                'ukuran_id' => $ukuranId,
                 'jumlah' => $request->quantity,
-                'total_harga' => $request->quantity * $hargaProduk,
+                'total_harga' => $totalHarga,
             ]);
         }
 
-        if ($request->ajax() || $request->wantsJson()) {
-            // Untuk permintaan AJAX, kirim response JSON
-            return response()->json([
-                'success' => true,
-                'message' => 'Produk berhasil ditambahkan ke keranjang',
-                'count' => $this->getCartCount()->original['count']
-            ]);
-        }
-
-        return redirect()->route('keranjang.index')->with('success', 'Produk berhasil ditambahkan ke keranjang');
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk berhasil ditambahkan ke keranjang',
+            'count' => $this->getCartCount()->original['count']
+        ]);
     }
 
     /**
@@ -376,15 +352,20 @@ class KeranjangController extends Controller
 
         // Cek kepemilikan
         if ($keranjang->user_id != Auth::id()) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk mengubah item ini'], 403);
         }
 
         // Ambil data produk
         $produk = Produk::findOrFail($keranjang->id_Produk);
 
-        // Cek stok
+        // Cek stok yang tersedia
         if ($produk->stok < $request->jumlah) {
-            return response()->json(['success' => false, 'message' => 'Stok tidak mencukupi, stok tersedia: ' . $produk->stok], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Stok tidak mencukupi, stok tersedia: ' . $produk->stok,
+                'available_stock' => $produk->stok,
+                'product_name' => $produk->nama_ikan,
+            ], 400);
         }
 
         // Update jumlah dan total harga
@@ -392,7 +373,20 @@ class KeranjangController extends Controller
         $keranjang->total_harga = $request->jumlah * $produk->harga;
         $keranjang->save();
 
-        return response()->json(['success' => true, 'message' => 'Keranjang berhasil diperbarui']);
+        // Log successful update
+        \Illuminate\Support\Facades\Log::info('Cart item updated successfully', [
+            'id_keranjang' => $keranjang->id_keranjang,
+            'user_id' => $keranjang->user_id,
+            'jumlah' => $request->jumlah,
+            'total_harga' => $keranjang->total_harga
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Keranjang berhasil diperbarui',
+            'new_total' => $keranjang->total_harga,
+            'formatted_total' => number_format($keranjang->total_harga, 0, ',', '.')
+        ]);
     }
 
     /**

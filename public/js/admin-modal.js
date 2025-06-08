@@ -173,12 +173,11 @@ function setupAdminOrderAction(actionType, orderId) {
     let title = '', text = '', buttonText = '', formAction = '';
     let type = null; // 'shipping' or 'cancel' for conditional fields
 
-    // Get the modal element
+    // Get the modal element - check if it exists first
     const modal = document.getElementById('orderActionModal');
     if (!modal) {
-        console.error('[ModalJS] Error: Modal element not found: orderActionModal. Cannot setup.');
-        alert('Error: Modal element not found. Please reload the page and try again.');
-        return false;
+        console.log('[ModalJS] Info: orderActionModal not found on this page. Skipping setup.');
+        return false; // Gracefully exit without error
     }
 
     // Reset conditional containers (hide all by default)

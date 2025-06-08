@@ -4,48 +4,10 @@
 @section('title', 'Detail Pesanan #' . $pesanan->id_pesanan)
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/modal-force.css') }}">
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
-    /* Biarkan semua gaya CSS yang sudah ada di sini */
-    /* Pastikan styling modal (modal-backdrop, modal-container, modal-content) sudah benar */
     /* Tailwind utility classes for order details page */
-    /* Modal styling */
-    .modal-backdrop {
-        background-color: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(2px);
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-    }
-
-    .modal-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        inset: 0;
-        z-index: 50;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 8px;
-        max-width: 600px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        position: relative;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        z-index: 51;
-    }
-
-    /* Make modal visible when show class is added */
-    /* Hapus bagian ini jika admin-modal.js sudah menangani display:flex !important; */
-    /* #orderActionModal.show, #paymentProofModal.show {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    } */
 
     /* Color variables */
     .color-orange {
@@ -662,7 +624,7 @@
                     'Diproses' => [
                         'icon' => 'fas fa-box-open',
                         'color' => 'primary',
-                        'desc' => 'Pembayaran telah dikonfirmasi. Tim kami sedang mempersiapkan pesanan untuk pengiriman.'
+                        'desc' => 'Pembayaran telah dikonfirmasi. Ikan sedang dalam proses karantina (± 1 minggu) untuk memastikan kualitas terbaik sebelum pengiriman.'
                     ],
                     'Dikirim' => [
                         'icon' => 'fas fa-shipping-fast',
@@ -834,9 +796,6 @@
                                                 Produk tidak tersedia
                                             @endif
                                         </div>
-                                        @if($detail->ukuran_id && isset($detail->ukuran))
-                                            <div class="text-sm text-gray-500">Ukuran: {{ $detail->ukuran->ukuran }}</div>
-                                        @endif
                                     </div>
                                     <div class="mt-2 md:mt-0 md:ml-3 text-center" style="min-width: 60px;">
                                         <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
@@ -960,7 +919,7 @@
                                     </div>
                                     <div class="timeline-title text-base text-gray-800 font-bold mb-1">Pesanan Diproses</div>
                                     <div class="timeline-body text-sm text-gray-600">
-                                        Pesanan <span class="font-medium">#{{ $pesanan->id_pesanan }}</span> sedang diproses dan disiapkan untuk pengiriman.
+                                        Pesanan <span class="font-medium">#{{ $pesanan->id_pesanan }}</span> sedang dalam proses karantina ikan (± 1 minggu) untuk memastikan kualitas terbaik sebelum pengiriman.
                                     </div>
                                 </div>
                             </div>
@@ -1047,6 +1006,114 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Review Section --}}
+            @if($pesanan->status_pesanan == 'Selesai')
+                @php
+                    $reviews = $pesanan->getOrderReviews();
+                @endphp
+
+                @if($reviews->isNotEmpty())
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="border-b border-gray-200 px-5 py-4">
+                            <h3 class="text-base font-semibold text-orange-600 flex items-center">
+                                <i class="fas fa-star mr-2"></i> Review Pelanggan
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            @foreach($reviews as $review)
+                                <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h4 class="font-semibold text-gray-900">{{ $review->user->name ?? 'Pelanggan' }}</h4>
+                                                <p class="text-sm text-gray-600">{{ $review->produk->nama_ikan ?? 'Produk' }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="flex items-center mb-1">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    @if($i <= $review->rating)
+                                                        <i class="fas fa-star text-yellow-400"></i>
+                                                    @else
+                                                        <i class="far fa-star text-gray-300"></i>
+                                                    @endif
+                                                @endfor
+                                                <span class="ml-2 text-sm font-medium text-gray-700">{{ $review->rating }}/5</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500">{{ $review->created_at->format('d M Y') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <p class="text-gray-700 leading-relaxed">{{ $review->komentar }}</p>
+                                    </div>
+
+                                    @if($review->foto_review)
+                                        @php
+                                            $photos = is_array($review->foto_review) ? $review->foto_review : [$review->foto_review];
+                                        @endphp
+                                        <div class="mb-3">
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($photos as $photo)
+                                                    <div class="relative">
+                                                        @php
+                                                            $photoUrl = '';
+                                                            if (Str::startsWith($photo, ['http://', 'https://'])) {
+                                                                $photoUrl = $photo;
+                                                            } elseif (Str::startsWith($photo, 'uploads/')) {
+                                                                $photoUrl = asset($photo);
+                                                            } elseif (Str::startsWith($photo, 'storage/')) {
+                                                                $photoUrl = asset($photo);
+                                                            } else {
+                                                                $photoUrl = asset('storage/' . $photo);
+                                                            }
+                                                        @endphp
+                                                        <img src="{{ $photoUrl }}"
+                                                             alt="Foto Review"
+                                                             class="w-16 h-16 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-75 transition-opacity"
+                                                             onclick="openPhotoModal('{{ $photoUrl }}')">
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($review->balasan_admin)
+                                        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg">
+                                            <div class="flex items-start">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-reply text-blue-600 mt-1"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-blue-800">Balasan Admin:</p>
+                                                    <p class="text-sm text-blue-700 mt-1">{{ $review->balasan_admin }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="flex justify-end space-x-2 mt-4">
+                                        <button onclick="openReplyModalSwal({{ $review->id }}, '{{ addslashes($review->komentar) }}', '{{ addslashes($review->balasan_admin ?? '') }}')"
+                                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-md hover:bg-blue-200 transition-colors">
+                                            <i class="fas fa-reply mr-1"></i>
+                                            {{ $review->balasan_admin ? 'Edit Balasan' : 'Balas' }}
+                                        </button>
+                                        <button onclick="viewReviewDetail({{ $review->id }})"
+                                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            Detail
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endif
         </div>
 
         <div class="lg:col-span-1">
@@ -1119,8 +1186,7 @@
                             </div>
                             @if($pesanan->bukti_pembayaran)
                                 <div class="mt-3 text-center">
-                                    {{-- Mengubah onclick menjadi kelas CSS untuk penanganan JS terpusat --}}
-                                    <button type="button" class="trigger-payment-proof-modal inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 border border-orange-300 text-sm font-medium rounded-md hover:bg-orange-200 transition-colors duration-150">
+                                    <button type="button" class="view-payment-proof inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 border border-orange-300 text-sm font-medium rounded-md hover:bg-orange-200 transition-colors duration-150" data-image-url="{{ route('admin.pesanan.payment-proof', ['id' => $pesanan->id_pesanan]) }}" data-file-name="{{ basename($pesanan->bukti_pembayaran) }}">
                                         <i class="fas fa-image fa-sm mr-2"></i> Lihat Bukti Pembayaran
                                     </button>
                                     <div class="text-xs text-gray-500 mt-1">Klik untuk melihat bukti pembayaran</div>
@@ -1259,163 +1325,964 @@
         </div>
     </div>
 </div>
-
-{{-- Payment Proof Modal --}}
-<div id="paymentProofModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="modal-backdrop"></div> {{-- Backdrop tanpa onclick karena listener JS --}}
-
-    <div class="modal-container">
-        <div class="modal-content max-w-2xl w-full mx-auto">
-        <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-3 flex justify-between items-center rounded-t-lg">
-            <h3 class="text-lg leading-6 font-medium text-white flex items-center" id="paymentProofModalLabel">
-                <i class="fas fa-receipt mr-2"></i>
-                Bukti Pembayaran
-            </h3>
-            <button type="button" class="text-white hover:text-gray-200 modal-close focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1" aria-label="Close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="p-6">
-            @if($pesanan->bukti_pembayaran)
-                <div class="text-center">
-                    @php
-                        // Try to determine correct image URL with better path handling
-                        $fileName = basename($pesanan->bukti_pembayaran);
-
-                        // Use our direct route for viewing payment proof images
-                        $imageUrl = route('admin.pesanan.payment-proof', ['id' => $pesanan->id_pesanan]);
-
-                        // Also prepare regular URLs for fallback purposes - these are not used in src but useful for debug info
-                        $regularImageUrl = '';
-
-                        // First check the most common case - uploads/payments directory
-                        if(Str::startsWith($pesanan->bukti_pembayaran, 'uploads/payments/')) {
-                            $regularImageUrl = asset($pesanan->bukti_pembayaran);
-                        }
-                        // Then check if the file exists directly in uploads/payments
-                        elseif(file_exists(public_path('uploads/payments/' . $fileName))) {
-                            $regularImageUrl = asset('uploads/payments/' . $fileName);
-                        }
-                        // Check other common paths
-                        elseif(Str::startsWith($pesanan->bukti_pembayaran, 'storage/')) {
-                            $regularImageUrl = asset($pesanan->bukti_pembayaran);
-                        }
-                        elseif(Str::startsWith($pesanan->bukti_pembayaran, 'payment_proofs/')) {
-                            $regularImageUrl = asset('storage/' . $pesanan->bukti_pembayaran);
-                        }
-                        // Fallback to the original path
-                        else {
-                            $regularImageUrl = asset($pesanan->bukti_pembayaran);
-                        }
-                    @endphp
-
-                    <div class="bg-gray-100 p-3 rounded-lg mb-4">
-                        <img src="{{ $imageUrl }}" alt="Bukti Pembayaran" class="max-w-full h-auto rounded-lg shadow-md mx-auto"
-                            style="max-height: 500px;" id="paymentProofImage" onerror="this.onerror=null;this.src='{{ asset('Images/image-not-found.png') }}';document.getElementById('imageError').classList.remove('hidden')">
-                    </div>
-
-                    <div id="imageError" class="hidden mb-4 p-3 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200">
-                        <p class="flex items-center">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                            Gambar tidak dapat ditampilkan. Coba buka langsung melalui link berikut:
-                        </p>
-                        <a href="{{ $imageUrl }}" target="_blank" class="text-blue-600 hover:underline mt-1 block">
-                            Buka gambar di tab baru
-                        </a>
-
-                        <div class="mt-3 pt-3 border-t border-yellow-200 text-xs text-yellow-700">
-                            <details>
-                                <summary class="cursor-pointer">Informasi Debug</summary>
-                                <div class="mt-2 space-y-1 text-left">
-                                    <p><strong>Path yang dicoba:</strong></p>
-                                    <ul class="list-disc pl-4">
-                                        <li>Asli: <code>{{ $pesanan->bukti_pembayaran }}</code></li>
-                                        <li>URL Generated: <code>{{ $imageUrl }}</code></li>
-                                        <li>Public path: <code>{{ public_path('uploads/payments/' . basename($pesanan->bukti_pembayaran)) }}</code></li>
-                                        <li>File exists: <code>{{ file_exists(public_path('uploads/payments/' . basename($pesanan->bukti_pembayaran))) ? 'Ya' : 'Tidak' }}</code></li>
-                                    </ul>
-                                </div>
-                            </details>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 text-sm text-gray-600 bg-white p-3 rounded-lg border border-gray-200">
-                        <div class="flex justify-between mb-2">
-                            <p><strong>File:</strong> {{ $fileName }}</p>
-                            <p><strong>Upload:</strong> {{ $pesanan->updated_at->format('d M Y, H:i') }} WIB</p>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2">Path: {{ $pesanan->bukti_pembayaran }}</p>
-
-                        <div class="mt-3 pt-3 border-t border-gray-200 flex justify-center">
-                            <a href="{{ $imageUrl }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-xs">
-                                <i class="fas fa-external-link-alt mr-1.5"></i> Buka di Tab Baru
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @else
-                <div class="text-center text-gray-500 py-8">
-                    <i class="fas fa-image fa-4x mb-3 opacity-25"></i>
-                    <p class="text-lg">Belum ada bukti pembayaran yang diupload.</p>
-                </div>
-            @endif
-        </div>
-        <div class="bg-gray-50 px-4 py-3 flex justify-end rounded-b-lg border-t border-gray-200">
-            <button type="button" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors duration-150 font-medium modal-close focus:outline-none focus:ring-2 focus:ring-orange-500">
-                <i class="fas fa-times mr-1"></i> Tutup
-            </button>
-        </div>
-    </div>
-</div>
-
-{{-- Order Action Modal --}}
-<div id="orderActionModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="modal-backdrop"></div> {{-- Backdrop tanpa onclick karena listener JS --}}
-
-    <div class="modal-container">
-        <div class="modal-content max-w-2xl w-full mx-auto">
-            <div class="bg-orange-600 px-4 py-3 flex justify-between items-center">
-                <h3 class="text-lg leading-6 font-medium text-white" id="orderActionModalLabel">Update Status Pesanan</h3>
-                <button type="button" class="text-white hover:text-gray-200 modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="orderActionForm" method="POST">
-                @csrf
-                {{-- Jangan tambahkan atribut action di sini, biarkan JS yang mengatur --}}
-                {{-- Jika butuh PATCH/PUT, tambahkan input _method via JS sesuai kebutuhan --}}
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <p id="orderActionText" class="text-gray-700 mb-4">Apakah Anda yakin ingin mengubah status pesanan ini?</p>
-
-                    <div id="orderCancelReasonContainer" class="mb-4 hidden">
-                        <label for="alasan_pembatalan" class="block text-sm font-medium text-gray-700 mb-1">Alasan Pembatalan</label>
-                        <textarea id="alasan_pembatalan" name="alasan_pembatalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan alasan pembatalan pesanan"></textarea>
-                    </div>
-
-                    <div id="orderShippingContainer" class="mb-4 hidden">
-                        <label for="nomor_resi" class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi Pengiriman</label>
-                        <input type="text" id="nomor_resi" name="resi" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan nomor resi pengiriman">
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm" id="orderActionButton">
-                        Konfirmasi
-                    </button>
-                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close">
-                        Batal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/admin-modal-fixed.js') }}"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 <script>
-// Ini adalah script di dalam Blade, HANYA untuk log yang sangat spesifik jika diperlukan.
-// Hindari logika modal di sini.
-console.log('[VIEW] admin/pesanan/show.blade.php loaded and only loads admin-modal-fixed.js');
+document.addEventListener('DOMContentLoaded', function() {
+    // SweetAlert2 confirmation for order actions
+
+    // View Payment Proof
+    document.querySelectorAll('.view-payment-proof').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const imageUrl = this.dataset.imageUrl;
+            const fileName = this.dataset.fileName;
+
+            Swal.fire({
+                title: 'Bukti Pembayaran',
+                html: `
+                    <div class="text-center">
+                        <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                            <img src="${imageUrl}" alt="Bukti Pembayaran" class="max-w-full h-auto rounded-lg shadow-md mx-auto"
+                                 style="max-height: 400px;" onerror="this.onerror=null;this.src='{{ asset('Images/image-not-found.png') }}';this.nextElementSibling.classList.remove('hidden');">
+                            <div class="hidden mt-4 p-3 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200">
+                                <p class="flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Gambar tidak dapat ditampilkan
+                                </p>
+                                <a href="${imageUrl}" target="_blank" class="text-blue-600 hover:underline mt-1 block">
+                                    Buka gambar di tab baru
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600 bg-white p-3 rounded-lg border border-gray-200">
+                            <p><strong>File:</strong> ${fileName}</p>
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <a href="${imageUrl}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-xs">
+                                    <i class="fas fa-external-link-alt mr-1.5"></i> Buka di Tab Baru
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: false,
+                confirmButtonColor: '#f97316',
+                confirmButtonText: 'Tutup',
+                width: '600px',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
+    });
+
+    // Copy Resi Number
+    document.querySelectorAll('.copy-resi-button').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const resiInput = document.getElementById('resiNumber');
+            if (resiInput) {
+                resiInput.select();
+                resiInput.setSelectionRange(0, 99999); // For mobile devices
+
+                try {
+                    document.execCommand('copy');
+
+                    // Show success toast
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Nomor resi berhasil disalin!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } catch (err) {
+                    // Fallback for browsers that don't support execCommand
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Gagal menyalin nomor resi',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            }
+        });
+    });
+
+    // Confirm Payment
+    document.querySelectorAll('.confirm-payment').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const orderId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran?',
+                text: 'Pembayaran akan dikonfirmasi dan pesanan akan masuk ke proses karantina ikan.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Konfirmasi!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Mengkonfirmasi Pembayaran...',
+                        text: 'Sedang memproses konfirmasi pembayaran.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    updateOrderStatus(orderId, 'confirm-payment');
+                }
+            });
+        });
+    });
+
+    // Process Order
+    document.querySelectorAll('.process-order').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const orderId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Proses Pesanan?',
+                text: 'Pesanan akan diubah ke status "Diproses" dan siap untuk dikirim.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Proses!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Memproses Pesanan...',
+                        text: 'Sedang mengubah status pesanan ke "Diproses".',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    updateOrderStatus(orderId, 'process');
+                }
+            });
+        });
+    });
+
+    // Ship Order
+    document.querySelectorAll('.ship-order').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const orderId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Kirim Pesanan',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-4 text-center text-gray-700">Pesanan akan ditandai sebagai "Dikirim"</p>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Resi Pengiriman <span class="text-red-500">*</span></label>
+                            <input type="text" id="swal-resi-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Contoh: JNE123456789" autocomplete="off">
+                            <p class="text-xs text-gray-500 mt-1">Masukkan nomor resi dari kurir pengiriman</p>
+                        </div>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                            <p class="text-sm text-blue-700">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Pastikan produk sudah dikemas dan siap dikirim sebelum melanjutkan.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Kirim Pesanan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                focusConfirm: false,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                },
+                didOpen: () => {
+                    // Focus pada input nomor resi
+                    document.getElementById('swal-resi-input').focus();
+                },
+                preConfirm: () => {
+                    const resi = document.getElementById('swal-resi-input').value.trim();
+
+                    if (!resi) {
+                        Swal.showValidationMessage('Nomor resi harus diisi!');
+                        return false;
+                    }
+
+                    if (resi.length < 5) {
+                        Swal.showValidationMessage('Nomor resi terlalu pendek! Minimal 5 karakter.');
+                        return false;
+                    }
+
+                    if (resi.length > 50) {
+                        Swal.showValidationMessage('Nomor resi terlalu panjang! Maksimal 50 karakter.');
+                        return false;
+                    }
+
+                    return resi;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Mengirim Pesanan...',
+                        text: 'Sedang memproses pengiriman pesanan dengan nomor resi: ' + result.value,
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    updateOrderStatusWithResi(orderId, 'ship', result.value);
+                }
+            });
+        });
+    });
+
+    // Complete Order
+    document.querySelectorAll('.complete-order').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const orderId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Selesaikan Pesanan?',
+                text: 'Pesanan akan ditandai sebagai "Selesai". Tindakan ini tidak dapat dibatalkan.',
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Selesaikan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Menyelesaikan Pesanan...',
+                        text: 'Sedang menandai pesanan sebagai selesai.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    updateOrderStatus(orderId, 'complete');
+                }
+            });
+        });
+    });
+
+    // Cancel Order
+    document.querySelectorAll('.cancel-order').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const orderId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Batalkan Pesanan?',
+                html: `
+                    <div class="text-center mb-4">
+                        <p class="text-red-600 font-semibold mb-2">⚠️ PERINGATAN ⚠️</p>
+                        <p class="mb-4">Pesanan akan dibatalkan dan <strong>tidak dapat dikembalikan</strong>!</p>
+                    </div>
+                    <div class="text-left">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Pembatalan *</label>
+                        <textarea id="swal-cancel-reason" rows="3" required
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+                                  placeholder="Masukkan alasan pembatalan pesanan (minimal 10 karakter)..."></textarea>
+                    </div>
+                `,
+                icon: 'warning',
+                width: '600px',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Batalkan!',
+                cancelButtonText: 'Tidak',
+                reverseButtons: true,
+                focusConfirm: false,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md',
+                    content: 'text-left'
+                },
+                didOpen: () => {
+                    // Focus pada textarea
+                    document.getElementById('swal-cancel-reason').focus();
+                },
+                preConfirm: () => {
+                    const reason = document.getElementById('swal-cancel-reason').value.trim();
+
+                    if (!reason) {
+                        Swal.showValidationMessage('Alasan pembatalan harus diisi!');
+                        return false;
+                    }
+
+                    if (reason.length < 10) {
+                        Swal.showValidationMessage('Alasan pembatalan minimal 10 karakter!');
+                        return false;
+                    }
+
+                    if (reason.length > 500) {
+                        Swal.showValidationMessage('Alasan pembatalan maksimal 500 karakter!');
+                        return false;
+                    }
+
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Membatalkan Pesanan...',
+                        text: 'Sedang memproses pembatalan pesanan.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    updateOrderStatusWithReason(orderId, 'cancel', result.value);
+                }
+            });
+        });
+    });
+
+    // Helper function to update order status
+    function updateOrderStatus(orderId, action) {
+        // Create and submit form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/pesanan/${orderId}/${action}`;
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Helper function to update order status with additional data (like reason)
+    function updateOrderStatusWithReason(orderId, action, reason) {
+        // Create and submit form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/pesanan/${orderId}/${action}`;
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'alasan_pembatalan';
+        reasonInput.value = reason;
+
+        form.appendChild(csrfToken);
+        form.appendChild(reasonInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Helper function to update order status with shipping number
+    function updateOrderStatusWithResi(orderId, action, resi) {
+        // Create and submit form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/pesanan/${orderId}/${action}`;
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const resiInput = document.createElement('input');
+        resiInput.type = 'hidden';
+        resiInput.name = 'resi';
+        resiInput.value = resi;
+
+        form.appendChild(csrfToken);
+        form.appendChild(resiInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Photo modal for review images
+    function openPhotoModal(photoUrl) {
+        Swal.fire({
+            html: `<img src="${photoUrl}" alt="Foto Review" class="max-w-full h-auto rounded-lg shadow-md">`,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: '600px',
+            customClass: {
+                popup: 'rounded-lg',
+                closeButton: 'text-gray-500 hover:text-gray-700'
+            }
+        });
+    }
+
+    // View review detail
+    function viewReviewDetail(reviewId) {
+        // Show loading while fetching data
+        Swal.fire({
+            title: 'Memuat Detail Review...',
+            text: 'Sedang mengambil informasi review.',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Fetch review details
+        fetch(`/admin/reviews/${reviewId}/detail`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showReviewDetailModal(data.review);
+            } else {
+                throw new Error(data.message || 'Gagal memuat detail review');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Gagal memuat detail review: ' + error.message,
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
+    }
+
+    // Show detailed review modal
+    function showReviewDetailModal(review) {
+        // Build star rating HTML
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= review.rating) {
+                starsHtml += '<i class="fas fa-star text-yellow-400"></i>';
+            } else {
+                starsHtml += '<i class="far fa-star text-gray-300"></i>';
+            }
+        }
+
+        // Build photo gallery HTML
+        let photosHtml = '';
+        if (review.photos && review.photos.length > 0) {
+            photosHtml = `
+                <div class="mb-4">
+                    <h5 class="font-medium text-gray-800 mb-3">Foto Review (${review.photos.length})</h5>
+                    <div class="grid grid-cols-3 gap-2">
+                        ${review.photos.map((photo, index) => `
+                            <div class="relative group cursor-pointer" onclick="openPhotoGallery(${review.id}, ${index})">
+                                <img src="${photo}" alt="Review Photo ${index + 1}"
+                                     class="w-full h-20 object-cover rounded-lg border border-gray-200 group-hover:opacity-75 transition-opacity">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center justify-center">
+                                    <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build admin reply HTML
+        let adminReplyHtml = '';
+        if (review.admin_reply) {
+            adminReplyHtml = `
+                <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-reply text-blue-600 mr-2"></i>
+                        <span class="font-medium text-blue-800">Balasan Admin</span>
+                        <span class="text-sm text-blue-600 ml-auto">${review.admin_reply_date || ''}</span>
+                    </div>
+                    <p class="text-blue-800">${review.admin_reply}</p>
+                </div>
+            `;
+        }
+
+        // Build interaction stats HTML
+        let interactionHtml = '';
+        if (review.helpful_count || review.not_helpful_count) {
+            interactionHtml = `
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <h5 class="font-medium text-gray-800 mb-2">Interaksi</h5>
+                    <div class="flex space-x-4 text-sm text-gray-600">
+                        <span><i class="fas fa-thumbs-up text-green-500 mr-1"></i>${review.helpful_count || 0} Helpful</span>
+                        <span><i class="fas fa-thumbs-down text-red-500 mr-1"></i>${review.not_helpful_count || 0} Not Helpful</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Status badge
+        let statusBadge = '';
+        if (review.status === 'approved') {
+            statusBadge = '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Disetujui</span>';
+        } else if (review.status === 'pending') {
+            statusBadge = '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Menunggu</span>';
+        } else if (review.status === 'rejected') {
+            statusBadge = '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Ditolak</span>';
+        }
+
+        Swal.fire({
+            title: '<div class="text-left"><h3 class="text-xl font-bold text-gray-800">Detail Review</h3></div>',
+            html: `
+                <div class="text-left space-y-4">
+                    <!-- Review Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                <span class="text-orange-600 font-bold">${review.user_name ? review.user_name.charAt(0).toUpperCase() : 'U'}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${review.user_name || 'Pengguna'}</h4>
+                                <p class="text-sm text-gray-500">${review.created_at || ''}</p>
+                                ${review.is_verified ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1"><i class="fas fa-check-circle mr-1"></i>Terverifikasi</span>' : ''}
+                            </div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <div class="flex items-center space-x-3">
+                            <img src="${review.product_image || '/images/no-image.png'}"
+                                 alt="${review.product_name || 'Produk'}"
+                                 class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                 onerror="this.src='/images/no-image.png'">
+                            <div>
+                                <h5 class="font-medium text-gray-900">${review.product_name || 'Produk tidak tersedia'}</h5>
+                                <p class="text-sm text-gray-600">Pesanan: #${review.order_id || 'N/A'}</p>
+                                ${review.product_price ? `<p class="text-sm font-medium text-orange-600">Rp ${new Intl.NumberFormat('id-ID').format(review.product_price)}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating -->
+                    <div class="flex items-center space-x-2">
+                        <div class="flex">${starsHtml}</div>
+                        <span class="font-semibold text-gray-900">${review.rating}/5</span>
+                    </div>
+
+                    <!-- Review Content -->
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h5 class="font-medium text-gray-800 mb-2">Review:</h5>
+                        <p class="text-gray-700 leading-relaxed">${review.comment || 'Tidak ada komentar'}</p>
+                    </div>
+
+                    ${photosHtml}
+                    ${adminReplyHtml}
+                    ${interactionHtml}
+                </div>
+            `,
+            showCancelButton: true,
+            cancelButtonText: 'Tutup',
+            confirmButtonText: review.admin_reply ? 'Edit Balasan' : 'Balas Review',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true,
+            width: '800px',
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md',
+                htmlContainer: 'swal2-html-container-custom'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openReplyModalSwal(review.id, review.comment, review.admin_reply || '');
+            }
+        });
+    }
+
+    // Photo gallery modal
+    function openPhotoGallery(reviewId, photoIndex = 0) {
+        // Fetch review photos
+        fetch(`/admin/reviews/${reviewId}/photos`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.photos && data.photos.length > 0) {
+                showPhotoGalleryModal(data.photos, photoIndex);
+            } else {
+                Swal.fire({
+                    title: 'Tidak Ada Foto',
+                    text: 'Tidak ada foto yang tersedia untuk review ini.',
+                    icon: 'info',
+                    confirmButtonColor: '#f97316',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Gagal memuat foto review.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
+
+    // Show photo gallery modal
+    function showPhotoGalleryModal(photos, currentIndex = 0) {
+        let currentPhotoIndex = currentIndex;
+
+        function updatePhotoModal() {
+            const photo = photos[currentPhotoIndex];
+            const photoCounter = `${currentPhotoIndex + 1} dari ${photos.length}`;
+
+            const prevDisabled = currentPhotoIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200';
+            const nextDisabled = currentPhotoIndex === photos.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200';
+
+            return `
+                <div class="relative">
+                    <!-- Photo Counter -->
+                    <div class="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
+                        ${photoCounter}
+                    </div>
+
+                    <!-- Main Photo -->
+                    <div class="flex justify-center items-center bg-gray-100 rounded-lg" style="min-height: 400px;">
+                        <img src="${photo}" alt="Review Photo ${currentPhotoIndex + 1}"
+                             class="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
+                             onerror="this.src='/images/no-image.png'">
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center mt-4">
+                        <button onclick="previousPhoto()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-colors ${prevDisabled}"
+                                ${currentPhotoIndex === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-left mr-2"></i>Sebelumnya
+                        </button>
+
+                        <div class="flex space-x-2">
+                            ${photos.map((_, index) => `
+                                <button onclick="goToPhoto(${index})"
+                                        class="w-3 h-3 rounded-full transition-colors ${index === currentPhotoIndex ? 'bg-orange-500' : 'bg-gray-300 hover:bg-gray-400'}">
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <button onclick="nextPhoto()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg transition-colors ${nextDisabled}"
+                                ${currentPhotoIndex === photos.length - 1 ? 'disabled' : ''}>
+                            Selanjutnya<i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                    </div>
+
+                    <!-- Thumbnail Strip -->
+                    ${photos.length > 1 ? `
+                        <div class="mt-4 overflow-x-auto">
+                            <div class="flex space-x-2 pb-2">
+                                ${photos.map((photo, index) => `
+                                    <button onclick="goToPhoto(${index})"
+                                            class="flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${index === currentPhotoIndex ? 'border-orange-500' : 'border-gray-300 hover:border-gray-400'}">
+                                        <img src="${photo}" alt="Thumbnail ${index + 1}"
+                                             class="w-full h-full object-cover">
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Show initial modal
+        Swal.fire({
+            title: '<div class="text-left"><h3 class="text-xl font-bold text-gray-800">Galeri Foto Review</h3></div>',
+            html: updatePhotoModal(),
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: '800px',
+            customClass: {
+                popup: 'rounded-lg',
+                htmlContainer: 'swal2-html-container-custom'
+            },
+            didOpen: () => {
+                // Add global functions for navigation
+                window.previousPhoto = () => {
+                    if (currentPhotoIndex > 0) {
+                        currentPhotoIndex--;
+                        Swal.update({
+                            html: updatePhotoModal()
+                        });
+                    }
+                };
+
+                window.nextPhoto = () => {
+                    if (currentPhotoIndex < photos.length - 1) {
+                        currentPhotoIndex++;
+                        Swal.update({
+                            html: updatePhotoModal()
+                        });
+                    }
+                };
+
+                window.goToPhoto = (index) => {
+                    currentPhotoIndex = index;
+                    Swal.update({
+                        html: updatePhotoModal()
+                    });
+                };
+
+                // Keyboard navigation
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'ArrowLeft') {
+                        window.previousPhoto();
+                    } else if (e.key === 'ArrowRight') {
+                        window.nextPhoto();
+                    }
+                });
+            },
+            willClose: () => {
+                // Clean up global functions
+                delete window.previousPhoto;
+                delete window.nextPhoto;
+                delete window.goToPhoto;
+            }
+        });
+    }
+
+    // Open reply modal with SweetAlert
+    function openReplyModalSwal(reviewId, reviewText, currentReply = '') {
+        const isEdit = currentReply.length > 0;
+
+        Swal.fire({
+            title: isEdit ? 'Edit Balasan Admin' : 'Balas Review',
+            html: `
+                <div class="text-left">
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border">
+                        <h5 class="font-medium text-gray-800 mb-2">Review Pelanggan:</h5>
+                        <p class="text-sm text-gray-600">"${reviewText}"</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            ${isEdit ? 'Edit Balasan' : 'Balasan Admin'} <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="swal-reply-input"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  rows="4"
+                                  placeholder="Tulis balasan untuk review ini...">${currentReply}</textarea>
+                        <p class="text-xs text-gray-500 mt-1">Maksimal 500 karakter</p>
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: isEdit ? 'Update Balasan' : 'Kirim Balasan',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            focusConfirm: false,
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md'
+            },
+            didOpen: () => {
+                document.getElementById('swal-reply-input').focus();
+            },
+            preConfirm: () => {
+                const reply = document.getElementById('swal-reply-input').value.trim();
+
+                if (!reply) {
+                    Swal.showValidationMessage('Balasan tidak boleh kosong!');
+                    return false;
+                }
+
+                if (reply.length > 500) {
+                    Swal.showValidationMessage('Balasan terlalu panjang! Maksimal 500 karakter.');
+                    return false;
+                }
+
+                return reply;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                submitReply(reviewId, result.value, isEdit);
+            }
+        });
+    }
+
+    // Submit reply function
+    function submitReply(reviewId, reply, isEdit = false) {
+        // Show loading
+        Swal.fire({
+            title: isEdit ? 'Mengupdate Balasan...' : 'Mengirim Balasan...',
+            text: 'Sedang memproses balasan Anda.',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        formData.append('balasan_admin', reply);
+
+        // Submit via fetch
+        fetch(`/admin/reviews/${reviewId}/reply`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: isEdit ? 'Balasan berhasil diupdate!' : 'Balasan berhasil dikirim!',
+                    icon: 'success',
+                    confirmButtonColor: '#059669',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-lg',
+                        confirmButton: 'rounded-md'
+                    }
+                }).then(() => {
+                    // Reload page to show updated reply
+                    window.location.reload();
+                });
+            } else {
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat memproses balasan: ' + error.message,
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
+    }
+
+    // Helper function to update order status with resi
+    function updateOrderStatusWithResi(orderId, action, resi) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/pesanan/${orderId}/${action}`;
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const resiInput = document.createElement('input');
+        resiInput.type = 'hidden';
+        resiInput.name = 'resi';
+        resiInput.value = resi;
+
+        form.appendChild(csrfToken);
+        form.appendChild(resiInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+});
 </script>
 @endpush

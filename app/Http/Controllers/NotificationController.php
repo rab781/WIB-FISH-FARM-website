@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\Produk;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -118,7 +120,23 @@ class NotificationController extends Controller
             $notification->save();
 
             if (request()->ajax()) {
-                return response()->json(['success' => true]);
+                $redirectUrl = null;
+                if (is_array($notification->data) && isset($notification->data['url'])) {
+                    $redirectUrl = $this->validateAndGetRedirectUrl($notification);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'redirect_url' => $redirectUrl
+                ]);
+            }
+
+            // If notification has a URL, validate and redirect there, otherwise redirect back
+            if (is_array($notification->data) && isset($notification->data['url'])) {
+                $validUrl = $this->validateAndGetRedirectUrl($notification);
+                if ($validUrl) {
+                    return redirect($validUrl);
+                }
             }
 
             // Redirect based on user type
@@ -270,5 +288,73 @@ class NotificationController extends Controller
             'data' => $data['data'] ?? null,
             'for_admin' => false,
         ]);
+    }
+
+    /**
+     * Validate notification URL and return appropriate redirect URL
+     */
+    private function validateAndGetRedirectUrl($notification)
+    {
+        if (!is_array($notification->data) || !isset($notification->data['url'])) {
+            return null;
+        }
+
+        $url = $notification->data['url'];
+        $type = $notification->type ?? 'general';
+
+        try {
+            // Check if URL is for product detail
+            if ($type === 'product' && isset($notification->data['product_id'])) {
+                $productId = $notification->data['product_id'];
+                $product = \App\Models\Produk::withTrashed()->find($productId);
+
+                if (!$product) {
+                    // Product completely deleted - redirect to product list
+                    return route('produk.index');
+                } elseif ($product->deleted_at) {
+                    // Product soft deleted - notify user and redirect to product list
+                    session()->flash('warning', 'Produk yang dimaksud telah dihapus. Anda dialihkan ke halaman produk.');
+                    return route('produk.index');
+                }
+                // Product exists and available - return original URL
+                return $url;
+            }
+
+            // Check if URL is for order detail
+            if ($type === 'order' && isset($notification->data['order_id'])) {
+                $orderId = $notification->data['order_id'];
+                $order = \App\Models\Pesanan::find($orderId);
+
+                if (!$order) {
+                    // Order not found - redirect to orders list
+                    $isAdmin = Auth::user()->is_admin ?? false;
+                    if ($isAdmin) {
+                        return route('admin.pesanan.index');
+                    } else {
+                        return route('pesanan.index');
+                    }
+                }
+                // Order exists - return original URL
+                return $url;
+            }
+
+            // For other notification types or if no specific validation needed
+            return $url;
+
+        } catch (\Exception $e) {
+            Log::error('Error validating notification URL: ' . $e->getMessage(), [
+                'notification_id' => $notification->id,
+                'url' => $url,
+                'type' => $type
+            ]);
+
+            // If validation fails, redirect based on user type
+            $isAdmin = Auth::user()->is_admin ?? false;
+            if ($isAdmin) {
+                return route('admin.notifications.index');
+            } else {
+                return route('notifications.index');
+            }
+        }
     }
 }

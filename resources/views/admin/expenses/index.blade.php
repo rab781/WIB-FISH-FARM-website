@@ -263,7 +263,7 @@
                         @forelse($expenses as $expense)
                             <tr>
                                 <td>
-                                    <span class="date-badge">{{ $expense->expense_date->format('d M Y') }}</span>
+                                    <span class="date-badge">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('d M Y') : \Carbon\Carbon::parse($expense->expense_date)->format('d M Y') }}</span>
                                 </td>
                                 <td>
                                     <span class="category-badge">{{ $expense->category }}</span>
@@ -286,10 +286,10 @@
                                         <a href="{{ route('admin.expenses.edit', $expense->id_expense) }}" class="btn btn-sm btn-warning me-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.expenses.destroy', $expense->id_expense) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                        <form action="{{ route('admin.expenses.destroy', $expense->id_expense) }}" method="POST" class="delete-expense-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">
+                                            <button type="submit" class="btn btn-sm btn-danger delete-expense-btn" data-expense-id="{{ $expense->id_expense }}" data-expense-description="{{ $expense->description }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -432,45 +432,137 @@
 
         new Chart(categoryCtx, categoryConfig);
 
-        // Excel Export
+        // SweetAlert2 for Delete Expense
+        document.querySelectorAll('.delete-expense-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const expenseId = this.getAttribute('data-expense-id');
+                const expenseDescription = this.getAttribute('data-expense-description');
+                const form = this.closest('.delete-expense-form');
+
+                Swal.fire({
+                    title: 'Hapus Pengeluaran',
+                    text: `Apakah Anda yakin ingin menghapus pengeluaran "${expenseDescription}"? Tindakan ini tidak dapat dibatalkan.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, Hapus',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                        confirmButton: 'btn btn-confirm',
+                        cancelButton: 'btn btn-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus...',
+                            text: 'Sedang menghapus data pengeluaran',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit the form
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Excel Export with SweetAlert2 confirmation
         document.getElementById('exportExcel').addEventListener('click', function() {
-            // Fetch data from server
-            fetch(`{{ route('admin.expenses.export') }}?start_date={{ $startDate }}&end_date={{ $endDate }}&category={{ $category }}`)
-                .then(response => response.json())
-                .then(response => {
-                    const data = response.data;
-                    const startDate = response.startDate;
-                    const endDate = response.endDate;
-
-                    // Create workbook and worksheet
-                    const wb = XLSX.utils.book_new();
-
-                    // Add title rows with filter info
-                    const title = [
-                        ["LAPORAN PENGELUARAN"],
-                        ["Periode:", `${startDate} sampai ${endDate}`],
-                        [""],
-                        ["Tanggal", "Kategori", "Deskripsi", "Jumlah", "Metode Pembayaran", "Berkala", "Tipe Berkala"]
-                    ];
-
-                    // Add data rows
-                    data.forEach(expense => {
-                        title.push([
-                            new Date(expense.expense_date).toLocaleDateString('id-ID'),
-                            expense.category,
-                            expense.description,
-                            expense.amount,
-                            expense.payment_method || '-',
-                            expense.is_recurring ? 'Ya' : 'Tidak',
-                            expense.recurring_type || '-'
-                        ]);
+            Swal.fire({
+                title: 'Export Data Excel',
+                text: 'Apakah Anda ingin mengexport data pengeluaran ke file Excel?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Export',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Memproses Export...',
+                        text: 'Sedang mempersiapkan file Excel',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
 
-                    // Create sheet and export
-                    const ws = XLSX.utils.aoa_to_sheet(title);
-                    XLSX.utils.book_append_sheet(wb, ws, "Pengeluaran");
-                    XLSX.writeFile(wb, `laporan-pengeluaran-${startDate}-${endDate}.xlsx`);
-                });
+                    // Fetch data from server
+                    fetch(`{{ route('admin.expenses.export') }}?start_date={{ $startDate }}&end_date={{ $endDate }}&category={{ $category }}`)
+                        .then(response => response.json())
+                        .then(response => {
+                            const data = response.data;
+                            const startDate = response.startDate;
+                            const endDate = response.endDate;
+
+                            // Create workbook and worksheet
+                            const wb = XLSX.utils.book_new();
+
+                            // Add title rows with filter info
+                            const title = [
+                                ["LAPORAN PENGELUARAN"],
+                                ["Periode:", `${startDate} sampai ${endDate}`],
+                                [""],
+                                ["Tanggal", "Kategori", "Deskripsi", "Jumlah", "Metode Pembayaran", "Berkala", "Tipe Berkala"]
+                            ];
+
+                            // Add data rows
+                            data.forEach(expense => {
+                                title.push([
+                                    new Date(expense.expense_date).toLocaleDateString('id-ID'),
+                                    expense.category,
+                                    expense.description,
+                                    expense.amount,
+                                    expense.payment_method || '-',
+                                    expense.is_recurring ? 'Ya' : 'Tidak',
+                                    expense.recurring_type || '-'
+                                ]);
+                            });
+
+                            // Create sheet and export
+                            const ws = XLSX.utils.aoa_to_sheet(title);
+                            XLSX.utils.book_append_sheet(wb, ws, "Pengeluaran");
+                            XLSX.writeFile(wb, `laporan-pengeluaran-${startDate}-${endDate}.xlsx`);
+
+                            // Show success message
+                            Swal.fire({
+                                title: 'Export Berhasil!',
+                                text: 'File Excel berhasil didownload',
+                                icon: 'success',
+                                confirmButtonColor: '#10b981',
+                                customClass: {
+                                    popup: 'animate__animated animate__fadeInUp'
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Export Gagal!',
+                                text: 'Terjadi kesalahan saat mengexport data',
+                                icon: 'error',
+                                confirmButtonColor: '#dc2626',
+                                customClass: {
+                                    popup: 'animate__animated animate__shakeX'
+                                }
+                            });
+                        });
+                }
+            });
         });
     });
 </script>

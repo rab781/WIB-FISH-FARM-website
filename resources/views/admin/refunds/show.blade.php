@@ -356,12 +356,32 @@ function submitActionForm() {
         if (data.success) {
             location.reload();
         } else {
-            alert('Gagal memproses refund: ' + (data.message || 'Terjadi kesalahan'));
+            Swal.fire({
+                title: 'Gagal Memproses Refund',
+                text: data.message || 'Terjadi kesalahan saat memproses refund',
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'Tutup',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat memproses refund');
+        Swal.fire({
+            title: 'Kesalahan Sistem',
+            text: 'Terjadi kesalahan saat memproses refund. Silakan coba lagi.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'Tutup',
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md'
+            }
+        });
     });
 }
 

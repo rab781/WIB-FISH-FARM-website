@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.customer')
 
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -34,9 +34,9 @@
 
             <!-- Cart items -->
             @foreach($keranjang as $item)
-            <div class="flex flex-col md:flex-row border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200" data-price="{{ $item->ukuran && $item->ukuran->harga ? $item->ukuran->harga : $item->produk->harga }}" data-total="{{ $item->total_harga }}">
+            <div class="flex flex-col md:flex-row border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200" data-price="{{ $item->produk->harga }}" data-total="{{ $item->total_harga }}">
                 <div class="md:w-6 p-4 flex items-center justify-center">
-                    <input type="checkbox" name="selected_items[]" value="{{ $item->id_keranjang }}" class="cart-item-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500" onchange="updateCartItem(this)">
+                    <input type="checkbox" name="selected_items[]" value="{{ $item->id_keranjang }}" class="cart-item-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500">
                 </div>
 
                 <div class="flex-1 p-4">
@@ -56,16 +56,9 @@
                         </div>
                         <div class="ml-0 md:ml-4">
                             <h3 class="text-base font-medium text-gray-900">{{ $item->produk->nama_ikan }}</h3>
-                            @if($item->ukuran)
-                            <p class="text-sm text-gray-500">Ukuran: {{ $item->ukuran->ukuran }}</p>
-                            @endif
                             <!-- Mobile view only price -->
                             <p class="mt-1 text-sm text-gray-500 md:hidden">
-                                @if($item->ukuran && $item->ukuran->harga)
-                                    Rp {{ number_format($item->ukuran->harga, 0, ',', '.') }}
-                                @else
-                                    Rp {{ number_format($item->produk->harga, 0, ',', '.') }}
-                                @endif
+                                Rp {{ number_format($item->produk->harga, 0, ',', '.') }}
                             </p>
                         </div>
                     </div>
@@ -85,14 +78,14 @@
                 <!-- Quantity control -->
                 <div class="w-full md:w-32 p-4 flex items-center justify-center">
                     <div class="flex items-center">
-                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-l border border-gray-300" onclick="handleQuantityChange({{ $item->id_keranjang }}, 'decrease')">
+                        <button type="button" class="quantity-decrease w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-l border border-gray-300" data-cart-id="{{ $item->id_keranjang }}">
                             <span class="sr-only">Decrease quantity</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                         </button>
                         <input type="number" id="quantity-{{ $item->id_keranjang }}" value="{{ $item->jumlah }}" min="1" max="999" class="w-16 h-8 border-t border-b border-gray-300 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" readonly>
-                        <button type="button" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-r border border-gray-300" onclick="handleQuantityChange({{ $item->id_keranjang }}, 'increase')">
+                        <button type="button" class="quantity-increase w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-r border border-gray-300" data-cart-id="{{ $item->id_keranjang }}">
                             <span class="sr-only">Increase quantity</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -167,34 +160,155 @@
 
 @section('scripts')
 <script>
-    function incrementCartItem(button) {
-        let form = button.closest('form');
-        let input = form.querySelector('input[type=number]');
-        if (input.value < parseInt(input.max) || !input.max) {
-            input.value = parseInt(input.value) + 1;
-            // Auto submit the form after a short delay
-            setTimeout(() => form.submit(), 500);
-        }
-    }
-
-    function decrementCartItem(button) {
-        let form = button.closest('form');
-        let input = form.querySelector('input[type=number]');
-        if (input.value > 1) {
-            input.value = parseInt(input.value) - 1;
-            // Auto submit the form after a short delay
-            setTimeout(() => form.submit(), 500);
-        }
-    }
-
-    // Dispatch cart updated event whenever a form is submitted
+    // Wait for SweetAlert to be loaded
     document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('.quantity-form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function() {
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('cartUpdated'));
-                }, 500);
+        // Check if SweetAlert is loaded
+        if (typeof Swal === 'undefined') {
+            console.error('SweetAlert2 is not loaded');
+            return;
+        }
+
+        console.log('SweetAlert2 loaded successfully');
+
+        // Global functions yang dapat diakses dari mana saja
+        window.updateCartItem = function(checkbox) {
+            const row = checkbox.closest('.flex.flex-col.md\\:flex-row');
+
+            if (!row) {
+                console.error('Row element not found for checkbox');
+                return;
+            }
+
+            // Toggle selected state visual
+            if (checkbox.checked) {
+                row.classList.add('bg-orange-50');
+                row.classList.add('border-l-4');
+                row.classList.add('border-l-orange-500');
+            } else {
+                row.classList.remove('bg-orange-50');
+                row.classList.remove('border-l-4');
+                row.classList.remove('border-l-orange-500');
+            }
+
+            updateTotalAndCount();
+        };
+
+        window.updateTotalAndCount = function() {
+            const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
+            const selectedTotalDisplay = document.getElementById('selectedTotal');
+            const selectedCountDisplay = document.getElementById('selectedItemCount');
+            const lanjutBtn = document.getElementById('lanjutPembayaranBtn');
+            let total = 0;
+
+            selectedItems.forEach(item => {
+                const row = item.closest('.flex.flex-col.md\\:flex-row');
+                if (row && row.dataset.total) {
+                    const itemTotal = parseFloat(row.dataset.total);
+                    if (!isNaN(itemTotal)) {
+                        total += itemTotal;
+                    }
+                }
+            });
+
+            if (selectedTotalDisplay) {
+                selectedTotalDisplay.textContent = total.toLocaleString('id-ID');
+            }
+            if (selectedCountDisplay) {
+                selectedCountDisplay.textContent = selectedItems.length;
+            }
+            if (lanjutBtn) {
+                lanjutBtn.disabled = selectedItems.length === 0;
+            }
+        };
+
+        // Handle quantity change
+        window.handleQuantityChange = function(cartId, action) {
+            const input = document.getElementById(`quantity-${cartId}`);
+            if (!input) return;
+
+            let currentValue = parseInt(input.value);
+            let newValue = currentValue;
+
+            if (action === 'increase') {
+                if (currentValue < parseInt(input.max) || !input.max) {
+                    newValue = currentValue + 1;
+                }
+            } else if (action === 'decrease') {
+                if (currentValue > 1) {
+                    newValue = currentValue - 1;
+                } else if (currentValue === 1) {
+                    // Show confirmation when trying to decrease quantity below 1
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: 'Mengurangi kuantitas menjadi 0 akan menghapus produk dari keranjang. Apakah Anda yakin?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Delete the item by submitting the delete form
+                            const deleteForm = input.closest('.flex.flex-col.md\\:flex-row').querySelector('.delete-form');
+                            if (deleteForm) {
+                                deleteForm.submit();
+                            }
+                        }
+                    });
+                    return; // Don't proceed with normal update
+                }
+            }
+
+            if (newValue !== currentValue) {
+                input.value = newValue;
+
+                // Submit form via AJAX untuk update quantity
+                fetch(`{{ url('/keranjang') }}/${cartId}/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        jumlah: newValue
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update total harga di UI
+                        location.reload(); // Reload untuk update yang akurat
+                    } else {
+                        console.error('Failed to update cart item');
+                        input.value = currentValue; // Revert value
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    input.value = currentValue; // Revert value
+                });
+            }
+        };
+
+        // Quantity control event listeners
+        document.querySelectorAll('.quantity-decrease').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Decrease clicked');
+                const cartId = this.getAttribute('data-cart-id');
+                console.log('Cart ID:', cartId);
+                handleQuantityChange(cartId, 'decrease');
+            });
+        });
+
+        document.querySelectorAll('.quantity-increase').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Increase clicked');
+                const cartId = this.getAttribute('data-cart-id');
+                console.log('Cart ID:', cartId);
+                handleQuantityChange(cartId, 'increase');
             });
         });
 
@@ -209,119 +323,142 @@
             });
         }
 
+        // Individual checkbox functionality
+        document.querySelectorAll('.cart-item-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => updateCartItem(cb));
+        });
+
         // Delete confirmation for single item
         const deleteBtns = document.querySelectorAll('.delete-btn');
+        console.log('Found delete buttons:', deleteBtns.length);
         deleteBtns.forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                if(window.confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?', {
-                    confirmButtonText: 'Oke',
+                console.log('Delete button clicked');
+                const form = this.closest('form');
+                console.log('Form found:', form);
+
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: 'Apakah Anda yakin ingin menghapus produk ini dari keranjang?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
                     cancelButtonText: 'Batal'
-                })) {
-                    this.closest('form').submit();
-                }
+                }).then((result) => {
+                    console.log('SweetAlert result:', result);
+                    if (result.isConfirmed) {
+                        console.log('Form submitting...');
+                        form.submit();
+                    }
+                });
             });
         });
 
         // Delete selected items functionality
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        console.log('Delete selected button found:', deleteSelectedBtn);
         if (deleteSelectedBtn) {
             deleteSelectedBtn.addEventListener('click', function(e) {
-                e.preventDefault(); // Mencegah form submit secara otomatis
+                e.preventDefault();
+                console.log('Delete selected clicked');
                 const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
                 console.log('Selected items count:', selectedItems.length);
 
                 if (selectedItems.length > 0) {
-                    if (window.confirm('Apakah Anda yakin ingin menghapus ' + selectedItems.length + ' produk yang terpilih dari keranjang?', {
-                        confirmButtonText: 'Oke',
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: `Apakah Anda yakin ingin menghapus ${selectedItems.length} produk yang terpilih dari keranjang?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal'
-                    })) {
-                        document.getElementById('bulkDeleteForm').submit();
-                    }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Create a new form with only selected items
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '{{ route('keranjang.bulk-delete') }}';
+
+                            // Add CSRF token
+                            const csrfToken = document.createElement('input');
+                            csrfToken.type = 'hidden';
+                            csrfToken.name = '_token';
+                            csrfToken.value = '{{ csrf_token() }}';
+                            form.appendChild(csrfToken);
+
+                            // Add selected item IDs
+                            selectedItems.forEach(checkbox => {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'selected_items[]';
+                                input.value = checkbox.value;
+                                form.appendChild(input);
+                            });
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
                 } else {
-                    alert('Tidak ada produk yang dipilih untuk dihapus.');
+                    Swal.fire({
+                        title: 'Tidak Ada Produk Terpilih',
+                        text: 'Tidak ada produk yang dipilih untuk dihapus.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         }
 
-        // Manage cart item selection and total calculation
-        const lanjutBtn = document.getElementById('lanjutPembayaranBtn');
-        const checkboxes = document.querySelectorAll('.cart-item-checkbox');
-        const selectedTotalDisplay = document.getElementById('selectedTotal');
-        const selectedCountDisplay = document.getElementById('selectedItemCount');
-
-        function updateCartItem(checkbox) {
-            const row = checkbox.closest('.flex.flex-col.md\\:flex-row');
-
-            // Toggle selected state visual
-            if (checkbox.checked) {
-                row.classList.add('bg-orange-50');
-                row.classList.add('border-l-4');
-                row.classList.add('border-l-orange-500');
-            } else {
-                row.classList.remove('bg-orange-50');
-                row.classList.remove('border-l-4');
-                row.classList.remove('border-l-orange-500');
-            }
-
-            updateTotalAndCount();
-        }
-
-        function updateTotalAndCount() {
-            const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
-            let total = 0;
-
-            selectedItems.forEach(item => {
-                const row = item.closest('.flex.flex-col.md\\:flex-row');
-                total += parseFloat(row.dataset.total);
-            });
-
-            selectedTotalDisplay.textContent = total.toLocaleString('id-ID');
-            selectedCountDisplay.textContent = selectedItems.length;
-            lanjutBtn.disabled = selectedItems.length === 0;
-        }
-
-        // Initialize checkboxes
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', () => updateCartItem(cb));
-        });
-
         // Handle checkout button click
-        lanjutBtn.addEventListener('click', function() {
-            const selectedItems = Array.from(document.querySelectorAll('.cart-item-checkbox:checked')).map(cb => cb.value);
+        const lanjutBtn = document.getElementById('lanjutPembayaranBtn');
+        if (lanjutBtn) {
+            lanjutBtn.addEventListener('click', function() {
+                const selectedItems = Array.from(document.querySelectorAll('.cart-item-checkbox:checked')).map(cb => cb.value);
 
-            if (selectedItems.length === 0) {
-                alert('Silakan pilih minimal satu produk untuk melanjutkan ke pembayaran.');
-                return;
-            }
+                if (selectedItems.length === 0) {
+                    Swal.fire({
+                        title: 'Tidak Ada Produk Terpilih',
+                        text: 'Silakan pilih minimal satu produk untuk melanjutkan ke pembayaran.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
 
-            // Create a form dynamically to submit selected items
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route('checkout') }}';
+                // Create a form dynamically to submit selected items
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route('checkout') }}';
 
-            // Add CSRF token
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            form.appendChild(csrfToken);
+                // Add CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
 
-            // Add selected items
-            selectedItems.forEach(itemId => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'selected_items[]';
-                input.value = itemId;
-                form.appendChild(input);
+                // Add selected items
+                selectedItems.forEach(itemId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selected_items[]';
+                    input.value = itemId;
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
             });
+        }
 
-            document.body.appendChild(form);
-            form.submit();
-        });
-
-        // Inisialisasi saat load
-        updateLanjutBtn();
+        // Initialize on load
+        updateTotalAndCount();
     });
 </script>
 @endsection

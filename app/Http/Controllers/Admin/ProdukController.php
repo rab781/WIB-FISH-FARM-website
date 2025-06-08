@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class ProdukController extends Controller
 {
@@ -201,11 +202,16 @@ class ProdukController extends Controller
      */
     public function destroy(string $id)
     {
-        $produk = Produk::findOrFail($id);
-        $produk->delete(); // Soft delete
+        try {
+            $produk = Produk::findOrFail($id);
+            $produk->delete(); // Soft delete
 
-        return redirect()->route('admin.produk.index')
-                ->with('success', 'Produk berhasil dihapus (soft delete)');
+            Alert::success('Berhasil!', 'Produk berhasil dihapus sementara');
+            return redirect()->route('admin.produk.index');
+        } catch (\Exception $e) {
+            Alert::error('Error!', 'Gagal menghapus produk');
+            return redirect()->back();
+        }
     }
 
     /**
@@ -213,11 +219,16 @@ class ProdukController extends Controller
      */
     public function restore(string $id)
     {
-        $produk = Produk::withTrashed()->findOrFail($id);
-        $produk->restore();
+        try {
+            $produk = Produk::withTrashed()->findOrFail($id);
+            $produk->restore();
 
-        return redirect()->route('admin.produk.index')
-                ->with('success', 'Produk berhasil dipulihkan');
+            Alert::success('Berhasil!', 'Produk berhasil dipulihkan');
+            return redirect()->route('admin.produk.index');
+        } catch (\Exception $e) {
+            Alert::error('Error!', 'Gagal memulihkan produk');
+            return redirect()->back();
+        }
     }
 
     /**
@@ -225,22 +236,27 @@ class ProdukController extends Controller
      */
     public function forceDelete(string $id)
     {
-        $produk = Produk::withTrashed()->findOrFail($id);
+        try {
+            $produk = Produk::withTrashed()->findOrFail($id);
 
-        // Check if the product has any related detail_pesanan records
-        if ($produk->detailPesanan()->count() > 0) {
-            return redirect()->route('admin.produk.index')
-                    ->with('error', 'Tidak dapat menghapus produk secara permanen karena terkait dengan pesanan. Gunakan soft delete saja.');
+            // Check if the product has any related detail_pesanan records
+            if ($produk->detailPesanan()->count() > 0) {
+                Alert::error('Error!', 'Tidak dapat menghapus produk secara permanen karena terkait dengan pesanan.');
+                return redirect()->route('admin.produk.index');
+            }
+
+            // Hapus gambar jika ada
+            if ($produk->gambar && file_exists(public_path($produk->gambar))) {
+                unlink(public_path($produk->gambar));
+            }
+
+            $produk->forceDelete();
+
+            Alert::success('Berhasil!', 'Produk berhasil dihapus permanen');
+            return redirect()->route('admin.produk.index');
+        } catch (\Exception $e) {
+            Alert::error('Error!', 'Gagal menghapus produk permanen');
+            return redirect()->back();
         }
-
-        // Hapus gambar jika ada
-        if ($produk->gambar && file_exists(public_path($produk->gambar))) {
-            unlink(public_path($produk->gambar));
-        }
-
-        $produk->forceDelete();
-
-        return redirect()->route('admin.produk.index')
-                ->with('success', 'Produk berhasil dihapus permanen');
     }
 }

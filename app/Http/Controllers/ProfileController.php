@@ -56,56 +56,93 @@ class ProfileController extends Controller
     {
         $user = User::find(Auth::id());
 
+        // Enhanced validation with better error messages
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'no_hp' => 'required|string|max:20',
             'alamat_id' => 'sometimes|nullable|exists:alamat,id',
-            'alamat_jalan' => 'sometimes|nullable|string',
-            'foto' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'alamat_jalan' => 'sometimes|nullable|string|max:500',
+            'foto' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'password' => 'sometimes|nullable|min:8|confirmed',
+        ], [
+            'foto.image' => 'File harus berupa gambar',
+            'foto.mimes' => 'Format foto harus JPEG, PNG, JPG, GIF, atau WebP',
+            'foto.max' => 'Ukuran foto maksimal 2MB',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->no_hp = $request->no_hp;
+        try {
+            // Update basic profile data
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->no_hp = $request->no_hp;
 
-        // Update location data if provided
-        if ($request->alamat_id) {
-            $user->alamat_id = $request->alamat_id;
-        }
-        if ($request->alamat_jalan) {
-            $user->alamat_jalan = $request->alamat_jalan;
-        }
-
-        // Update password if provided
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-
-        // Handle profile photo upload
-        if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($user->foto && Storage::exists('public/uploads/users/' . $user->foto)) {
-                Storage::delete('public/uploads/users/' . $user->foto);
+            // Update location data if provided
+            if ($request->filled('alamat_id')) {
+                $user->alamat_id = $request->alamat_id;
+            }
+            if ($request->filled('alamat_jalan')) {
+                $user->alamat_jalan = $request->alamat_jalan;
             }
 
-            // Make sure the directory exists
-            Storage::makeDirectory('public/uploads/users');
+            // Update password ONLY if provided and not empty
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
 
-            $file = $request->file('foto');
-            $fileName = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
+            // Handle profile photo upload with better error handling
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
 
-            // Store the file and save the path
-            $file->storeAs('public/uploads/users', $fileName);
-            $user->foto = $fileName;
+                // Validate file is uploaded successfully
+                if ($file->isValid()) {
+                    // Delete old photo if exists
+                    if ($user->foto && Storage::exists('public/uploads/users/' . $user->foto)) {
+                        Storage::delete('public/uploads/users/' . $user->foto);
+                    }
+
+                    // Make sure the directory exists
+                    if (!Storage::exists('public/uploads/users')) {
+                        Storage::makeDirectory('public/uploads/users');
+                    }
+
+                    // Generate unique filename
+                    $fileName = time() . '_' . $user->id . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    // Store the file and save the path
+                    $path = $file->storeAs('public/uploads/users', $fileName);
+
+                    if ($path) {
+                        $user->foto = $fileName;
+                        Log::info('Profile photo uploaded successfully: ' . $fileName);
+                    } else {
+                        Log::error('Failed to store profile photo');
+                        return redirect()->back()
+                            ->with('error', 'Gagal mengupload foto profil. Silakan coba lagi.')
+                            ->withInput();
+                    }
+                } else {
+                    Log::error('Invalid file upload: ' . $file->getErrorMessage());
+                    return redirect()->back()
+                        ->with('error', 'File foto tidak valid: ' . $file->getErrorMessage())
+                        ->withInput();
+                }
+            }
+
+            // Save all changes to the database
+            $user->save();
+
+            return redirect()->route('profile.show')
+                ->with('success', 'Profil berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            Log::error('Profile update error: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memperbarui profil. Silakan coba lagi.')
+                ->withInput();
         }
-
-        // Save all changes to the database
-        $user->save();
-
-        return redirect()->route('profile.show')
-            ->with('success', 'Profil berhasil diperbarui!');
     }
 
     /**

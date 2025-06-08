@@ -266,11 +266,11 @@
             <div class="mt-4 flex items-center space-x-4 text-sm text-gray-600">
                 <span class="flex items-center">
                     <i class="fas fa-thumbs-up mr-1 text-green-500"></i>
-                    {{ $review->interactions->where('type', 'helpful')->count() }} Helpful
+                    {{ $review->interactions->where('interaction_type', 'helpful')->count() }} Helpful
                 </span>
                 <span class="flex items-center">
                     <i class="fas fa-thumbs-down mr-1 text-red-500"></i>
-                    {{ $review->interactions->where('type', 'not_helpful')->count() }} Not Helpful
+                    {{ $review->interactions->where('interaction_type', 'not_helpful')->count() }} Not Helpful
                 </span>
             </div>
             @endif

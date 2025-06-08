@@ -30,10 +30,15 @@
     <!-- Title -->
     <title>{{ $title ?? 'WIB Fish Farm' }}</title>
 
-    <!-- Scripts - Deferred to improve page load speed -->
-    <script src="//unpkg.com/alpinejs" defer></script>
+    <!-- Scripts - Load in correct order -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script src="{{ asset('js/landing.js') }}" defer></script>
+    <script src="{{ asset('js/landing.js') }}"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Inline JavaScript -->
     <script>
         // Menyediakan data produk dari database ke JavaScript
         const productData = @json($produk ?? []);
@@ -52,6 +57,7 @@
     </script>
 
     @stack('styles')
+    @include('sweetalert::alert')
 </head>
 <body class="bg-white"
       x-data="appState()"

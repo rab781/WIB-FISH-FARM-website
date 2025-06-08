@@ -18,14 +18,11 @@ class Expense extends Model
         'notes'
     ];
 
-    protected $dates = [
-        'expense_date',
-        'created_at',
-        'updated_at',
-        'deleted_at'
-    ];
-
     protected $casts = [
         'amount' => 'decimal:2',
+        'expense_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 }

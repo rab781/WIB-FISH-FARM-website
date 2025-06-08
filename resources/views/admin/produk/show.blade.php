@@ -36,14 +36,63 @@
                 <div class="flex space-x-2 mt-6">
                     <a href="{{ route('admin.produk.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded font-semibold transition">Kembali</a>
                     <a href="{{ route('admin.produk.edit', $produk->id_Produk) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold transition">Edit</a>
-                    <form action="{{ route('admin.produk.destroy', $produk->id_Produk) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                    <form id="deleteProductForm" action="{{ route('admin.produk.destroy', $produk->id_Produk) }}" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition">Hapus</button>
+                        <button type="button" id="deleteProductBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition">Hapus</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('deleteProductBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Hapus Produk?',
+        text: 'Produk "{{ $produk->nama_produk }}" akan dihapus. Tindakan ini dapat dibatalkan nanti.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-lg',
+            confirmButton: 'rounded-md',
+            cancelButton: 'rounded-md'
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 500);
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus...',
+                text: 'Sedang memproses penghapusan produk.',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            document.getElementById('deleteProductForm').submit();
+        }
+    });
+});
+</script>
+@endpush
+
 @endsection

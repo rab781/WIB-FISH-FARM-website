@@ -44,18 +44,6 @@ class Produk extends Model
         return $this->hasMany(Ulasan::class, 'id_Produk', 'id_Produk');
     }
 
-    // Relasi ke produk ukuran
-    public function ukuran()
-    {
-        return $this->hasMany(ProdukUkuran::class, 'id_produk', 'id_Produk');
-    }
-
-    // Method untuk mendapatkan ukuran yang aktif dan tersedia
-    public function getAvailableSizesAttribute()
-    {
-        return $this->ukuran()->active()->inStock()->get();
-    }
-
     // Hitung popularitas berdasarkan jumlah pesanan
     public function getOrderCountAttribute()
     {

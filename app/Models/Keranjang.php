@@ -19,7 +19,6 @@ class Keranjang extends Model
     protected $fillable = [
         'user_id',
         'id_Produk',
-        'ukuran_id',
         'jumlah',
         'total_harga',
     ];
@@ -34,11 +33,5 @@ class Keranjang extends Model
     public function produk()
     {
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
-    }
-
-    // Relasi ke ukuran produk
-    public function ukuran()
-    {
-        return $this->belongsTo(ProdukUkuran::class, 'ukuran_id', 'id');
     }
 }

@@ -8,24 +8,24 @@
         @apply bg-white rounded-lg shadow border-t-4 p-5 flex items-center transition-all duration-300 ease-in-out relative overflow-hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .summary-card:hover {
         @apply shadow-lg;
         transform: translateY(-5px);
     }
-    
+
     .summary-card.revenue {
         @apply border-blue-500;
     }
-    
+
     .summary-card.orders {
         @apply border-green-500;
     }
-    
+
     .summary-card.average {
         @apply border-purple-500;
     }
-    
+
     .summary-card::before {
         content: '';
         position: absolute;
@@ -38,75 +38,75 @@
         transform: translate(30%, -30%);
         z-index: 0;
     }
-    
+
     .summary-icon {
         @apply w-14 h-14 rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0 mr-4 shadow-md z-10;
     }
-    
+
     .card-title {
         @apply text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100;
     }
-    
+
     .dashboard-title {
         @apply text-xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200;
     }
-    
+
     .table-header-custom {
         @apply bg-gray-50 text-gray-700 uppercase text-xs font-semibold tracking-wider;
     }
-    
+
     .table-row-hover:hover {
         @apply bg-orange-50 transition-colors duration-150;
     }
-    
+
     .table-row-hover:hover td:first-child {
         @apply border-l-4 border-orange-500;
     }
-    
+
     .chart-box {
         @apply bg-white rounded-lg shadow border-t-4 border-orange-500 p-5 transition-all duration-300;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
     }
-    
+
     .chart-box:hover {
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
     }
-    
+
     .filter-card {
         @apply bg-white rounded-lg shadow border-t-4 border-gray-300 p-5;
     }
-    
+
     /* Animated elements */
     @keyframes float {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-5px); }
         100% { transform: translateY(0px); }
     }
-    
+
     .float-animation {
         animation: float 4s ease-in-out infinite;
     }
-    
+
     .form-input-custom {
         @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500;
     }
-    
+
     .btn-primary-custom {
         @apply bg-orange-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-orange-700 transition-colors duration-200 flex items-center justify-center;
     }
-    
+
     .btn-secondary-custom {
         @apply bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center;
     }
-    
+
     .stat-label {
         @apply text-sm font-semibold uppercase mb-1 flex items-center gap-1;
     }
-    
+
     .stat-value {
         @apply text-2xl font-bold text-gray-900;
     }
-    
+
     .stat-desc {
         @apply text-xs text-gray-500 mt-1 flex items-center gap-1;
     }
@@ -148,7 +148,7 @@
     </div>
 
     <h2 class="dashboard-title">Ringkasan Kinerja {{ $selectedYear }}</h2>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="summary-card revenue group hover:transform hover:-translate-y-2 transition-all duration-300 float-animation" style="animation-delay: 0s">
             <div class="summary-icon bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300">
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Monthly Revenue Chart
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
     const monthlyData = @json($yearlyData); // Pastikan ini menyediakan data { month: 'Jan', total_revenue: 1000 }
-    
+
     // Create gradient
     const revenueGradient = revenueCtx.createLinearGradient(0, 0, 0, 400);
     revenueGradient.addColorStop(0, 'rgba(249, 115, 22, 0.4)');
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Top Products Chart
     const productsCtx = document.getElementById('topProductsChart').getContext('2d');
     const topProductsData = @json($topProducts->take(5)); // Ambil 5 produk teratas saja untuk chart
-    
+
     // Create custom colors with gradient
     const gradients = [];
     const colors = [
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { start: 'rgba(23, 162, 184, 0.9)', end: 'rgba(23, 162, 184, 0.6)' },   // Info Blue
         { start: 'rgba(249, 115, 22, 0.9)', end: 'rgba(249, 115, 22, 0.6)' }    // Orange
     ];
-    
+
     // Create horizontal gradient for each bar
     colors.forEach((color, i) => {
         const gradient = productsCtx.createLinearGradient(0, 0, 300, 0);
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     ticks: {
                         font: {
-                            size: 11, 
+                            size: 11,
                             weight: 'bold'
                         },
                         color: '#334155'
@@ -567,9 +567,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedYear = document.getElementById('year').value;
         const url = `{{ route('admin.reports.sales') }}?year=${selectedYear}&export=true`;
 
-        // Simulating the export process. In a real scenario, this would likely trigger a download.
-        alert('Laporan Penjualan akan segera diekspor. (Fitur ekspor aktual perlu diimplementasikan di backend)');
-        // window.location.href = url; // Uncomment this to trigger actual download if backend is ready
+        // Show SweetAlert2 for export
+        Swal.fire({
+            title: 'Ekspor Laporan Penjualan',
+            text: 'Memulai ekspor laporan penjualan...',
+            icon: 'info',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'rounded-lg'
+            }
+        }).then(() => {
+            // window.location.href = url; // Uncomment this to trigger actual download if backend is ready
+            Swal.fire({
+                title: 'Fungsi Belum Tersedia',
+                text: 'Fitur ekspor aktual perlu diimplementasikan di backend.',
+                icon: 'warning',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md'
+                }
+            });
+        });
     };
 });
 </script>

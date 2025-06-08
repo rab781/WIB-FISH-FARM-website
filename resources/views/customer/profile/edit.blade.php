@@ -11,7 +11,7 @@
 
         <!-- Form Container -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" id="profileForm">
                 @csrf
                 @method('PUT')
 
@@ -119,19 +119,20 @@
                             @enderror
                         </div>
 
-                        
+
                     </div>
                 </div>
 
                 <!-- Change Password -->
                 <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-5">Ubah Password</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Ubah Password</h3>
+                    <p class="text-sm text-gray-500 mb-5">Biarkan kosong jika tidak ingin mengubah password</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Password -->
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password Baru (Opsional)</label>
                             <input type="password" name="password" id="password" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500 @error('password') border-red-300 @enderror">
-                            <p class="mt-1 text-xs text-gray-500">Biarkan kosong jika tidak ingin mengubah password.</p>
+                            <p class="mt-1 text-xs text-gray-500">Minimal 8 karakter. Biarkan kosong jika tidak ingin mengubah.</p>
                             @error('password')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
@@ -141,6 +142,7 @@
                         <div>
                             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password Baru</label>
                             <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">Ulangi password baru jika mengubah password.</p>
                         </div>
                     </div>
                 </div>
@@ -217,14 +219,98 @@
 <script>
     function showPreview(input) {
         if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire({
+                    title: 'File Terlalu Besar',
+                    text: 'Ukuran foto maksimal 2MB',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire({
+                    title: 'Format File Tidak Valid',
+                    text: 'Format foto harus JPEG, PNG, JPG, GIF, atau WebP',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+                input.value = '';
+                return;
+            }
+
+            // Show preview
             var reader = new FileReader();
             reader.onload = function(e) {
                 const preview = input.parentElement.previousElementSibling;
                 preview.innerHTML = '<img src="' + e.target.result + '" class="preview-image">';
             }
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
+
+    function confirmUpdate() {
+        return new Promise((resolve) => {
+            Swal.fire({
+                title: 'Konfirmasi Perubahan',
+                text: 'Apakah anda yakin untuk mengubah data profil?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Ubah!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                resolve(result.isConfirmed);
+            });
+        });
+    }
+
+    // Handle form submission with validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profileForm');
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Validate password confirmation if password is filled
+                const password = document.getElementById('password').value;
+                const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+                if (password && password !== passwordConfirmation) {
+                    Swal.fire({
+                        title: 'Password Tidak Cocok',
+                        text: 'Konfirmasi password tidak sesuai dengan password baru',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                    return;
+                }
+
+                if (password && password.length < 8) {
+                    Swal.fire({
+                        title: 'Password Terlalu Pendek',
+                        text: 'Password minimal 8 karakter',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                    return;
+                }
+
+                const confirmed = await confirmUpdate();
+                if (confirmed) {
+                    this.submit();
+                }
+            });
+        }
+    });
 </script>
 <script src="{{ asset('js/address-autocomplete-fixed.js') }}"></script>
 @endpush

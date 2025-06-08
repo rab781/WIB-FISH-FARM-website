@@ -2,8 +2,57 @@
 
 @section('title', 'Tulis Review')
 
+@push('styles')
+<style>
+    .rating-star, .product-rating-star {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .rating-star:hover, .product-rating-star:hover {
+        transform: scale(1.1);
+    }
+    .rating-star.active, .product-rating-star.active {
+        color: #f59e0b !important;
+        transform: scale(1.05);
+    }
+    .form-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .card {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .submit-btn {
+        transition: all 0.3s ease;
+    }
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .error-message {
+        font-size: 0.875rem;
+        color: #dc2626;
+        margin-top: 0.25rem;
+    }
+    .success-animation {
+        animation: bounce 0.3s ease;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-5px); }
+        60% { transform: translateY(-3px); }
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="form-container">
+    <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between">
@@ -52,7 +101,7 @@
                                         </div>
                                     </div>
 
-                                    <input type="hidden" name="reviews[{{ $index }}][id_produk]" value="{{ $detailPesanan->produk->id_Produk }}">
+                                    <input type="hidden" name="reviews[{{ $index }}][id_produk]" value="{{ $detailPesanan->id_Produk }}">
 
                                     <!-- Rating for this product -->
                                     <div class="mt-4">

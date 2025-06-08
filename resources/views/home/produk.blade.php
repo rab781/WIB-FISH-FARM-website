@@ -84,6 +84,11 @@
                 let nameMatch = true;
                 let typeMatch = true;
                 let popularityMatch = true;
+                let stockMatch = true;
+
+                // Stock filter - hide products with 0 or negative stock
+                const stock = parseInt(item.getAttribute('data-stock') || 0);
+                stockMatch = stock > 0;
 
                 // Search query filter
                 if (this.searchQuery.trim() !== '') {
@@ -100,8 +105,8 @@
                 // Popularity filter - reset to true by default
                 popularityMatch = true;
 
-                // Apply filters except popularity to show/hide products
-                if (nameMatch && typeMatch) {
+                // Apply filters including stock to show/hide products
+                if (nameMatch && typeMatch && stockMatch) {
                     item.classList.add('filtered');
                     item.classList.remove('hidden');
                 } else {
@@ -211,12 +216,14 @@
     <!-- Products Grid -->
     <div class="products-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
         @foreach($produk as $p)
+            @if($p->stok > 0)
             <div class="product-item filtered bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                 data-name="{{ $p->nama_ikan }}"
                 data-price="{{ $p->harga }}"
                 data-type="{{ strtolower($p->jenis_ikan ?? 'lainnya') }}"
                 data-popularity="{{ isset($p->detail_pesanan_count) ? $p->detail_pesanan_count : $p->order_count }}"
-                data-id="{{ $p->id_Produk }}">
+                data-id="{{ $p->id_Produk }}"
+                data-stock="{{ $p->stok }}">
 
                 <!-- Clickable product image and header -->
                 <a href="{{ route('detailProduk', $p->id_Produk) }}" class="block">
@@ -235,6 +242,11 @@
                                 <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">Populer</span>
                             </div>
                         @endif
+                        @if($p->stok > 0 && $p->stok <= 5)
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">Stok Terbatas</span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="p-4 pb-0">
@@ -242,7 +254,9 @@
                         <div class="flex justify-between items-center mb-2">
                             <p class="text-gray-900 font-bold">Rp {{ number_format($p->harga, 0, ',', '.') }}</p>
                             <div class="flex items-center">
-                                <p class="text-sm text-gray-600 mr-2">Stok: {{ $p->stok }}</p>
+                                <p class="text-sm mr-2 {{ $p->stok <= 5 ? 'text-red-600 font-semibold' : 'text-gray-600' }}">
+                                    Stok: {{ $p->stok }}
+                                </p>
                                 @if(isset($p->detail_pesanan_count) && $p->detail_pesanan_count > 0)
                                 <span class="text-xs text-gray-500">({{ $p->detail_pesanan_count }} terjual)</span>
                                 @elseif(isset($p->order_count) && $p->order_count > 0)
@@ -254,24 +268,31 @@
                 </a>
 
                 <div class="p-4 pt-0">
-                    @auth
-                        <form action="{{ route('cart.add') }}" method="POST" class="add-to-cart-form">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $p->id_Produk }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-md text-sm font-medium transition">
+                    @if($p->stok > 0)
+                        @auth
+                            <form action="{{ route('cart.add') }}" method="POST" class="add-to-cart-form">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $p->id_Produk }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-md text-sm font-medium transition">
+                                    Tambah ke Keranjang
+                                </button>
+                            </form>
+                        @else
+                            <button
+                                onclick="showAuthModal()"
+                                class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-md text-sm font-medium transition">
                                 Tambah ke Keranjang
                             </button>
-                        </form>
+                        @endauth
                     @else
-                        <button
-                            onclick="showAuthModal()"
-                            class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-md text-sm font-medium transition">
-                            Tambah ke Keranjang
+                        <button disabled class="w-full bg-gray-400 text-white py-2 px-3 rounded-md text-sm font-medium cursor-not-allowed">
+                            Stok Habis
                         </button>
-                    @endauth
+                    @endif
                 </div>
             </div>
+            @endif
         @endforeach
     </div>
 
@@ -284,8 +305,9 @@
         <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <h3 class="mt-4 text-lg font-medium text-gray-900">Tidak ada produk ditemukan</h3>
-        <p class="mt-2 text-gray-500">Coba ubah filter pencarian Anda</p>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">Tidak ada produk tersedia</h3>
+        <p class="mt-2 text-gray-500">Tidak ada produk yang sesuai dengan filter pencarian atau semua produk sedang habis stok</p>
+        <p class="mt-1 text-sm text-gray-400">Coba ubah filter pencarian atau periksa kembali nanti</p>
     </div>
 
     <!-- Pagination -->

@@ -107,7 +107,7 @@
                             <div class="col-md-6">
                                 <div class="info-group">
                                     <div class="info-label">Tanggal</div>
-                                    <div class="info-value">{{ $expense->expense_date->format('d F Y') }}</div>
+                                    <div class="info-value">{{ $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('d F Y') : \Carbon\Carbon::parse($expense->expense_date)->format('d F Y') }}</div>
                                 </div>
                             </div>
 
@@ -151,10 +151,10 @@
                         <i class="fas fa-edit me-1"></i> Edit Pengeluaran
                     </a>
 
-                    <form action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                    <form id="deleteExpenseShowForm" action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-action">
+                        <button type="button" id="deleteExpenseShowBtn" class="btn btn-danger btn-action">
                             <i class="fas fa-trash me-1"></i> Hapus Pengeluaran
                         </button>
                     </form>
@@ -162,4 +162,53 @@
             </div>
         </div>
     </div>
-    @endsection
+
+@push('scripts')
+<script>
+document.getElementById('deleteExpenseShowBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Hapus Pengeluaran?',
+        html: '<div class="text-center"><p class="text-red-600 font-semibold mb-2">⚠️ PERINGATAN ⚠️</p><p>Pengeluaran "{{ $expense->deskripsi }}" akan dihapus secara permanen dan <strong>tidak dapat dibatalkan</strong>!</p></div>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-lg',
+            confirmButton: 'rounded-md',
+            cancelButton: 'rounded-md'
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 500);
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus...',
+                text: 'Sedang memproses penghapusan pengeluaran.',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            document.getElementById('deleteExpenseShowForm').submit();
+        }
+    });
+});
+</script>
+@endpush
+
+@endsection

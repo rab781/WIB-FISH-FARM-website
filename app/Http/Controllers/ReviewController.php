@@ -39,16 +39,34 @@ class ReviewController extends Controller
     {
         // Ensure user can only review their own orders
         if ($pesanan->user_id !== Auth::id()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk mereview pesanan ini'
+                ], 403);
+            }
             abort(403);
         }
 
         // Validate that the order is completed and can be reviewed
         if ($pesanan->status_pesanan !== 'Selesai') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya pesanan yang telah selesai yang dapat direview'
+                ], 400);
+            }
             return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat direview');
         }
 
         // Check if there are still reviewable products
         if ($pesanan->reviewable_products->isEmpty()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Semua produk dalam pesanan ini sudah direview'
+                ], 400);
+            }
             return back()->with('error', 'Semua produk dalam pesanan ini sudah direview');
         }
 
@@ -61,6 +79,13 @@ class ReviewController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak valid',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
             return back()->withErrors($validator)->withInput();
         }
 
@@ -101,6 +126,13 @@ class ReviewController extends Controller
             ]);
 
             $reviewCount++;
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "{$reviewCount} review berhasil ditambahkan"
+            ]);
         }
 
         return redirect()->route('reviews.index')->with('success', "{$reviewCount} review berhasil ditambahkan");
@@ -313,10 +345,8 @@ class ReviewController extends Controller
             return back()->with('error', 'Hanya pesanan yang telah selesai yang dapat direview');
         }
 
-        // Make sure the pesanan has tanggal_diterima set
-        if (!$pesanan->tanggal_diterima) {
-            return back()->with('error', 'Pesanan belum dapat direview karena belum dikonfirmasi sebagai diterima');
-        }
+        // Note: Removed tanggal_diterima requirement - orders with status "Selesai" can be reviewed
+        // regardless of whether tanggal_diterima is set, as the status indicates completion
 
         // Load the order details including products
         $pesanan->load(['detailPesanan.produk']);

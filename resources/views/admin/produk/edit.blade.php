@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.produk.update', $produk->id_Produk) }}" method="POST" enctype="multipart/form-data" class="py-6 px-8">
+        <form id="updateProductForm" action="{{ route('admin.produk.update', $produk->id_Produk) }}" method="POST" enctype="multipart/form-data" class="py-6 px-8">
             @csrf
             @method('PUT')
 
@@ -108,8 +108,8 @@
                 <a href="{{ route('admin.produk.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md">
                     Batal
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-                    Simpan Perubahan
+                <button type="button" id="updateProductBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+                    SELESAI
                 </button>
             </div>
         </form>
@@ -145,6 +145,51 @@
             `;
             @endif
         }
+    });
+
+    // SweetAlert2 confirmation for product update
+    document.getElementById('updateProductBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Simpan Perubahan?',
+            text: 'Apakah Anda yakin ingin menyimpan perubahan pada produk "{{ $produk->nama_ikan }}"?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md'
+            },
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve();
+                    }, 500);
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Menyimpan...',
+                    text: 'Sedang memproses perubahan produk.',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                document.getElementById('updateProductForm').submit();
+            }
+        });
     });
 </script>
 @endpush

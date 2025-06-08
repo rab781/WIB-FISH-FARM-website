@@ -20,7 +20,7 @@ class KeluhanController extends Controller
                             ->paginate(10);
 
         // Path view yang benar berdasarkan controller Anda
-        return view('keluhan.index', compact('keluhans'));
+        return view('customer.keluhan.index', compact('keluhans'));
     }
 
     /**
@@ -39,7 +39,7 @@ class KeluhanController extends Controller
         ];
 
         // Path view yang benar berdasarkan controller Anda
-        return view('keluhan.create', compact('jenisKeluhan'));
+        return view('customer.keluhan.create', compact('jenisKeluhan'));
     }
 
     /**
@@ -83,7 +83,7 @@ class KeluhanController extends Controller
         }
 
         // Path view yang benar berdasarkan controller Anda
-        return view('keluhan.show', compact('keluhan'));
+        return view('customer.keluhan.show', compact('keluhan'));
     }
 
     // Method edit, update, destroy yang kosong tetap dipertahankan seperti controller Anda

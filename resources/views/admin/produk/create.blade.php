@@ -24,7 +24,7 @@
                     <div class="mb-4">
                         <label for="nama_ikan" class="block text-gray-700 font-medium mb-2">Nama Ikan</label>
                         <input type="text" name="nama_ikan" id="nama_ikan" value="{{ old('nama_ikan') }}" required
-                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('nama_ikan')  @else border-gray-300 @enderror">
+                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('nama_ikan')  @else border-gray-300 @enderror">
                         @error('nama_ikan')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -33,7 +33,7 @@
                     <div class="mb-4">
                         <label for="jenis_ikan" class="block text-gray-700 font-medium mb-2">Jenis Ikan</label>
                         <select name="jenis_ikan" id="jenis_ikan" required
-                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('jenis_ikan')  @else border-gray-300 @enderror">
+                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('jenis_ikan')  @else border-gray-300 @enderror">
                             <option value="">Pilih Jenis Ikan</option>
                             <option value="Koi" {{ old('jenis_ikan') == 'Koi' ? 'selected' : '' }}>Koi</option>
                             <option value="Koki" {{ old('jenis_ikan') == 'Koki' ? 'selected' : '' }}>Koki</option>
@@ -50,7 +50,7 @@
                                 <span class="text-gray-500">Rp</span>
                             </div>
                             <input type="number" name="harga" id="harga" value="{{ old('harga') }}" required min="0"
-                                class="w-full px-3 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('harga')  @else border-gray-300 @enderror">
+                                class="w-full px-3 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('harga')  @else border-gray-300 @enderror">
                         </div>
                         @error('harga')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -60,7 +60,7 @@
                     <div class="mb-4">
                         <label for="stok" class="block text-gray-700 font-medium mb-2">Stok</label>
                         <input type="number" name="stok" id="stok" value="{{ old('stok') }}" required min="0"
-                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('stok')  @else border-gray-300 @enderror">
+                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('stok')  @else border-gray-300 @enderror">
                         @error('stok')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -71,7 +71,7 @@
                     <div class="mb-4">
                         <label for="deskripsi" class="block text-gray-700 font-medium mb-2">Deskripsi</label>
                         <textarea name="deskripsi" id="deskripsi" rows="3" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deskripsi')  @enderror">{{ old('deskripsi') }}</textarea>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('deskripsi')  @enderror">{{ old('deskripsi') }}</textarea>
                         @error('deskripsi')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -87,7 +87,7 @@
                             </div>
                         </div>
                         <input type="file" name="gambar" id="gambar" accept="image/*"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('gambar')  @enderror">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 @error('gambar')  @enderror">
                         @error('gambar')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -99,7 +99,7 @@
                 <a href="{{ route('admin.produk.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md mr-2">
                     Batal
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+                <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md">
                     Simpan Produk
                 </button>
             </div>

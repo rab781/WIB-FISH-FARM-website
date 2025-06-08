@@ -595,7 +595,12 @@ function toggleHelpful(reviewId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat memproses feedback');
+        Swal.fire({
+            title: 'Error',
+            text: 'Terjadi kesalahan saat memproses feedback',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     });
 }
 
@@ -612,9 +617,23 @@ function shareReview(reviewId) {
     } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            alert('Link review berhasil disalin ke clipboard!');
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Link review berhasil disalin ke clipboard!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         }).catch(() => {
-            alert('Gagal menyalin link review');
+            Swal.fire({
+                title: 'Gagal',
+                text: 'Gagal menyalin link review',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
     }
 }
@@ -645,7 +664,12 @@ function loadMoreReviews() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Gagal memuat review tambahan');
+        Swal.fire({
+            title: 'Error',
+            text: 'Gagal memuat review tambahan',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     })
     .finally(() => {
         button.textContent = originalText;

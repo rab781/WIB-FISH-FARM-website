@@ -87,7 +87,7 @@
                                     <!-- Results will be inserted here -->
                                 </tbody>
                             </table>
-                            
+
                             <div class="p-4 mt-2" id="comprehensiveConclusion">
                                 <!-- Conclusion will be added here -->
                             </div>
@@ -258,7 +258,12 @@
             const searchTerm = testSearchInput.value;
 
             if (searchTerm.length < 3) {
-                alert('Masukkan minimal 3 karakter untuk pencarian');
+                Swal.fire({
+                    title: 'Input Tidak Valid',
+                    text: 'Masukkan minimal 3 karakter untuk pencarian',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
@@ -422,16 +427,16 @@
                     // Add success rate for conclusion
                     const totalEndpoints = Object.keys(data.test_results).length;
                     const successRate = Math.round((totalSuccess / totalEndpoints) * 100);
-                    
+
                     // Style conclusion based on success rate
                     let conclusionClass = 'bg-yellow-50 text-yellow-700';
-                    
+
                     if (successRate >= 70) {
                         conclusionClass = 'bg-green-50 text-green-700';
                     } else if (successRate <= 30) {
                         conclusionClass = 'bg-red-50 text-red-700';
                     }
-                    
+
                     comprehensiveConclusion.innerHTML = `
                         <div class="p-4 rounded-lg ${conclusionClass}">
                             <h4 class="font-medium mb-2">Hasil Diagnosa API RajaOngkir</h4>

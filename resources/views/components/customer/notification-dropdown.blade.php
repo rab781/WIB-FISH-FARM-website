@@ -169,14 +169,80 @@ function loadCustomerNotifications() {
                 </div>
             `;
 
-            // Add click event to navigate to detail page
+            // Add click event to navigate to detail page and mark as read
             if (notification.data && notification.data.url) {
                 item.addEventListener('click', function(e) {
                     // Don't navigate if clicked on the "mark as read" button
                     if (e.target.closest('.mark-read')) {
                         return;
                     }
-                    window.location.href = notification.data.url;
+                    
+                    // If notification is unread, mark it as read first
+                    if (!notification.is_read) {
+                        const formData = new FormData();
+                        formData.append('_token', csrfToken);
+
+                        fetch(`{{ url('notifications') }}/${notification.id}/mark-as-read`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken || ''
+                            },
+                            body: formData,
+                            credentials: 'same-origin'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Update the Alpine.js unreadCount variable
+                                const alpineData = document.querySelector('[x-data]').__x.$data;
+                                if (alpineData && typeof alpineData.unreadCount !== 'undefined') {
+                                    alpineData.unreadCount = Math.max(0, alpineData.unreadCount - 1);
+                                }
+                                
+                                // Use validated URL from server response
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                } else {
+                                    window.location.href = notification.data.url;
+                                }
+                            } else {
+                                // Navigate even if marking as read fails
+                                window.location.href = notification.data.url;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error marking notification as read:', error);
+                            // Still navigate even if marking as read fails
+                            window.location.href = notification.data.url;
+                        });
+                    } else {
+                        // If already read, validate URL before redirect
+                        fetch(`{{ url('notifications') }}/${notification.id}/mark-as-read`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken || ''
+                            },
+                            body: new FormData(),
+                            credentials: 'same-origin'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                window.location.href = notification.data.url;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error validating notification URL:', error);
+                            window.location.href = notification.data.url;
+                        });
+                        window.location.href = notification.data.url;
+                    }
                 });
             }
 

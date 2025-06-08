@@ -94,6 +94,9 @@ class ProfileController extends Controller
             $user->foto = $fileName;
         }
 
+        // Save all changes to the database
+        $user->save();
+
         return redirect()->route('admin.profile.show')
             ->with('success', 'Profil berhasil diperbarui!');
     }

@@ -57,7 +57,7 @@
                     @php
                         $statusColors = [
                             'Menunggu Review' => 'warning',
-                            'Dalam Review' => 'info', 
+                            'Dalam Review' => 'info',
                             'Disetujui' => 'success',
                             'Ditolak' => 'danger',
                             'Dana Dikembalikan' => 'primary',
@@ -65,7 +65,7 @@
                         ];
                         $currentStatus = $pengembalian->status_pengembalian;
                     @endphp
-                    
+
                     <div class="text-center mb-3">
                         <span class="badge bg-{{ $statusColors[$currentStatus] ?? 'secondary' }} fs-6 px-3 py-2">
                             {{ $currentStatus }}
@@ -73,7 +73,7 @@
                     </div>
 
                     <!-- Status Update Form -->
-                    <form action="{{ route('admin.pengembalian.updateStatus', $pengembalian->id) }}" method="POST">
+                    <form id="statusUpdateForm" action="{{ route('admin.pengembalian.updateStatus', $pengembalian->id) }}" method="POST">
                         @csrf
                         <div class="mb-3">
                             <label for="status_pengembalian" class="form-label">Ubah Status</label>
@@ -86,21 +86,21 @@
                                 <option value="Selesai" {{ $currentStatus === 'Selesai' ? 'selected' : '' }}>Selesai</option>
                             </select>
                         </div>
-                        
+
                         <div class="mb-3" id="transactionNumberField" style="display: none;">
                             <label for="nomor_transaksi_pengembalian" class="form-label">Nomor Transaksi</label>
-                            <input type="text" name="nomor_transaksi_pengembalian" id="nomor_transaksi_pengembalian" 
-                                   class="form-control" value="{{ $pengembalian->nomor_transaksi_pengembalian }}" 
+                            <input type="text" name="nomor_transaksi_pengembalian" id="nomor_transaksi_pengembalian"
+                                   class="form-control" value="{{ $pengembalian->nomor_transaksi_pengembalian }}"
                                    placeholder="Masukkan nomor transaksi">
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="catatan_admin" class="form-label">Catatan Admin</label>
-                            <textarea name="catatan_admin" id="catatan_admin" class="form-control" rows="3" 
+                            <textarea name="catatan_admin" id="catatan_admin" class="form-control" rows="3"
                                       placeholder="Berikan catatan untuk pelanggan...">{{ $pengembalian->catatan_admin }}</textarea>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
+
+                        <button type="button" id="updateStatusBtn" class="btn btn-primary w-100">
                             <i class="fas fa-save me-1"></i> Update Status
                         </button>
                     </form>
@@ -127,17 +127,17 @@
                             <p class="text-muted mb-0">{{ $pengembalian->user->email }}</p>
                         </div>
                     </div>
-                    
+
                     @if($pengembalian->user->no_telepon)
                     <div class="mb-2">
                         <strong>Telepon:</strong> {{ $pengembalian->user->no_telepon }}
                     </div>
                     @endif
-                    
+
                     <div class="mb-2">
                         <strong>Bergabung:</strong> {{ $pengembalian->user->created_at->format('d/m/Y') }}
                     </div>
-                    
+
                     <a href="{{ route('admin.users.show', $pengembalian->user->id) }}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-eye me-1"></i> Lihat Profil
                     </a>
@@ -161,7 +161,7 @@
                     @endif
                     @if($pengembalian->account_number)
                         <div class="mb-2">
-                            <strong>No. Rekening:</strong> 
+                            <strong>No. Rekening:</strong>
                             <code>{{ $pengembalian->account_number }}</code>
                         </div>
                     @endif
@@ -201,7 +201,7 @@
                     @endif
                     @if($pengembalian->nomor_transaksi_pengembalian)
                         <div class="mb-2">
-                            <strong>No. Transaksi:</strong> 
+                            <strong>No. Transaksi:</strong>
                             <code>{{ $pengembalian->nomor_transaksi_pengembalian }}</code>
                         </div>
                     @endif
@@ -225,7 +225,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <strong>ID Pesanan:</strong>
-                                <a href="{{ route('admin.pesanan.show', $pengembalian->pesanan->id_pesanan) }}" 
+                                <a href="{{ route('admin.pesanan.show', $pengembalian->pesanan->id_pesanan) }}"
                                    class="text-decoration-none ms-2">
                                     {{ $pengembalian->pesanan->id_pesanan }}
                                 </a>
@@ -275,9 +275,9 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($detail->produk && $detail->produk->foto_produk)
-                                                <img src="{{ Storage::url($detail->produk->foto_produk) }}" 
-                                                     alt="{{ $detail->produk->nama_produk }}" 
-                                                     class="img-thumbnail me-2" 
+                                                <img src="{{ Storage::url($detail->produk->foto_produk) }}"
+                                                     alt="{{ $detail->produk->nama_produk }}"
+                                                     class="img-thumbnail me-2"
                                                      style="width: 40px; height: 40px; object-fit: cover;">
                                             @endif
                                             <div>
@@ -341,11 +341,11 @@
                                 <div class="row g-2">
                                     @foreach($photos as $photo)
                                     <div class="col-md-3">
-                                        <img src="{{ Storage::url($photo) }}" 
-                                             alt="Bukti" 
-                                             class="img-thumbnail w-100" 
+                                        <img src="{{ Storage::url($photo) }}"
+                                             alt="Bukti"
+                                             class="img-thumbnail w-100"
                                              style="height: 150px; object-fit: cover; cursor: pointer;"
-                                             data-bs-toggle="modal" 
+                                             data-bs-toggle="modal"
                                              data-bs-target="#photoModal-{{ $loop->index }}">
                                     </div>
 
@@ -415,7 +415,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="approveNote" class="form-label">Catatan (Opsional)</label>
-                        <textarea name="catatan_admin" id="approveNote" class="form-control" rows="3" 
+                        <textarea name="catatan_admin" id="approveNote" class="form-control" rows="3"
                                   placeholder="Berikan catatan jika diperlukan..."></textarea>
                     </div>
                 </div>
@@ -447,7 +447,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="rejectNote" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
-                        <textarea name="catatan_admin" id="rejectNote" class="form-control" rows="4" 
+                        <textarea name="catatan_admin" id="rejectNote" class="form-control" rows="4"
                                   placeholder="Jelaskan alasan penolakan dengan detail..." required></textarea>
                     </div>
                 </div>
@@ -475,10 +475,10 @@
                 <div class="modal-body">
                     <div class="alert alert-primary">
                         <i class="fas fa-money-bill-wave me-2"></i>
-                        Konfirmasi bahwa dana sebesar <strong>Rp {{ number_format($pengembalian->jumlah_refund, 0, ',', '.') }}</strong> 
+                        Konfirmasi bahwa dana sebesar <strong>Rp {{ number_format($pengembalian->jumlah_refund, 0, ',', '.') }}</strong>
                         telah ditransfer ke rekening pelanggan.
                     </div>
-                    
+
                     @if($pengembalian->bank_name)
                     <div class="mb-3">
                         <strong>Informasi Transfer:</strong>
@@ -489,15 +489,15 @@
                         </ul>
                     </div>
                     @endif
-                    
+
                     <div class="mb-3">
                         <label for="refundTransactionNumber" class="form-label">Nomor Transaksi <span class="text-danger">*</span></label>
-                        <input type="text" name="nomor_transaksi_pengembalian" id="refundTransactionNumber" 
+                        <input type="text" name="nomor_transaksi_pengembalian" id="refundTransactionNumber"
                                class="form-control" placeholder="Masukkan nomor transaksi bank" required>
                     </div>
                     <div class="mb-3">
                         <label for="refundNote" class="form-label">Catatan (Opsional)</label>
-                        <textarea name="catatan_admin" id="refundNote" class="form-control" rows="2" 
+                        <textarea name="catatan_admin" id="refundNote" class="form-control" rows="2"
                                   placeholder="Catatan tambahan..."></textarea>
                     </div>
                 </div>
@@ -518,7 +518,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.getElementById('status_pengembalian');
     const transactionField = document.getElementById('transactionNumberField');
-    
+    const updateStatusBtn = document.getElementById('updateStatusBtn');
+
     function toggleTransactionField() {
         if (statusSelect.value === 'Dana Dikembalikan') {
             transactionField.style.display = 'block';
@@ -528,18 +529,359 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('nomor_transaksi_pengembalian').required = false;
         }
     }
-    
+
     statusSelect.addEventListener('change', toggleTransactionField);
     toggleTransactionField(); // Initial check
+
+    // SweetAlert2 Status Update Confirmation
+    updateStatusBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const selectedStatus = statusSelect.value;
+        const currentStatus = '{{ $currentStatus }}';
+        const notes = document.getElementById('catatan_admin').value;
+        const transactionNumber = document.getElementById('nomor_transaksi_pengembalian').value;
+
+        // Don't allow update if status is the same
+        if (selectedStatus === currentStatus) {
+            Swal.fire({
+                title: 'Tidak Ada Perubahan',
+                text: 'Status yang dipilih sama dengan status saat ini',
+                icon: 'info',
+                confirmButtonColor: '#6b7280',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Validate transaction number for "Dana Dikembalikan" status
+        if (selectedStatus === 'Dana Dikembalikan' && !transactionNumber.trim()) {
+            Swal.fire({
+                title: 'Nomor Transaksi Diperlukan',
+                text: 'Silakan masukkan nomor transaksi untuk status "Dana Dikembalikan"',
+                icon: 'warning',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Configure confirmation based on status
+        let icon, title, text, confirmButtonText, confirmButtonColor;
+
+        switch(selectedStatus) {
+            case 'Dalam Review':
+                icon = 'info';
+                title = 'Ubah Status ke Dalam Review';
+                text = 'Apakah Anda yakin ingin mengubah status pengembalian menjadi "Dalam Review"?';
+                confirmButtonText = 'Ya, Ubah Status';
+                confirmButtonColor = '#3b82f6';
+                break;
+            case 'Disetujui':
+                icon = 'success';
+                title = 'Setujui Pengembalian';
+                text = 'Apakah Anda yakin ingin menyetujui pengajuan pengembalian ini? Pelanggan akan menerima notifikasi persetujuan.';
+                confirmButtonText = 'Ya, Setujui';
+                confirmButtonColor = '#10b981';
+                break;
+            case 'Ditolak':
+                icon = 'warning';
+                title = 'Tolak Pengembalian';
+                text = 'Apakah Anda yakin ingin menolak pengajuan pengembalian ini? Pastikan catatan admin sudah diisi dengan alasan yang jelas.';
+                confirmButtonText = 'Ya, Tolak';
+                confirmButtonColor = '#dc2626';
+                break;
+            case 'Dana Dikembalikan':
+                icon = 'question';
+                title = 'Konfirmasi Dana Dikembalikan';
+                text = `Konfirmasi bahwa dana sebesar Rp {{ number_format($pengembalian->jumlah_refund, 0, ',', '.') }} telah ditransfer ke rekening pelanggan dengan nomor transaksi: ${transactionNumber}`;
+                confirmButtonText = 'Ya, Konfirmasi Transfer';
+                confirmButtonColor = '#f97316';
+                break;
+            case 'Selesai':
+                icon = 'success';
+                title = 'Selesaikan Pengembalian';
+                text = 'Apakah Anda yakin ingin menandai pengembalian ini sebagai selesai? Status ini menandakan bahwa seluruh proses pengembalian telah completed.';
+                confirmButtonText = 'Ya, Selesaikan';
+                confirmButtonColor = '#059669';
+                break;
+            default:
+                icon = 'question';
+                title = 'Ubah Status Pengembalian';
+                text = `Apakah Anda yakin ingin mengubah status pengembalian menjadi "${selectedStatus}"?`;
+                confirmButtonText = 'Ya, Ubah Status';
+                confirmButtonColor = '#6b7280';
+        }
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonColor: confirmButtonColor,
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: confirmButtonText,
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'animate__animated animate__fadeInDown',
+                confirmButton: 'btn btn-confirm',
+                cancelButton: 'btn btn-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Sedang mengupdate status pengembalian',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Submit the form
+                document.getElementById('statusUpdateForm').submit();
+            }
+        });
+    });
 });
 
+// SweetAlert2 Modal Functions
 function showApproveModal() {
-    new bootstrap.Modal(document.getElementById('approveModal')).show();
+    Swal.fire({
+        title: 'Setujui Pengembalian',
+        html: `
+            <div class="text-left">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Admin (Opsional)</label>
+                    <textarea id="swal-approve-notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Berikan catatan jika diperlukan..."></textarea>
+                </div>
+            </div>
+        `,
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Setujui Pengembalian',
+        cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        preConfirm: () => {
+            const notes = document.getElementById('swal-approve-notes').value;
+            return { notes };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { notes } = result.value;
+            submitApproveForm(notes);
+        }
+    });
 }
 
 function showRejectModal() {
-    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    Swal.fire({
+        title: 'Tolak Pengembalian',
+        html: `
+            <div class="text-left">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                    <textarea id="swal-reject-notes" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Jelaskan alasan penolakan dengan detail..." required></textarea>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Tolak Pengembalian',
+        cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        preConfirm: () => {
+            const notes = document.getElementById('swal-reject-notes').value;
+            if (!notes.trim()) {
+                Swal.showValidationMessage('Alasan penolakan harus diisi');
+                return false;
+            }
+            return { notes };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { notes } = result.value;
+            submitRejectForm(notes);
+        }
+    });
 }
+
+function showRefundModal() {
+    Swal.fire({
+        title: 'Konfirmasi Pengembalian Dana',
+        html: `
+            <div class="text-left">
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-money-bill-wave mr-2"></i>
+                    Konfirmasi bahwa dana sebesar <strong>Rp {{ number_format($pengembalian->jumlah_refund, 0, ',', '.') }}</strong>
+                    telah ditransfer ke rekening pelanggan.
+                </div>
+
+                @if($pengembalian->bank_name)
+                <div class="mb-4">
+                    <strong>Informasi Transfer:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Bank: {{ $pengembalian->bank_name }}</li>
+                        <li>No. Rekening: {{ $pengembalian->account_number }}</li>
+                        <li>Nama: {{ $pengembalian->account_holder_name }}</li>
+                    </ul>
+                </div>
+                @endif
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Transaksi <span class="text-red-500">*</span></label>
+                    <input type="text" id="swal-transaction-number" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Masukkan nomor transaksi bank" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
+                    <textarea id="swal-refund-notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Catatan tambahan..."></textarea>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#f97316',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Konfirmasi Transfer',
+        cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        preConfirm: () => {
+            const transactionNumber = document.getElementById('swal-transaction-number').value;
+            const notes = document.getElementById('swal-refund-notes').value;
+
+            if (!transactionNumber.trim()) {
+                Swal.showValidationMessage('Nomor transaksi harus diisi');
+                return false;
+            }
+
+            return { transactionNumber, notes };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { transactionNumber, notes } = result.value;
+            submitRefundForm(transactionNumber, notes);
+        }
+    });
+}
+
+// Form submission functions
+function submitApproveForm(notes) {
+    Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang menyetujui pengembalian',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("admin.pengembalian.approve", $pengembalian->id) }}';
+
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+
+    if (notes) {
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'catatan_admin';
+        notesInput.value = notes;
+        form.appendChild(notesInput);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function submitRejectForm(notes) {
+    Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang menolak pengembalian',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("admin.pengembalian.reject", $pengembalian->id) }}';
+
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+
+    const notesInput = document.createElement('input');
+    notesInput.type = 'hidden';
+    notesInput.name = 'catatan_admin';
+    notesInput.value = notes;
+    form.appendChild(notesInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function submitRefundForm(transactionNumber, notes) {
+    Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang mengkonfirmasi transfer dana',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("admin.pengembalian.markRefunded", $pengembalian->id) }}';
+
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+
+    const transactionInput = document.createElement('input');
+    transactionInput.type = 'hidden';
+    transactionInput.name = 'nomor_transaksi_pengembalian';
+    transactionInput.value = transactionNumber;
+    form.appendChild(transactionInput);
+
+    if (notes) {
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'catatan_admin';
+        notesInput.value = notes;
+        form.appendChild(notesInput);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 
 function showRefundModal() {
     new bootstrap.Modal(document.getElementById('refundModal')).show();
@@ -553,7 +895,7 @@ function showRefundModal() {
         width: 60px;
         height: 60px;
     }
-    
+
     .avatar-circle {
         width: 100%;
         height: 100%;
@@ -564,25 +906,25 @@ function showRefundModal() {
         font-weight: bold;
         font-size: 18px;
     }
-    
+
     .card {
         border: none;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
-    
+
     .badge {
         font-size: 0.8em;
     }
-    
+
     .img-thumbnail {
         border: 1px solid #dee2e6;
         transition: transform 0.2s;
     }
-    
+
     .img-thumbnail:hover {
         transform: scale(1.05);
     }
-    
+
     code {
         background-color: #f8f9fa;
         padding: 2px 6px;

@@ -456,65 +456,31 @@
                                             <div class="text-xs text-gray-500">Ongkir: Rp {{ number_format($order->ongkir_biaya, 0, ',', '.') }}</div>
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 whitespace-nowrap text-center" onclick="event.stopPropagation()" data-order="{{ $order->status_pesanan }}">
-                                        <div class="relative" x-data="{ open: false }">
-                                            @php
-                                                $statusClass = 'status-' . strtolower(str_replace(' ', '-', $order->status_pesanan));
-                                                $statusText = $order->status_pesanan;
+                                    <td class="px-3 py-3 whitespace-nowrap text-center" data-order="{{ $order->status_pesanan }}">
+                                        @php
+                                            $statusClass = 'status-' . strtolower(str_replace(' ', '-', $order->status_pesanan));
+                                            $statusText = $order->status_pesanan;
 
-                                                // Show special status text for when payment proof uploaded but not yet confirmed
-                                                if ($order->status_pesanan == 'Menunggu Pembayaran' && $order->bukti_pembayaran) {
-                                                    $statusText = 'Menunggu Konfirmasi';
-                                                    $statusClass = 'status-menunggu-konfirmasi';
-                                                }
-                                            @endphp
+                                            // Show special status text for when payment proof uploaded but not yet confirmed
+                                            if ($order->status_pesanan == 'Menunggu Pembayaran' && $order->bukti_pembayaran) {
+                                                $statusText = 'Menunggu Konfirmasi';
+                                                $statusClass = 'status-menunggu-konfirmasi';
+                                            }
+                                        @endphp
 
-                                            <button @click="open = !open" type="button" class="status-badge {{ $statusClass }} inline-flex items-center justify-between w-full">
-                                                <span>{{ $statusText }}</span>
-                                                <i class="fas fa-chevron-down ml-2 text-xs"></i>
-                                            </button>
+                                        {{-- Status badge tanpa dropdown untuk keamanan --}}
+                                        <div class="flex flex-col items-center space-y-2">
+                                            <span class="status-badge {{ $statusClass }}">
+                                                {{ $statusText }}
+                                            </span>
 
-                                            <div x-show="open"
-                                                 @click.away="open = false"
-                                                 class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                                                 x-transition:enter="transition ease-out duration-100"
-                                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                                 x-transition:leave="transition ease-in duration-75"
-                                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                                 x-transition:leave-end="transform opacity-0 scale-95">
-                                                <div class="py-1" role="menu" aria-orientation="vertical">
-                                                    <form method="POST" id="statusForm-{{ $order->id_pesanan }}">
-                                                        @csrf
-                                                        <input type="hidden" name="order_id" value="{{ $order->id_pesanan }}">
-
-                                                        <button type="button" onclick="updateStatus('{{ $order->id_pesanan }}', 'Menunggu Konfirmasi')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ ($order->status_pesanan == 'Menunggu Pembayaran' && $order->bukti_pembayaran) ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                                                            <span class="status-badge status-menunggu-konfirmasi mr-2"></span>
-                                                            Menunggu Konfirmasi
-                                                        </button>
-
-                                                        <button type="button" onclick="updateStatus('{{ $order->id_pesanan }}', 'Sedang Diproses')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $order->status_pesanan == 'Sedang Diproses' || $order->status_pesanan == 'Diproses' || $order->status_pesanan == 'Pembayaran Dikonfirmasi' ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                                                            <span class="status-badge status-sedang-diproses mr-2"></span>
-                                                            Sedang Diproses
-                                                        </button>
-
-                                                        <button type="button" onclick="updateStatus('{{ $order->id_pesanan }}', 'Sedang Dikirim')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $order->status_pesanan == 'Sedang Dikirim' || $order->status_pesanan == 'Dikirim' || $order->status_pesanan == 'Selesai' ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                                                            <span class="status-badge status-sedang-dikirim mr-2"></span>
-                                                            Sedang Dikirim
-                                                        </button>
-
-                                                        <button type="button" onclick="updateStatus('{{ $order->id_pesanan }}', 'Dibatalkan')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $order->status_pesanan == 'Dibatalkan' ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                                                            <span class="status-badge status-dibatalkan mr-2"></span>
-                                                            Dibatalkan
-                                                        </button>
-
-                                                        <button type="button" onclick="updateStatus('{{ $order->id_pesanan }}', 'Pengembalian')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $order->status_pesanan == 'Pengembalian' ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                                                            <span class="status-badge status-pengembalian mr-2"></span>
-                                                            Pengembalian
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
+                                            {{-- Tombol untuk ke detail pesanan --}}
+                                            <a href="{{ route('admin.pesanan.show', $order->id_pesanan) }}"
+                                               class="text-xs text-orange-600 hover:text-orange-800 font-medium px-2 py-1 rounded border border-orange-300 hover:border-orange-500 transition-colors duration-200"
+                                               onclick="event.stopPropagation()"
+                                               title="Kelola pesanan di halaman detail">
+                                                <i class="fas fa-edit mr-1"></i>Kelola
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -555,49 +521,17 @@
     </div>
 </div>
 
-<!-- Modal for Order Actions -->
-<div id="orderActionModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="orderActionModalLabel" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="orderActionModalLabel">Update Status Pesanan</h3>
-                        <div class="mt-4">
-                            <form id="orderActionForm" method="POST">
-                                @csrf
-                                <p id="orderActionText" class="text-gray-700 mb-4">Apakah Anda yakin ingin mengubah status pesanan ini?</p>
-
-                                <div id="orderCancelReasonContainer" class="mb-4 hidden">
-                                    <label for="alasan_pembatalan" class="block text-sm font-medium text-gray-700 mb-1">Alasan Pembatalan</label>
-                                    <textarea id="alasan_pembatalan" name="alasan_pembatalan" rows="3" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan alasan pembatalan pesanan"></textarea>
-                                </div>
-
-                                <div id="orderShippingContainer" class="mb-4 hidden">
-                                    <label for="resi" class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi Pengiriman</label>
-                                    <input type="text" id="resi" name="resi" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Masukkan nomor resi pengiriman">
-                                </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm" id="orderActionButton">
-                    Konfirmasi
-                </button>
-                <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close">
-                    Batal
-                </button>
-            </form>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Old modal system removed - now using SweetAlert2 for all order actions -->
 @endsection
 
 @section('scripts')
+<!-- Ensure jQuery is loaded -->
+<script>
+if (typeof jQuery === 'undefined') {
+    document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+}
+</script>
+
 <!-- Date Range Picker -->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
@@ -612,43 +546,17 @@
 
 <!-- Custom scripts for the admin orders page -->
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('orderActions', () => ({
-            showModal: false,
-            modalTitle: 'Update Status Pesanan',
-            modalText: 'Apakah Anda yakin ingin mengubah status pesanan ini?',
-            actionButtonText: 'Konfirmasi',
-            formAction: '',
-            showCancelReason: false,
-            showShipping: false,
+    // Wait for jQuery to be fully loaded
+    function initializeOrderPage() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initializeOrderPage, 50);
+            return;
+        }
 
-            setupModal(orderId, title, text, buttonText, formAction, type = null) {
-                this.modalTitle = title;
-                this.modalText = text;
-                this.actionButtonText = buttonText;
-                this.formAction = formAction;
+        console.log('jQuery loaded successfully:', typeof jQuery);
+        console.log('updateStatus function is globally accessible:', typeof window.updateStatus === 'function');
 
-                // Reset containers
-                this.showCancelReason = false;
-                this.showShipping = false;
-
-                // Show specific container based on type
-                if (type === 'cancel') {
-                    this.showCancelReason = true;
-                } else if (type === 'shipping') {
-                    this.showShipping = true;
-                }
-
-                this.showModal = true;
-            },
-
-            closeModal() {
-                this.showModal = false;
-            }
-        }));
-    });
-
-    $(document).ready(function() {
+        $(document).ready(function() {
         // Initialize DataTable with comprehensive configuration
         var table = $('#orderTable').DataTable({
             "responsive": true,
@@ -931,8 +839,6 @@
             // Save the sort preference in localStorage
             localStorage.setItem('orderPreference', 'idAsc');
         });
-            localStorage.setItem('orderPreference', 'oldest');
-        });
 
         $('#sortCustomerAZ').click(function() {
             table.order([1, 'asc']).draw();
@@ -962,20 +868,6 @@
             localStorage.setItem('orderPreference', 'priceLow');
         });
 
-        $('#sortIdDesc').click(function() {
-            table.order([0, 'desc']).draw();  // Order by ID column (highest ID first)
-            $('.btn-outline-secondary').removeClass('active');
-            $(this).addClass('active');
-            localStorage.setItem('orderPreference', 'idDesc');
-        });
-
-        $('#sortIdAsc').click(function() {
-            table.order([0, 'asc']).draw();  // Order by ID column (lowest ID first)
-            $('.btn-outline-secondary').removeClass('active');
-            $(this).addClass('active');
-            localStorage.setItem('orderPreference', 'idAsc');
-        });
-
         // Multi-column sorting info
         var multiSortInfo = $('<div class="alert alert-secondary mt-2" style="font-size: 0.8rem; padding: 0.4rem 0.6rem;"><i class="fas fa-keyboard mr-1"></i><strong>Tip Advanced:</strong> Tahan tombol <kbd>Shift</kbd> sambil klik header kolom untuk sorting multi-kolom.</div>');
         $('#orderTable_wrapper').append(multiSortInfo);
@@ -995,95 +887,6 @@
 
         $('#dateRange').on('cancel.daterangepicker', function(ev, picker) {
             $(this).val('');
-        });
-
-        // Order action modal
-        const orderModal = document.getElementById('orderActionModal');
-
-        // Handle order action buttons
-        $('.process-order').click(function(e) {
-            e.preventDefault();
-            const orderId = $(this).data('id');
-            setupOrderActionModal(
-                orderId,
-                'Proses Pesanan',
-                'Apakah Anda yakin ingin memproses pesanan #' + orderId + '?',
-                'Proses Pesanan',
-                '{{ route("admin.pesanan.process", ["id" => "__id__"]) }}'.replace('__id__', orderId)
-            );
-        });
-
-        $('.ship-order').click(function(e) {
-            e.preventDefault();
-            const orderId = $(this).data('id');
-            setupOrderActionModal(
-                orderId,
-                'Kirim Pesanan',
-                'Masukkan nomor resi pengiriman untuk pesanan #' + orderId,
-                'Kirim Pesanan',
-                '{{ route("admin.pesanan.ship", ["id" => "__id__"]) }}'.replace('__id__', orderId),
-                'shipping'
-            );
-        });
-
-        $('.confirm-payment').click(function(e) {
-            e.preventDefault();
-            const orderId = $(this).data('id');
-            setupOrderActionModal(
-                orderId,
-                'Konfirmasi Pembayaran',
-                'Apakah Anda yakin ingin mengkonfirmasi pembayaran untuk pesanan #' + orderId + '?',
-                'Konfirmasi Pembayaran',
-                '{{ route("admin.pesanan.confirm-payment", ["id" => "__id__"]) }}'.replace('__id__', orderId)
-            );
-        });
-
-        $('.cancel-order').click(function(e) {
-            e.preventDefault();
-            const orderId = $(this).data('id');
-            setupOrderActionModal(
-                orderId,
-                'Batalkan Pesanan',
-                'Apakah Anda yakin ingin membatalkan pesanan #' + orderId + '?',
-                'Batalkan Pesanan',
-                '{{ route("admin.pesanan.cancel", ["id" => "__id__"]) }}'.replace('__id__', orderId),
-                'cancel'
-            );
-        });
-
-        function setupOrderActionModal(orderId, title, text, buttonText, formAction, type = null) {
-            $('#orderActionModalLabel').text(title);
-            $('#orderActionText').text(text);
-            $('#orderActionButton').text(buttonText);
-            $('#orderActionForm').attr('action', formAction);
-
-            // Reset containers
-            $('#orderCancelReasonContainer').addClass('hidden');
-            $('#orderShippingContainer').addClass('hidden');
-
-            // Show specific container based on type
-            if(type === 'cancel') {
-                $('#orderCancelReasonContainer').removeClass('hidden');
-            } else if(type === 'shipping') {
-                $('#orderShippingContainer').removeClass('hidden');
-            }
-
-            // Show modal
-            $('#orderActionModal').removeClass('hidden');
-        }
-
-        // Close modal on click
-        document.querySelectorAll('.modal-close').forEach(button => {
-            button.addEventListener('click', function() {
-                $('#orderActionModal').addClass('hidden');
-            });
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(e) {
-            if (e.target === $('#orderActionModal')[0]) {
-                $('#orderActionModal').addClass('hidden');
-            }
         });
 
         // Reset filter button with DataTables integration
@@ -1114,51 +917,43 @@
             location.reload();
         });
 
-        // Export data button
+        // Export data button with SweetAlert2
         $('#exportBtn').click(function(e) {
             e.preventDefault();
-            alert('Fitur export data sedang dalam pengembangan');
-            // Actual implementation would be:
-            // window.location.href = '{{ route("admin.pesanan.index") }}' + '/export' + window.location.search;
+
+            Swal.fire({
+                title: 'Export Data Pesanan',
+                text: 'Fitur export sedang dalam pengembangan. Apakah Anda ingin melanjutkan?',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Export',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Informasi',
+                        text: 'Fitur export data sedang dalam pengembangan',
+                        icon: 'info',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    // Actual implementation would be:
+                    // window.location.href = '{{ route("admin.pesanan.index") }}' + '/export' + window.location.search;
+                }
+            });
         });
 
-        // Update status function for dropdown actions
-        window.updateStatus = function(orderId, status) {
-            // Show loading state
-            const statusForm = document.getElementById('statusForm-' + orderId);
-            if (statusForm) {
-                statusForm.querySelector('button[onclick*="' + status + '"]').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + status;
-            }
-
-            // Send AJAX request to update status
-            fetch('{{ route("admin.pesanan.updateStatus", ":id") }}'.replace(':id', orderId), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    status_pesanan: status
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    alert('Status pesanan berhasil diperbarui');
-                    // Reload page to show updated status
-                    location.reload();
-                } else {
-                    alert('Gagal memperbarui status: ' + data.message);
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat memperbarui status');
-                location.reload();
-            });
-        };
+        // Status update functionality has been removed for security reasons
+        // All status changes must now be performed through the detail page
     });
+
+    } // End of initializeOrderPage function
+
+    // Start initialization
+    initializeOrderPage();
 </script>
 @stack('scripts')

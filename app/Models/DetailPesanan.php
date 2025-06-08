@@ -20,7 +20,6 @@ class DetailPesanan extends Model
     protected $fillable = [
         'id_pesanan',
         'id_Produk',
-        'ukuran_id',
         'kuantitas',
         'harga',
         'subtotal',
@@ -38,9 +37,51 @@ class DetailPesanan extends Model
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
     }
 
-    // Relasi ke produk ukuran
-    public function produk_ukuran()
+    // Relasi ke ulasan untuk detail pesanan ini
+    public function ulasan()
     {
-        return $this->belongsTo(ProdukUkuran::class, 'ukuran_id', 'id');
+        return $this->hasMany(Ulasan::class, 'id_Produk', 'id_Produk')
+                    ->where('is_verified_purchase', true);
+    }
+
+    // Method untuk mendapatkan ulasan dari user yang sama dengan pesanan
+    public function userUlasan()
+    {
+        return $this->hasMany(Ulasan::class, 'id_Produk', 'id_Produk')
+                    ->whereColumn('user_id', function($query) {
+                        $query->select('user_id')
+                              ->from('pesanan')
+                              ->whereColumn('id_pesanan', 'detail_pesanan.id_pesanan')
+                              ->limit(1);
+                    })
+                    ->where('is_verified_purchase', true);
+    }
+
+    // Method untuk mendapatkan ulasan terkait dengan detail pesanan ini
+    public function getReviewsAttribute()
+    {
+        // Pastikan pesanan sudah ter-load
+        if (!$this->relationLoaded('pesanan')) {
+            $this->load('pesanan');
+        }
+
+        // Mendapatkan user_id dari pesanan
+        $userId = $this->pesanan->user_id ?? null;
+
+        if (!$userId) {
+            return collect();
+        }
+
+        // Mencari ulasan berdasarkan user_id dan id_Produk
+        return Ulasan::where('user_id', $userId)
+            ->where('id_Produk', $this->id_Produk)
+            ->where('is_verified_purchase', true)
+            ->get();
+    }
+
+    // Method untuk mengecek apakah ada ulasan untuk detail pesanan ini
+    public function hasReviews()
+    {
+        return $this->reviews->isNotEmpty();
     }
 }

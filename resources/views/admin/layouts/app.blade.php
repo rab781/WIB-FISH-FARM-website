@@ -24,7 +24,11 @@
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @stack('styles')
+    @include('sweetalert::alert')
 </head>
 
 <body class="bg-gray-100">
@@ -209,9 +213,6 @@
         </div>
     </div>
 
-    <!-- Admin modal system - globally available -->
-    <script src="{{ asset('js/admin-modal.js') }}"></script>
-
     @stack('scripts')
     <script>
         window.updateStatus = function(orderId, status) {
@@ -227,55 +228,72 @@
 
             const actualStatus = statusMapping[status] || status;
 
-            if (confirm('Apakah Anda yakin ingin mengubah status pesanan #' + orderId + ' menjadi "' + status + '"?')) {
-                const form = document.getElementById('statusForm-' + orderId);
-                // Use the POST route which is properly defined
-                console.log('Setting form action and method');
-                form.setAttribute('action', '{{ route("admin.pesanan.updateStatus", "__id__") }}'.replace('__id__', orderId));
-                form.setAttribute('method', 'POST');
-                console.log('Form method after setting:', form.getAttribute('method'));
+            Swal.fire({
+                title: 'Konfirmasi Perubahan Status',
+                text: `Apakah Anda yakin ingin mengubah status pesanan #${orderId} menjadi "${status}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Ubah Status',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('statusForm-' + orderId);
+                    // Use the POST route which is properly defined
+                    console.log('Setting form action and method');
+                    form.setAttribute('action', '{{ route("admin.pesanan.updateStatus", "__id__") }}'.replace('__id__', orderId));
+                    form.setAttribute('method', 'POST');
+                    console.log('Form method after setting:', form.getAttribute('method'));
 
-                // Clear out any existing hidden fields to prevent duplicates
-                const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
-                console.log('Found hidden inputs:', hiddenInputs.length);
+                    // Clear out any existing hidden fields to prevent duplicates
+                    const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
+                    console.log('Found hidden inputs:', hiddenInputs.length);
 
-                hiddenInputs.forEach(input => {
-                    console.log('Input field:', input.name, input.value);
-                    if (input.name !== '_token') {
-                        console.log('Removing input:', input.name);
-                        input.remove();
+                    hiddenInputs.forEach(input => {
+                        console.log('Input field:', input.name, input.value);
+                        if (input.name !== '_token') {
+                            console.log('Removing input:', input.name);
+                            input.remove();
+                        }
+                    });
+
+                    // Make sure we have CSRF token
+                    if (!form.querySelector('input[name="_token"]')) {
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfToken);
                     }
-                });
 
-                // Make sure we have CSRF token
-                if (!form.querySelector('input[name="_token"]')) {
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-                    form.appendChild(csrfToken);
+                    const statusInput = document.createElement('input');
+                    statusInput.type = 'hidden';
+                    statusInput.name = 'status_pesanan';
+                    statusInput.value = actualStatus;
+                    form.appendChild(statusInput);
+
+                    // Ensure there is no _method field (this would enable method spoofing)
+                    if (form.querySelector('input[name="_method"]')) {
+                        console.log('Found _method field, removing it');
+                        form.querySelector('input[name="_method"]').remove();
+                    }
+
+                    console.log('Final form elements before submission:');
+                    const allInputs = form.querySelectorAll('input[type="hidden"]');
+                    allInputs.forEach(input => {
+                        console.log('- Input:', input.name, '=', input.value);
+                    });
+
+                    form.submit();
                 }
-
-                const statusInput = document.createElement('input');
-                statusInput.type = 'hidden';
-                statusInput.name = 'status_pesanan';
-                statusInput.value = actualStatus;
-                form.appendChild(statusInput);
-
-                // Ensure there is no _method field (this would enable method spoofing)
-                if (form.querySelector('input[name="_method"]')) {
-                    console.log('Found _method field, removing it');
-                    form.querySelector('input[name="_method"]').remove();
-                }
-
-                console.log('Final form elements before submission:');
-                const allInputs = form.querySelectorAll('input[type="hidden"]');
-                allInputs.forEach(input => {
-                    console.log('- Input:', input.name, '=', input.value);
-                });
-
-                form.submit();
-            }
+            });
         };
 
         console.log('updateStatus function is globally accessible:', typeof window.updateStatus === 'function');

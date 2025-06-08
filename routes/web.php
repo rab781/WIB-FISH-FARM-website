@@ -78,16 +78,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/refunds', function () {
         return redirect()->route('pengembalian.index');
     })->name('customer.refunds.index');
-    
+
     Route::get('/refunds/{id}', function ($id) {
         // Convert RefundRequest id to Pengembalian id if needed
         // For now, just redirect to the pengembalian index
         return redirect()->route('pengembalian.index');
     })->name('customer.refunds.show');
-    
+
     Route::get('/pesanan/{pesanan}/refunds/create', function ($pesanan) {
         return redirect()->route('pengembalian.create', ['pesanan' => $pesanan]);
     })->name('customer.refunds.create');
+
+    // Add route aliases for refunds (for compatibility with blade templates)
+    Route::get('/refunds/create', function () {
+        return redirect()->route('pengembalian.index');
+    })->name('refunds.create');
+
+    Route::get('/refunds', function () {
+        return redirect()->route('pengembalian.index');
+    })->name('refunds.index');
+
+    Route::get('/refunds/{id}', function ($id) {
+        return redirect()->route('pengembalian.show', $id);
+    })->name('refunds.show');
+
+    Route::post('/refunds/store', [App\Http\Controllers\PengembalianController::class, 'store'])->name('refunds.store');
 
     // Review management - Customer
     Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'customerIndex'])->name('reviews.index');
@@ -148,11 +163,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class, ['as' => 'admin'])->except(['index']);
 
-    // Keluhan management routes
-    Route::get('keluhan', [App\Http\Controllers\Admin\KeluhanController::class, 'index'])->name('admin.keluhan.index');
-    Route::get('keluhan/{id}', [App\Http\Controllers\Admin\KeluhanController::class, 'show'])->name('admin.keluhan.show');
-    Route::put('keluhan/{id}/respond', [App\Http\Controllers\Admin\KeluhanController::class, 'respond'])->name('admin.keluhan.respond');
-
     // Admin profile routes
     Route::get('profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('admin.profile.show');
     Route::get('profile/edit', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profile.edit');
@@ -161,7 +171,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     // Admin keluhan routes
     Route::get('keluhan', [App\Http\Controllers\Admin\KeluhanController::class, 'index'])->name('admin.keluhan.index');
     Route::get('keluhan/{id}', [App\Http\Controllers\Admin\KeluhanController::class, 'show'])->name('admin.keluhan.show');
-    Route::post('keluhan/{id}/respond', [App\Http\Controllers\Admin\KeluhanController::class, 'respond'])->name('admin.keluhan.respond');
+    Route::match(['PUT', 'POST'], 'keluhan/{id}/respond', [App\Http\Controllers\Admin\KeluhanController::class, 'respond'])->name('admin.keluhan.respond');
 
     // Admin notification routes
     Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
@@ -238,6 +248,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         Route::get('/statistics', [App\Http\Controllers\Admin\ReviewController::class, 'statistics'])->name('admin.reviews.statistics');
         Route::get('/{review}', [App\Http\Controllers\Admin\ReviewController::class, 'show'])->name('admin.reviews.show');
         Route::post('/{review}/reply', [App\Http\Controllers\Admin\ReviewController::class, 'addReply'])->name('admin.reviews.addAdminReply');
+        // New API endpoints for enhanced review functionality
+        Route::get('/{review}/detail', [App\Http\Controllers\Admin\ReviewController::class, 'detail'])->name('admin.reviews.detail');
+        Route::get('/{review}/photos', [App\Http\Controllers\Admin\ReviewController::class, 'photos'])->name('admin.reviews.photos');
     });
 
     // Diagnostic Tools

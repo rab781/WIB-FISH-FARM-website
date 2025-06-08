@@ -62,7 +62,7 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
     }
-    
+
     .header-icon:hover {
         transform: scale(1.05);
         box-shadow: 0 4px 15px rgba(0,0,0,0.15);
@@ -271,7 +271,7 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     /* Form Row Spacing */
     .row.g-3 > .col,
     .row.g-3 > [class*="col-"] {
@@ -286,22 +286,22 @@
             flex-direction: column;
             align-items: flex-start;
         }
-        
+
         .expense-header > div:last-child {
             margin-top: 1rem;
             align-self: flex-start;
         }
-        
+
         .header-icon {
             width: 50px;
             height: 50px;
             font-size: 1.5rem;
         }
-        
+
         .metadata-panel .row {
             margin: 0 -0.5rem;
         }
-        
+
         .metadata-panel .col-6 {
             padding-left: 0.5rem;
             padding-right: 0.5rem;
@@ -408,7 +408,7 @@
                             Informasi Dasar
                         </h5>
                     </div>
-                    
+
                     <div class="card-body p-4">
                         <div class="row g-3">
                             <!-- Kategori Field -->
@@ -461,7 +461,7 @@
                                     <label for="expense_date" class="form-label d-flex align-items-center">
                                         <i class="fas fa-calendar-alt me-2 text-orange-500"></i>Tanggal <span class="text-danger ms-1">*</span>
                                     </label>
-                                    <input type="date" class="form-control @error('expense_date') is-invalid @enderror" id="expense_date" name="expense_date" value="{{ old('expense_date', $expense->expense_date->format('Y-m-d')) }}" required>
+                                    <input type="date" class="form-control @error('expense_date') is-invalid @enderror" id="expense_date" name="expense_date" value="{{ old('expense_date', $expense->expense_date instanceof \Carbon\Carbon ? $expense->expense_date->format('Y-m-d') : $expense->expense_date) }}" required>
                                     @error('expense_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -479,7 +479,7 @@
                             Detail Pengeluaran
                         </h5>
                     </div>
-                    
+
                     <div class="card-body p-4">
                         <div class="row g-3">
                             <!-- Deskripsi Field -->
@@ -520,7 +520,7 @@
                             Informasi Metadata
                         </h5>
                     </div>
-                    
+
                     <div class="card-body p-4">
                         <div class="metadata-panel form-float-in" style="animation-delay: 0.4s">
                             <div class="row text-center">
@@ -531,7 +531,7 @@
                                         {{ $expense->created_at->format('d M Y, H:i') }}
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-3 col-6 mb-3 mb-md-0">
                                     <div class="metadata-title">Terakhir Diperbarui</div>
                                     <div class="metadata-value">
@@ -539,7 +539,7 @@
                                         {{ $expense->updated_at->format('d M Y, H:i') }}
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-3 col-6">
                                     <div class="metadata-title">Status Data</div>
                                     <div class="metadata-value">
@@ -548,7 +548,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-3 col-6">
                                     <div class="metadata-title">Kategori</div>
                                     <div class="metadata-value">
@@ -578,11 +578,11 @@
                 <!-- Form Actions -->
                 <div class="d-flex justify-content-between mb-3">
                     <div>
-                        <a href="#" onclick="if(confirm('Apakah Anda yakin ingin menghapus pengeluaran ini? Tindakan ini tidak dapat dibatalkan.')) { document.getElementById('delete-form').submit(); return false; }" class="btn btn-outline-danger">
+                        <button type="button" id="deleteExpenseBtn" class="btn btn-outline-danger">
                             <i class="fas fa-trash-alt me-2"></i>Hapus Pengeluaran
-                        </a>
+                        </button>
                     </div>
-                    
+
                     <div class="d-flex">
                         @if(isset($queryParams) && !empty($queryParams))
                             <a href="{{ route('admin.reports.financial', $queryParams) }}" class="btn btn-secondary me-3">
@@ -615,4 +615,53 @@
             </form>
         </div>
     </div>
-    @endsection
+
+@push('scripts')
+<script>
+document.getElementById('deleteExpenseBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Hapus Pengeluaran?',
+        html: '<div class="text-center"><p class="text-red-600 font-semibold mb-2">⚠️ PERINGATAN ⚠️</p><p>Pengeluaran "{{ $expense->deskripsi }}" akan dihapus secara permanen dan <strong>tidak dapat dibatalkan</strong>!</p></div>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-lg',
+            confirmButton: 'rounded-md',
+            cancelButton: 'rounded-md'
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 500);
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus...',
+                text: 'Sedang memproses penghapusan pengeluaran.',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            document.getElementById('delete-form').submit();
+        }
+    });
+});
+</script>
+@endpush
+
+@endsection

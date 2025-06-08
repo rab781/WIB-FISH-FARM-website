@@ -45,7 +45,7 @@
             <div class="w-full md:w-1/4">
                 <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Hubungi Kami</h3>
                 <ul class="space-y-3">
-                    <li><a href="https//wa.me/62" class="text-base text-gray-400 hover:text-gray-300">Kontak</a></li>
+                    <li><a href="https://wa.me/6287889426560" target="_blank" class="text-base text-gray-400 hover:text-gray-300">Kontak</a></li>
                     <li><a href="{{ route('keluhan.index') }}" class="text-base text-gray-400 hover:text-gray-300">Layanan Pelanggan</a></li>
                 </ul>
             </div>

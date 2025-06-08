@@ -93,7 +93,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div>
+                        {{-- <div>
                             <p class="text-sm text-gray-500 mb-1">Bergabung Sejak</p>
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -110,7 +110,7 @@
                                 </svg>
                                 <p class="font-medium">{{ $user->updated_at->diffForHumans() }}</p>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

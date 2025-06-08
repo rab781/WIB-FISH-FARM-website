@@ -64,7 +64,19 @@ class PesananController extends Controller
         $query->orderBy('created_at', 'desc');
 
         $pesanan = $query->paginate(10);
-        return view('pesanan.index', compact('pesanan'));
+
+        // Manually load reviews for each detail pesanan
+        foreach ($pesanan as $p) {
+            foreach ($p->detailPesanan as $detail) {
+                $detail->userReviews = \App\Models\Ulasan::where('user_id', Auth::id())
+                    ->where('id_Produk', $detail->id_Produk)
+                    ->where('is_verified_purchase', true)
+                    ->with(['user', 'produk'])
+                    ->get();
+            }
+        }
+
+        return view('customer.pesanan.index', compact('pesanan'));
     }
 
     /**
@@ -177,12 +189,24 @@ class PesananController extends Controller
      */
     public function show(string $id)
     {
-        $pesanan = Pesanan::with(['detailPesanan.produk', 'user'])
+        $pesanan = Pesanan::with([
+                'detailPesanan.produk',
+                'user'
+            ])
             ->where('id_pesanan', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        return view('pesanan.show', compact('pesanan'));
+        // Manually load reviews for each detail pesanan
+        foreach ($pesanan->detailPesanan as $detail) {
+            $detail->userReviews = \App\Models\Ulasan::where('user_id', Auth::id())
+                ->where('id_Produk', $detail->id_Produk)
+                ->where('is_verified_purchase', true)
+                ->with(['user', 'produk'])
+                ->get();
+        }
+
+        return view('customer.pesanan.show', compact('pesanan'));
     }
 
     /**
@@ -275,6 +299,7 @@ class PesananController extends Controller
 
             // Update status pesanan menjadi selesai
             $pesanan->status_pesanan = 'Selesai';
+            $pesanan->tanggal_diterima = now(); // Set tanggal diterima
             $pesanan->save();
 
             // Notify admin about order completion
@@ -312,7 +337,7 @@ class PesananController extends Controller
                 ->with('error', 'Tidak dapat mengunggah bukti pembayaran karena status pesanan tidak valid.');
         }
 
-        return view('pesanan.payment-upload', compact('pesanan'));
+        return view('customer.pesanan.payment-upload', compact('pesanan'));
     }
 
     /**
@@ -495,7 +520,7 @@ class PesananController extends Controller
         // Mengambil item keranjang yang dipilih saja
         $keranjang = Keranjang::whereIn('id_keranjang', $request->selected_items)
                     ->where('user_id', Auth::id())
-                    ->with('produk', 'ukuran')
+                    ->with('produk')
                     ->get();
 
         // Cek jika keranjang kosong
@@ -535,7 +560,7 @@ class PesananController extends Controller
             'qris' => 'QRIS',
         ];
 
-        return view('pesanan.checkout', compact('keranjang', 'alamatLengkap', 'subtotal', 'ongkir', 'total', 'metodePembayaran'));
+        return view('customer.pesanan.checkout', compact('keranjang', 'alamatLengkap', 'subtotal', 'ongkir', 'total', 'metodePembayaran'));
     }
 
     /**
@@ -546,7 +571,7 @@ class PesananController extends Controller
         $user = Auth::user();
 
         // Tidak perlu mendapatkan provinsi lagi karena kita menggunakan RajaOngkir API
-        return view('pesanan.tambah_alamat', compact('user'));
+        return view('customer.pesanan.tambah_alamat', compact('user'));
     }
 
     /**
@@ -811,7 +836,7 @@ class PesananController extends Controller
             // Get selected cart items
             $keranjangItems = Keranjang::whereIn('id_keranjang', $request->selected_items)
                             ->where('user_id', Auth::id())
-                            ->with('produk', 'ukuran')
+                            ->with('produk')
                             ->get();
 
             if ($keranjangItems->isEmpty()) {
@@ -953,24 +978,15 @@ class PesananController extends Controller
                 DetailPesanan::create([
                     'id_pesanan' => $pesanan->id_pesanan,
                     'id_Produk' => $item->id_Produk,
-                    'ukuran_id' => $item->ukuran_id,
                     'kuantitas' => $item->jumlah,
-                    'harga' => $item->ukuran && $item->ukuran->harga ? $item->ukuran->harga : $item->produk->harga,
+                    'harga' => $item->produk->harga,
                     'subtotal' => $item->total_harga,
                 ]);
 
-                // Update stock
-                if ($item->ukuran_id) {
-                    // Update ukuran stock
-                    $ukuran = \App\Models\ProdukUkuran::find($item->ukuran_id);
-                    $ukuran->stok -= $item->jumlah;
-                    $ukuran->save();
-                } else {
-                    // Update product stock
-                    $produk = Produk::find($item->id_Produk);
-                    $produk->stok -= $item->jumlah;
-                    $produk->save();
-                }
+                // Update product stock
+                $produk = Produk::find($item->id_Produk);
+                $produk->stok -= $item->jumlah;
+                $produk->save();
             }
 
             // Delete selected cart items
@@ -1042,7 +1058,7 @@ class PesananController extends Controller
 
         $pesanan->load(['timeline', 'quarantineLog', 'pengembalian']);
 
-        return view('pesanan.tracking', compact('pesanan'));
+        return view('customer.pesanan.tracking', compact('pesanan'));
     }
 
     /**
@@ -1201,7 +1217,7 @@ class PesananController extends Controller
         $pesanan->load(['detailPesanan.produk', 'user', 'alamat']);
 
         // For now, return a view instead of PDF until PDF package is installed
-        return view('pesanan.invoice', compact('pesanan'));
+        return view('customer.pesanan.invoice', compact('pesanan'));
     }
 
     /**
@@ -1263,7 +1279,7 @@ class PesananController extends Controller
                 ->with('error', 'Alamat pengiriman tidak dapat diubah karena status pesanan sudah ' . $pesanan->status_pesanan);
         }
 
-        return view('pesanan.edit_alamat', compact('pesanan'));
+        return view('customer.pesanan.edit_alamat', compact('pesanan'));
     }
 
     /**
@@ -1340,7 +1356,7 @@ class PesananController extends Controller
             $alamat = \App\Models\Alamat::find($user->alamat_id);
         }
 
-        return view('pesanan.tambah_alamat', [
+        return view('customer.pesanan.tambah_alamat', [
             'user' => $user,
             'alamat' => $alamat,
             'selected_items' => request('selected_items', [])

@@ -122,24 +122,6 @@
                 </div>
             </div>
 
-            <!-- Ukuran Ikan -->
-            <div class="border-t border-gray-200 py-4">
-                <h3 class="text-sm text-gray-500 mb-2">Ukuran</h3>
-                <div class="flex flex-wrap gap-2" id="sizeOptions">
-                    @foreach($produk->ukuran()->active()->inStock()->get() as $index => $size)
-                    <div class="relative">
-                        <input type="radio" id="size-{{ $size->id }}" name="selected_size" value="{{ $size->id }}"
-                               class="sr-only size-radio" data-stok="{{ $size->stok }}" data-harga="{{ $size->harga }}"
-                               {{ $index === 0 ? 'checked' : '' }}>
-                        <label for="size-{{ $size->id }}"
-                               class="size-label cursor-pointer inline-flex px-3 py-2 border-2 border-gray-300 rounded-md text-sm font-medium hover:border-orange-600 transition-colors {{ $index === 0 ? 'border-orange-600 bg-orange-50' : '' }}">
-                            {{ $size->ukuran }}
-                        </label>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
             <div class="mt-6 border-t border-gray-200 pt-4">
                 @auth
                 <form action="{{ route('cart.add') }}" method="POST" id="addToCartForm" class="add-to-cart-form">
@@ -493,79 +475,6 @@
                 .catch(error => {
                     console.error('Error:', error);
                     showAlert('error', 'Terjadi kesalahan. Silakan coba lagi.');
-                });
-            });
-        }
-    });
-
-    // Handle size selection and update price/stock display
-    document.addEventListener('DOMContentLoaded', function() {
-        // Size selection handler
-        const sizeRadios = document.querySelectorAll('.size-radio');
-        const sizeLabels = document.querySelectorAll('.size-label');
-        const priceDisplay = document.querySelector('.text-3xl.font-bold.text-gray-900.mb-6');
-        const stokDisplay = document.getElementById('stokDisplay');
-        const quantityInput = document.getElementById('quantity');
-        const form = document.getElementById('addToCartForm');
-
-        if (sizeRadios.length > 0) {
-            // Add a hidden input for the selected size
-            const sizeInput = document.createElement('input');
-            sizeInput.type = 'hidden';
-            sizeInput.name = 'size_id';
-            sizeInput.id = 'size_id';
-
-            // Get the value of the first (default) selected size
-            const defaultSize = document.querySelector('.size-radio:checked');
-            if (defaultSize) {
-                sizeInput.value = defaultSize.value;
-
-                // Update max quantity based on selected size stock
-                const selectedStok = defaultSize.dataset.stok;
-                quantityInput.max = selectedStok;
-                stokDisplay.textContent = selectedStok + ' tersedia';
-
-                // Update price display if the size has a different price
-                const selectedHarga = parseInt(defaultSize.dataset.harga);
-                if (selectedHarga) {
-                    priceDisplay.textContent = 'Rp ' + selectedHarga.toLocaleString('id-ID');
-                }
-            }
-
-            // Add the hidden input to the form
-            if (form) {
-                form.appendChild(sizeInput);
-            }
-
-            // Handle size selection changes
-            sizeRadios.forEach((radio, index) => {
-                radio.addEventListener('change', function() {
-                    // Update hidden input value
-                    sizeInput.value = this.value;
-
-                    // Update visual selection
-                    sizeLabels.forEach(label => {
-                        label.classList.remove('border-orange-600', 'bg-orange-50');
-                        label.classList.add('border-gray-300');
-                    });
-                    sizeLabels[index].classList.remove('border-gray-300');
-                    sizeLabels[index].classList.add('border-orange-600', 'bg-orange-50');
-
-                    // Update stock display and max quantity
-                    const selectedStok = this.dataset.stok;
-                    stokDisplay.textContent = selectedStok + ' tersedia';
-                    quantityInput.max = selectedStok;
-
-                    // Reset quantity to 1 if current quantity exceeds new max
-                    if (parseInt(quantityInput.value) > parseInt(selectedStok)) {
-                        quantityInput.value = 1;
-                    }
-
-                    // Update price display if the size has a different price
-                    const selectedHarga = parseInt(this.dataset.harga);
-                    if (selectedHarga) {
-                        priceDisplay.textContent = 'Rp ' + selectedHarga.toLocaleString('id-ID');
-                    }
                 });
             });
         }

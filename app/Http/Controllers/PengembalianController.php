@@ -37,18 +37,27 @@ class PengembalianController extends Controller
                 ->where('status_pengembalian', 'Selesai')->count(),
         ];
 
-        return view('pengembalian.index', compact('pengembalian', 'stats'));
+        return view('customer.pengembalian.index', compact('pengembalian', 'stats'));
     }
 
     /**
      * Show the form for creating a new return request
      */
-    public function create($id_pesanan)
+    public function create($pesanan)
     {
-        $pesanan = Pesanan::with('detailPesanan.produk')
-            ->where('id_pesanan', $id_pesanan)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        // If pesanan is passed as string ID, find the model
+        if (is_string($pesanan)) {
+            $pesanan = Pesanan::with('detailPesanan.produk')
+                ->where('id_pesanan', $pesanan)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+        } else {
+            // If pesanan is already a model instance, ensure user ownership
+            if ($pesanan->user_id !== Auth::id()) {
+                abort(403);
+            }
+            $pesanan->load('detailPesanan.produk');
+        }
 
         // Check if order is eligible for return
         if (!in_array($pesanan->status_pesanan, ['Selesai', 'Dikirim'])) {
@@ -56,22 +65,22 @@ class PengembalianController extends Controller
         }
 
         // Check if return already exists
-        $existingReturn = Pengembalian::where('id_pesanan', $id_pesanan)->first();
+        $existingReturn = Pengembalian::where('id_pesanan', $pesanan->id_pesanan)->first();
         if ($existingReturn) {
             return redirect()->route('pengembalian.show', $existingReturn->id_pengembalian)
                 ->with('info', 'Anda sudah mengajukan pengembalian untuk pesanan ini.');
         }
 
-        return view('pengembalian.create', compact('pesanan'));
+        return view('customer.pengembalian.create', compact('pesanan'));
     }
 
     /**
      * Store a newly created return request
      */
-    public function store(Request $request)
+    public function store(Request $request, $pesanan = null)
     {
         $request->validate([
-            'id_pesanan' => 'required|exists:pesanan,id_pesanan',
+            'id_pesanan' => 'sometimes|required|exists:pesanan,id_pesanan',
             'jenis_keluhan' => 'required|in:Barang Rusak,Barang Tidak Sesuai,Barang Kurang,Kualitas Buruk,Lainnya',
             'deskripsi_masalah' => 'required|string|min:10|max:1000',
             'jumlah_klaim' => 'required|numeric|min:1000',
@@ -81,13 +90,28 @@ class PengembalianController extends Controller
             'foto_bukti.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        // Verify pesanan ownership
-        $pesanan = Pesanan::where('id_pesanan', $request->id_pesanan)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        // Handle pesanan parameter from route or form data
+        if ($pesanan) {
+            // From route parameter
+            if (is_string($pesanan)) {
+                $pesananModel = Pesanan::where('id_pesanan', $pesanan)
+                    ->where('user_id', Auth::id())
+                    ->firstOrFail();
+            } else {
+                $pesananModel = $pesanan;
+                if ($pesananModel->user_id !== Auth::id()) {
+                    abort(403);
+                }
+            }
+        } else {
+            // From form data (backward compatibility)
+            $pesananModel = Pesanan::where('id_pesanan', $request->id_pesanan)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+        }
 
         // Check if return already exists
-        if (Pengembalian::where('id_pesanan', $request->id_pesanan)->exists()) {
+        if (Pengembalian::where('id_pesanan', $pesananModel->id_pesanan)->exists()) {
             return redirect()->back()->with('error', 'Pengembalian untuk pesanan ini sudah pernah diajukan.');
         }
 
@@ -103,7 +127,7 @@ class PengembalianController extends Controller
 
         // Create return request
         $pengembalian = Pengembalian::create([
-            'id_pesanan' => $request->id_pesanan,
+            'id_pesanan' => $pesananModel->id_pesanan,
             'user_id' => Auth::id(),
             'jenis_keluhan' => $request->jenis_keluhan,
             'deskripsi_masalah' => $request->deskripsi_masalah,
@@ -129,7 +153,7 @@ class PengembalianController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        return view('pengembalian.show', compact('pengembalian'));
+        return view('customer.pengembalian.show', compact('pengembalian'));
     }
 
     /**
@@ -155,6 +179,7 @@ class PengembalianController extends Controller
         }
 
         // Check if it's within return period (e.g., 30 days after completion)
+        // Only check return period if tanggal_diterima is set, otherwise allow return for "Selesai" orders
         if ($pesanan->tanggal_diterima && $pesanan->tanggal_diterima->addDays(30)->isPast()) {
             return response()->json(['eligible' => false, 'message' => 'Periode pengembalian sudah berakhir (maksimal 30 hari setelah pesanan selesai).']);
         }
@@ -301,8 +326,8 @@ class PengembalianController extends Controller
 
         // Add timeline entry
         $this->addReturnTimeline(
-            $pengembalian, 
-            'completed', 
+            $pengembalian,
+            'completed',
             'Dana telah dikembalikan. Nomor transaksi: ' . $request->nomor_transaksi_pengembalian
         );
 

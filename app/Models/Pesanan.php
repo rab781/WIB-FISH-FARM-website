@@ -63,10 +63,6 @@ class Pesanan extends Model
         'ongkir_biaya',
         'berat_total',
         'jumlah_box',
-        // Karantina fields
-        'karantina_mulai',
-        'karantina_selesai',
-        'is_karantina_active',
         // Refund fields
         'status_refund',
         'alasan_refund',
@@ -144,6 +140,44 @@ class Pesanan extends Model
     {
         return $this->hasOne(QuarantineLog::class, 'id_pesanan', 'id_pesanan')
                    ->where('status', 'active');
+    }
+
+    // Relationship untuk mendapatkan semua reviews/ulasan untuk pesanan ini
+    public function reviews()
+    {
+        return $this->hasManyThrough(
+            Ulasan::class,
+            DetailPesanan::class,
+            'id_pesanan', // Foreign key di detail_pesanan
+            'id_Produk', // Foreign key di ulasan
+            'id_pesanan', // Local key di pesanan
+            'id_Produk' // Local key di detail_pesanan
+        )->where('ulasan.user_id', $this->user_id);
+    }
+
+    // Relationship alternatif untuk ulasan yang sudah verified purchase
+    public function verifiedReviews()
+    {
+        return $this->hasManyThrough(
+            Ulasan::class,
+            DetailPesanan::class,
+            'id_pesanan',
+            'id_Produk',
+            'id_pesanan',
+            'id_Produk'
+        )->where('ulasan.user_id', $this->user_id)
+         ->where('ulasan.is_verified_purchase', true);
+    }
+
+    // Method untuk mendapatkan semua review untuk pesanan ini (backward compatibility)
+    public function getOrderReviews()
+    {
+        $productIds = $this->detailPesanan->pluck('id_Produk');
+        return \App\Models\Ulasan::where('user_id', $this->user_id)
+            ->whereIn('id_Produk', $productIds)
+            ->where('is_verified_purchase', true)
+            ->with(['user', 'produk'])
+            ->get();
     }
 
     // Status management methods
@@ -359,10 +393,9 @@ class Pesanan extends Model
     {
         // Pesanan dapat direview jika:
         // 1. Status pesanan selesai
-        // 2. Pesanan telah diterima
-        // 3. Masih ada produk yang belum direview
+        // 2. Masih ada produk yang belum direview
+        // Note: Removed tanggal_diterima requirement - status "Selesai" is sufficient indicator
         return $this->status_pesanan === 'Selesai' &&
-               $this->tanggal_diterima &&
                $this->reviewable_products->isNotEmpty();
     }
 }

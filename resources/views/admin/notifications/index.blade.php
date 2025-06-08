@@ -6,9 +6,9 @@
         <h1 class="text-xl font-bold text-gray-800">Notifikasi Admin</h1>
 
         @if($notifications->isNotEmpty() && $notifications->where('is_read', false)->count() > 0)
-        <form action="{{ route('notifications.mark-all-as-read') }}" method="POST">
+        <form action="{{ route('notifications.mark-all-as-read') }}" method="POST" class="mark-all-read-form">
             @csrf
-            <button type="submit" class="text-sm text-yellow-600 hover:text-yellow-800">
+            <button type="button" class="text-sm text-yellow-600 hover:text-yellow-800 mark-all-read-btn">
                 Tandai semua sudah dibaca
             </button>
         </form>
@@ -25,7 +25,8 @@
     @else
         <div class="bg-white rounded-lg divide-y divide-gray-200">
             @foreach($notifications as $notification)
-                <div class="p-5 {{ !$notification->is_read ? 'bg-yellow-50 font-medium' : 'opacity-70' }}">
+                <div class="p-5 {{ !$notification->is_read ? 'bg-yellow-50 font-medium' : 'opacity-70' }} cursor-pointer hover:bg-yellow-100 transition-colors duration-150"
+                     onclick="handleAdminNotificationClick({{ $notification->id }}, {{ json_encode(isset($notification->data['url']) ? $notification->data['url'] : '') }}, {{ $notification->is_read ? 'true' : 'false' }})">
                     <div class="flex">
                         <div class="flex-shrink-0 mt-1">
                             @switch($notification->type)
@@ -66,9 +67,9 @@
                             <p class="text-gray-600 mt-1">{{ $notification->message }}</p>
                             @if(!$notification->is_read)
                             <div class="mt-2">
-                                <form action="{{ route('notifications.mark-as-read', $notification->id) }}" method="POST" class="inline">
+                                <form action="{{ route('notifications.mark-as-read', $notification->id) }}" method="POST" class="inline mark-read-form">
                                     @csrf
-                                    <button type="submit" class="text-xs text-yellow-600 hover:text-yellow-800">
+                                    <button type="button" class="text-xs text-yellow-600 hover:text-yellow-800 mark-read-btn" data-notification-id="{{ $notification->id }}">
                                         Tandai dibaca
                                     </button>
                                 </form>
@@ -85,4 +86,163 @@
         </div>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark all as read confirmation
+    const markAllReadBtn = document.querySelector('.mark-all-read-btn');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const form = this.closest('.mark-all-read-form');
+            const unreadCount = {{ $notifications->where('is_read', false)->count() }};
+
+            Swal.fire({
+                title: 'Tandai Semua Dibaca',
+                text: `Tandai ${unreadCount} notifikasi sebagai sudah dibaca?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Tandai Semua',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                    confirmButton: 'btn btn-confirm',
+                    cancelButton: 'btn btn-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Sedang menandai semua notifikasi',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    }
+
+    // Mark individual notification as read
+    document.querySelectorAll('.mark-read-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const form = this.closest('.mark-read-form');
+            const notificationId = this.getAttribute('data-notification-id');
+
+            Swal.fire({
+                title: 'Tandai Dibaca',
+                text: 'Tandai notifikasi ini sebagai sudah dibaca?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Tandai Dibaca',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                    confirmButton: 'btn btn-confirm',
+                    cancelButton: 'btn btn-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Sedang menandai notifikasi',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // Function to handle notification clicks with auto-redirect and mark as read
+    function handleAdminNotificationClick(notificationId, url, isRead) {
+        // If notification is not read, mark it as read first
+        if (!isRead) {
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            fetch(`/notifications/${notificationId}/mark-as-read`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.redirect_url) {
+                        // Use the validated URL from server response
+                        window.location.href = data.redirect_url;
+                    } else if (url) {
+                        // Fallback to original URL if no validated URL provided
+                        window.location.href = url;
+                    }
+                } else if (url) {
+                    // Redirect even if marking as read fails
+                    window.location.href = url;
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+                // Still redirect even if marking as read fails, but use fallback
+                if (url) {
+                    window.location.href = url;
+                } else {
+                    // If no URL available, reload the notifications page
+                    window.location.reload();
+                }
+            });
+        } else {
+            // If already read, validate URL before redirect
+            if (url) {
+                // For read notifications, still validate the URL via server
+                fetch(`/notifications/${notificationId}/mark-as-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: new FormData(),
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        window.location.href = url;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error validating notification URL:', error);
+                    window.location.href = url;
+                });
+            }
+        }
+    }
+});
+</script>
 @endsection

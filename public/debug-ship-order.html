@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Ship Order</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Debug Ship Order Functionality</h1>
+    <button id="test-ship" data-id="123">Test Ship Order</button>
+
+    <script>
+        // Mock CSRF token
+        const csrfMeta = document.createElement('meta');
+        csrfMeta.name = 'csrf-token';
+        csrfMeta.content = 'dummy-token';
+        document.head.appendChild(csrfMeta);
+
+        function submitShipOrder(orderId, resi) {
+            console.log('submitShipOrder called with:', {orderId, resi});
+
+            const url = 'http://localhost:8000/admin/pesanan/' + orderId + '/ship';
+            console.log('Fetch URL:', url);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    resi: resi
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#10b981'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat mengirim pesanan: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+        }
+
+        $(document).on('click', '#test-ship', function(e) {
+            e.preventDefault();
+            const orderId = $(this).data('id');
+            console.log('Ship button clicked, orderId:', orderId);
+
+            Swal.fire({
+                title: 'Kirim Pesanan',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-4 text-center text-gray-700">Pesanan akan ditandai sebagai "Dikirim"</p>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Resi Pengiriman <span class="text-red-500">*</span></label>
+                            <input type="text" id="swal-resi-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Contoh: JNE123456789" autocomplete="off">
+                            <p class="text-xs text-gray-500 mt-1">Masukkan nomor resi dari kurir pengiriman</p>
+                        </div>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                            <p class="text-sm text-blue-700">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Pastikan produk sudah dikemas dan siap dikirim sebelum melanjutkan.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Kirim Pesanan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                focusConfirm: false,
+                didOpen: () => {
+                    document.getElementById('swal-resi-input').focus();
+                },
+                preConfirm: () => {
+                    const resi = document.getElementById('swal-resi-input').value.trim();
+                    console.log('Resi input value:', resi);
+
+                    if (!resi) {
+                        Swal.showValidationMessage('Nomor resi harus diisi!');
+                        return false;
+                    }
+
+                    if (resi.length < 5) {
+                        Swal.showValidationMessage('Nomor resi terlalu pendek! Minimal 5 karakter.');
+                        return false;
+                    }
+
+                    if (resi.length > 50) {
+                        Swal.showValidationMessage('Nomor resi terlalu panjang! Maksimal 50 karakter.');
+                        return false;
+                    }
+
+                    return resi;
+                }
+            }).then((result) => {
+                console.log('SweetAlert result:', result);
+                if (result.isConfirmed) {
+                    console.log('Confirmed with resi:', result.value);
+
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Mengirim Pesanan...',
+                        text: 'Sedang memproses pengiriman pesanan dengan nomor resi: ' + result.value,
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit form dengan nomor resi
+                    submitShipOrder(orderId, result.value);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

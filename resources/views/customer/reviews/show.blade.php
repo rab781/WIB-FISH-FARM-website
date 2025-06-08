@@ -285,7 +285,7 @@
                         @if($review->pesanan)
                         <a href="{{ route('customer.orders.show', $review->pesanan->id) }}"
                         @else
-                        <a href="#" onclick="alert('Pesanan tidak tersedia'); return false;"
+                        <a href="#" onclick="Swal.fire({title: 'Perhatian', text: 'Pesanan tidak tersedia', icon: 'info', confirmButtonText: 'OK'}); return false;"
                         @endif
                            class="text-orange-600 hover:text-orange-700 text-sm font-medium transition-colors duration-200">
                             Lihat Detail Pesanan →
@@ -435,7 +435,12 @@ function likeReview(reviewId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat memproses like');
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat memproses like',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     });
 }
 
@@ -451,21 +456,52 @@ function shareReview(reviewId) {
     } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            alert('Link review berhasil disalin ke clipboard!');
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Link review berhasil disalin ke clipboard!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
         }).catch(() => {
-            alert('Gagal menyalin link review');
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Gagal menyalin link review',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
     }
 }
 
 function editReview() {
-    if (confirm('Apakah Anda yakin ingin mengedit review ini?')) {
-        window.location.href = `/customer/reviews/{{ $review->id }}/edit`;
-    }
+    Swal.fire({
+        title: 'Konfirmasi Edit',
+        text: 'Apakah Anda yakin ingin mengedit review ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Edit!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/customer/reviews/{{ $review->id }}/edit`;
+        }
+    });
 }
 
 function deleteReview() {
-    if (confirm('Apakah Anda yakin ingin menghapus review ini? Tindakan ini tidak dapat dibatalkan.')) {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: 'Apakah Anda yakin ingin menghapus review ini? Tindakan ini tidak dapat dibatalkan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
         fetch(`/customer/reviews/{{ $review->id }}`, {
             method: 'DELETE',
             headers: {
@@ -475,17 +511,34 @@ function deleteReview() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Review berhasil dihapus');
-                window.location.href = '/customer/reviews';
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Review berhasil dihapus',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/customer/reviews';
+                });
             } else {
-                alert('Gagal menghapus review: ' + (data.message || 'Terjadi kesalahan'));
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Gagal menghapus review: ' + (data.message || 'Terjadi kesalahan'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus review');
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat menghapus review',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
-    }
+        }
+    });
 }
 
 // Auto-refresh for pending reviews

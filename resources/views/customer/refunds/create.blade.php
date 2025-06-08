@@ -612,8 +612,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showCancelButton: true,
             confirmButtonColor: '#f97316',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Ya, Ajukan Refund',
-            cancelButtonText: 'Batal',
+            confirmButtonText: 'OKE',
+            cancelButtonText: 'BATAL',
             reverseButtons: true
         });
 

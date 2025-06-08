@@ -253,61 +253,6 @@
         @endif
     </div>
 </div>
-
-<!-- Process Refund Modal -->
-<div id="processModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Proses Refund</h3>
-
-                <form id="processForm">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select id="statusSelect" name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                            <option value="approved">Setujui</option>
-                            <option value="rejected">Tolak</option>
-                            <option value="processing">Proses</option>
-                            <option value="completed">Selesai</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Admin</label>
-                        <textarea id="notesTextarea" name="admin_notes" rows="3"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                  placeholder="Tambahkan catatan untuk pelanggan..."></textarea>
-                    </div>
-
-                    <div id="refundMethodDiv" class="mb-4 hidden">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Metode Refund</label>
-                        <select id="refundMethodSelect" name="refund_method" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                            <option value="bank_transfer">Transfer Bank</option>
-                            <option value="wallet">E-Wallet</option>
-                            <option value="store_credit">Kredit Toko</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" onclick="submitProcess()"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                    Proses
-                </button>
-                <button type="button" onclick="closeProcessModal()"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                    Batal
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -316,72 +261,255 @@ let currentRefundId = null;
 
 function processRefund(refundId, status = null) {
     currentRefundId = refundId;
-    if (status) {
-        document.getElementById('statusSelect').value = status;
+
+    let icon, title, text, confirmButtonText, confirmButtonColor;
+
+    switch(status) {
+        case 'approved':
+            icon = 'question';
+            title = 'Setujui Refund';
+            text = `Apakah Anda yakin ingin menyetujui refund #${refundId}?`;
+            confirmButtonText = 'Ya, Setujui';
+            confirmButtonColor = '#10b981';
+            break;
+        case 'rejected':
+            icon = 'warning';
+            title = 'Tolak Refund';
+            text = `Apakah Anda yakin ingin menolak refund #${refundId}?`;
+            confirmButtonText = 'Ya, Tolak';
+            confirmButtonColor = '#dc2626';
+            break;
+        default:
+            icon = 'info';
+            title = 'Proses Refund';
+            text = `Pilih status untuk refund #${refundId}`;
+            confirmButtonText = 'Proses';
+            confirmButtonColor = '#f97316';
     }
 
-    // Show/hide refund method based on status
-    const refundMethodDiv = document.getElementById('refundMethodDiv');
-    if (status === 'approved' || status === 'processing') {
-        refundMethodDiv.classList.remove('hidden');
+    if (status === 'approved' || status === 'rejected') {
+        // Show direct confirmation for approve/reject
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: icon,
+            input: 'textarea',
+            inputLabel: 'Catatan Admin (Opsional)',
+            inputPlaceholder: 'Tambahkan catatan untuk pelanggan...',
+            showCancelButton: true,
+            confirmButtonColor: confirmButtonColor,
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: confirmButtonText,
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'animate__animated animate__fadeInDown',
+                confirmButton: 'btn btn-confirm',
+                cancelButton: 'btn btn-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const adminNotes = result.value || '';
+                submitProcessDirect(refundId, status, adminNotes);
+            }
+        });
     } else {
-        refundMethodDiv.classList.add('hidden');
+        // Show detailed form for other statuses
+        Swal.fire({
+            title: 'Proses Refund',
+            html: `
+                <div class="text-left">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="swal-status" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            <option value="approved">Setujui</option>
+                            <option value="rejected">Tolak</option>
+                            <option value="processing">Proses</option>
+                            <option value="completed">Selesai</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Admin</label>
+                        <textarea id="swal-notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Tambahkan catatan untuk pelanggan..."></textarea>
+                    </div>
+                    <div id="swal-refund-method" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Metode Refund</label>
+                        <select id="swal-method" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            <option value="bank_transfer">Transfer Bank</option>
+                            <option value="wallet">E-Wallet</option>
+                            <option value="store_credit">Kredit Toko</option>
+                        </select>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonColor: '#f97316',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Proses Refund',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            didOpen: () => {
+                // Handle status change
+                const statusSelect = document.getElementById('swal-status');
+                const refundMethodDiv = document.getElementById('swal-refund-method');
+
+                statusSelect.addEventListener('change', function() {
+                    if (this.value === 'approved' || this.value === 'processing') {
+                        refundMethodDiv.classList.remove('hidden');
+                    } else {
+                        refundMethodDiv.classList.add('hidden');
+                    }
+                });
+            },
+            preConfirm: () => {
+                const status = document.getElementById('swal-status').value;
+                const notes = document.getElementById('swal-notes').value;
+                const method = document.getElementById('swal-method').value;
+
+                return { status, notes, method };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { status, notes, method } = result.value;
+                submitProcessDetailed(refundId, status, notes, method);
+            }
+        });
     }
-
-    document.getElementById('processModal').classList.remove('hidden');
 }
 
-function closeProcessModal() {
-    document.getElementById('processModal').classList.add('hidden');
-    currentRefundId = null;
-}
-
-function submitProcess() {
-    if (!currentRefundId) return;
+function submitProcessDirect(refundId, status, adminNotes) {
+    // Show loading
+    Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang memproses refund',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
     const formData = new FormData();
     formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-    formData.append('status', document.getElementById('statusSelect').value);
-    formData.append('admin_notes', document.getElementById('notesTextarea').value);
+    formData.append('status', status);
+    formData.append('admin_notes', adminNotes);
 
-    const refundMethod = document.getElementById('refundMethodSelect').value;
-    if (!document.getElementById('refundMethodDiv').classList.contains('hidden')) {
-        formData.append('refund_method', refundMethod);
-    }
-
-    fetch(`/admin/refunds/${currentRefundId}/process`, {
+    fetch(`/admin/refunds/${refundId}/process`, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            Swal.fire({
+                title: 'Berhasil!',
+                text: `Refund berhasil ${status === 'approved' ? 'disetujui' : 'ditolak'}`,
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                customClass: {
+                    popup: 'animate__animated animate__fadeInUp'
+                }
+            }).then(() => {
+                location.reload();
+            });
         } else {
-            alert('Gagal memproses refund');
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Gagal memproses refund',
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                customClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan');
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat memproses refund',
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            customClass: {
+                popup: 'animate__animated animate__shakeX'
+            }
+        });
     });
 }
 
-// Show/hide refund method based on status selection
-document.getElementById('statusSelect').addEventListener('change', function() {
-    const refundMethodDiv = document.getElementById('refundMethodDiv');
-    if (this.value === 'approved' || this.value === 'processing') {
-        refundMethodDiv.classList.remove('hidden');
-    } else {
-        refundMethodDiv.classList.add('hidden');
-    }
-});
+function submitProcessDetailed(refundId, status, adminNotes, refundMethod) {
+    // Show loading
+    Swal.fire({
+        title: 'Memproses...',
+        text: 'Sedang memproses refund',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
-// Close modal when clicking outside
-document.getElementById('processModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeProcessModal();
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+    formData.append('status', status);
+    formData.append('admin_notes', adminNotes);
+
+    if (status === 'approved' || status === 'processing') {
+        formData.append('refund_method', refundMethod);
     }
-});
+
+    fetch(`/admin/refunds/${refundId}/process`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Refund berhasil diproses',
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                customClass: {
+                    popup: 'animate__animated animate__fadeInUp'
+                }
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Gagal memproses refund',
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+                customClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat memproses refund',
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            customClass: {
+                popup: 'animate__animated animate__shakeX'
+            }
+        });
+    });
+}
+
+// Legacy functions for backward compatibility
+function closeProcessModal() {
+    // No longer needed with SweetAlert2
+}
+
+function submitProcess() {
+    // No longer needed with SweetAlert2
+}
 </script>
 @endpush

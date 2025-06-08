@@ -94,25 +94,25 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                             </a>
-                            <form action="{{ route('admin.produk.destroy', $p->id_Produk) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
+                            <form action="{{ route('admin.produk.destroy', $p->id_Produk) }}" method="POST" class="inline delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+                                <button type="button" class="text-red-600 hover:text-red-900 delete-btn" title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
                             </form>
                             @else
-                            <a href="{{ route('admin.produk.restore', $p->id_Produk) }}" class="text-yellow-600 hover:text-yellow-900" title="Pulihkan" onclick="return confirm('Pulihkan produk ini?')">
+                            <button class="text-yellow-600 hover:text-yellow-900 restore-btn" title="Pulihkan" data-url="{{ route('admin.produk.restore', $p->id_Produk) }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                            </a>
-                            <form action="{{ route('admin.produk.forceDelete', $p->id_Produk) }}" method="POST" class="inline" onsubmit="return confirm('Produk akan dihapus permanen. Lanjutkan?')">
+                            </button>
+                            <form action="{{ route('admin.produk.forceDelete', $p->id_Produk) }}" method="POST" class="inline force-delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus Permanen">
+                                <button type="button" class="text-red-600 hover:text-red-900 force-delete-btn" title="Hapus Permanen">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -138,4 +138,138 @@
         {{ $produk->links() }}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Delete confirmation
+    document.querySelectorAll('.delete-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const form = this.closest('form');
+
+            Swal.fire({
+                title: 'Hapus Produk?',
+                text: 'Produk akan dipindahkan ke sampah dan dapat dipulihkan nanti.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Oke',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        text: 'Sedang memproses penghapusan produk.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // Force delete confirmation
+    document.querySelectorAll('.force-delete-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const form = this.closest('form');
+
+            Swal.fire({
+                title: 'Hapus Permanen?',
+                html: '<div class="text-center"><p class="text-red-600 font-semibold mb-2">⚠️ PERINGATAN ⚠️</p><p>Produk akan dihapus secara permanen dan <strong>tidak dapat dipulihkan</strong>!</p></div>',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus Permanen!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Menghapus Permanen...',
+                        text: 'Sedang memproses penghapusan permanen produk.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // Restore confirmation
+    document.querySelectorAll('.restore-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const url = this.dataset.url;
+
+            Swal.fire({
+                title: 'Pulihkan Produk?',
+                text: 'Produk akan dikembalikan ke status aktif.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Pulihkan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-lg',
+                    confirmButton: 'rounded-md',
+                    cancelButton: 'rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Memulihkan...',
+                        text: 'Sedang memproses pemulihan produk.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Since the route is GET, just redirect to the URL
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+});
+</script>
 @endsection

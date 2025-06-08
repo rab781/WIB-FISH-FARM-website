@@ -205,7 +205,18 @@ class PesananController extends Controller
             ->where('id_pesanan', $id)
             ->firstOrFail();
 
-        return view('admin.pesanan.show', compact('pesanan'));
+        // Load reviews for completed orders
+        $reviews = collect();
+        if ($pesanan->status_pesanan === 'Selesai') {
+            $productIds = $pesanan->detailPesanan->pluck('id_Produk');
+            $reviews = \App\Models\Ulasan::where('user_id', $pesanan->user_id)
+                ->whereIn('id_Produk', $productIds)
+                ->with(['user', 'produk', 'adminReplier'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('admin.pesanan.show', compact('pesanan', 'reviews'));
     }
 
     /**
@@ -266,17 +277,18 @@ class PesananController extends Controller
         try {
             $pesanan = Pesanan::findOrFail($id);
 
-            if ($pesanan->status_pesanan !== 'Diproses') {
+            // Check if order can be shipped - must be processed status
+            if (!in_array($pesanan->status_pesanan, ['Diproses', 'Sedang Diproses', 'Pembayaran Dikonfirmasi'])) {
                 if (request()->ajax()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Hanya pesanan dengan status Diproses yang dapat dikirim.'
+                        'message' => 'Hanya pesanan dengan status Diproses yang dapat dikirim. Status saat ini: ' . $pesanan->status_pesanan
                     ], 400);
                 }
                 return redirect()->back()->with('error', 'Hanya pesanan dengan status Diproses yang dapat dikirim.');
             }
 
-            // Update status and tracking number using proper quote encapsulation
+            // Update status and tracking number
             $pesanan->update([
                 'status_pesanan' => 'Dikirim',
                 'no_resi' => $request->resi,

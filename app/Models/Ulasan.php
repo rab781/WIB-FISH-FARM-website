@@ -51,6 +51,28 @@ class Ulasan extends Model
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
     }
 
+    // Relasi ke detail pesanan - untuk mendapatkan info order
+    public function detailPesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_Produk', 'id_Produk')
+                    ->whereHas('pesanan', function($query) {
+                        $query->where('user_id', $this->user_id);
+                    });
+    }
+
+    // Relasi ke pesanan - melalui detail pesanan
+    public function pesanan()
+    {
+        return $this->hasOneThrough(
+            Pesanan::class,
+            DetailPesanan::class,
+            'id_Produk', // Foreign key on detail_pesanan table
+            'id_pesanan', // Foreign key on pesanan table
+            'id_Produk', // Local key on ulasan table
+            'id_pesanan' // Local key on detail_pesanan table
+        )->where('pesanan.user_id', $this->user_id);
+    }
+
     // Enhanced relationships
     public function adminReplier()
     {

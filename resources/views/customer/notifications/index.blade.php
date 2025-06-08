@@ -26,7 +26,8 @@
         @else
             <div class="bg-white rounded-lg shadow-md divide-y divide-gray-200">
                 @foreach($notifications as $notification)
-                    <div class="p-5 {{ !$notification->is_read ? 'bg-orange-50 font-medium' : 'opacity-70' }}">
+                    <div class="p-5 {{ !$notification->is_read ? 'bg-orange-50 font-medium' : 'opacity-70' }} cursor-pointer hover:bg-orange-100 transition-colors duration-150"
+                         onclick="handleNotificationClick({{ $notification->id }}, {{ json_encode(isset($notification->data['url']) ? $notification->data['url'] : '') }}, {{ $notification->is_read ? 'true' : 'false' }})">
                         <div class="flex">
                             <div class="flex-shrink-0 mt-1">
                                 @switch($notification->type)
@@ -87,4 +88,77 @@
         @endif
     </div>
 </div>
+
+<script>
+function handleNotificationClick(notificationId, url, isRead) {
+    // If notification is not read, mark it as read first
+    if (!isRead) {
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        fetch(`/notifications/${notificationId}/mark-as-read`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.redirect_url) {
+                    // Use the validated URL from server response
+                    window.location.href = data.redirect_url;
+                } else if (url) {
+                    // Fallback to original URL if no validated URL provided
+                    window.location.href = url;
+                }
+            } else if (url) {
+                // Redirect even if marking as read fails
+                window.location.href = url;
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+            // Still redirect even if marking as read fails, but use fallback
+            if (url) {
+                window.location.href = url;
+            } else {
+                // If no URL available, reload the notifications page
+                window.location.reload();
+            }
+        });
+    } else {
+        // If already read, validate URL before redirect
+        if (url) {
+            // For read notifications, still validate the URL via server
+            fetch(`/notifications/${notificationId}/mark-as-read`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: new FormData(),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    window.location.href = url;
+                }
+            })
+            .catch(error => {
+                console.error('Error validating notification URL:', error);
+                window.location.href = url;
+            });
+        }
+    }
+}
+</script>
 @endsection

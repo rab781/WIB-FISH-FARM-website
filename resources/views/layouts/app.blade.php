@@ -24,6 +24,9 @@
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script src="{{ asset('js/landing.js') }}"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <title>{{ $title ?? 'WIB Fish Farm' }}</title>
 
     @stack('styles')
@@ -56,14 +59,25 @@
             if (currentQuantity > 1) {
                 currentQuantity -= 1;
             } else {
-                if (confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?')) {
-                    const deleteForm = document.querySelector(`.flex.flex-col.md\\:flex-row input[value="${cartItemId}"]`)
-                        .closest('.flex.flex-col.md\\:flex-row')
-                        .querySelector('.delete-form');
-                    if (deleteForm) {
-                        deleteForm.submit();
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: 'Apakah Anda yakin ingin menghapus produk ini dari keranjang?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const deleteForm = document.querySelector(`.flex.flex-col.md\\:flex-row input[value="${cartItemId}"]`)
+                            .closest('.flex.flex-col.md\\:flex-row')
+                            .querySelector('.delete-form');
+                        if (deleteForm) {
+                            deleteForm.submit();
+                        }
                     }
-                }
+                });
                 return;
             }
         }
@@ -90,14 +104,24 @@
                 window.location.reload();
             } else {
                 // Gagal, tampilkan pesan error
-                alert(data.message || 'Terjadi kesalahan saat memperbarui kuantitas');
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Terjadi kesalahan saat memperbarui kuantitas',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
                 // Kembalikan nilai input ke nilai semula
                 window.location.reload();
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat memperbarui kuantitas');
+            Swal.fire({
+                title: 'Error',
+                text: 'Terjadi kesalahan saat memperbarui kuantitas',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             window.location.reload();
         });
     }

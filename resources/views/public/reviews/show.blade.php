@@ -553,7 +553,12 @@ function toggleHelpful(reviewId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat memproses feedback');
+        Swal.fire({
+            title: 'Error',
+            text: 'Terjadi kesalahan saat memproses feedback',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     });
 }
 
@@ -572,7 +577,16 @@ function shareReview() {
     } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            alert('Link review berhasil disalin ke clipboard!');
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Link review berhasil disalin ke clipboard!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         }).catch(() => {
             // Fallback to manual copy
             const textArea = document.createElement('textarea');
@@ -581,7 +595,16 @@ function shareReview() {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert('Link review berhasil disalin!');
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Link review berhasil disalin!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         });
     }
 }
@@ -604,7 +627,12 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
 
     const reason = document.querySelector('input[name="reason"]:checked');
     if (!reason) {
-        alert('Silakan pilih alasan laporan');
+        Swal.fire({
+            title: 'Alasan Laporan Belum Dipilih',
+            text: 'Silakan pilih alasan laporan',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
         return;
     }
 
@@ -624,15 +652,30 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Laporan berhasil dikirim. Terima kasih atas feedback Anda.');
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Laporan berhasil dikirim. Terima kasih atas feedback Anda.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
             closeReportModal();
         } else {
-            alert('Gagal mengirim laporan: ' + (data.message || 'Terjadi kesalahan'));
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Gagal mengirim laporan: ' + (data.message || 'Terjadi kesalahan'),
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengirim laporan');
+        Swal.fire({
+            title: 'Error',
+            text: 'Terjadi kesalahan saat mengirim laporan',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     });
 });
 
