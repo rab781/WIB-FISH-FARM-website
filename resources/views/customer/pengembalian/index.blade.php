@@ -6,38 +6,444 @@
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
-    .status-badge {
-        @apply px-3 py-1 rounded-full text-sm font-medium;
+    :root {
+        --primary-color: #f97316;
+        --primary-dark: #ea580c;
+        --primary-light: #fed7aa;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --bg-light: #f8fafc;
+        --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
-    .status-pending { @apply bg-yellow-100 text-yellow-800; }
-    .status-approved { @apply bg-green-100 text-green-800; }
-    .status-rejected { @apply bg-red-100 text-red-800; }
-    .status-processing { @apply bg-blue-100 text-blue-800; }
-    .status-completed { @apply bg-gray-100 text-gray-800; }
 
-    .refund-card {
-        @apply bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 p-6;
+    .gradient-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        margin-bottom: 2rem;
     }
 
-    .refund-card:hover {
-        transform: translateY(-2px);
+    .gradient-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .modern-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
         transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
 
-    .evidence-photo {
-        @apply w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer transition-transform hover:scale-105;
+    .modern-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
-    .page-header {
-        @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white py-8 rounded-lg shadow-md mb-8;
+    .modern-card:hover {
+        box-shadow: var(--shadow-large);
+        transform: translateY(-2px);
+    }
+
+    .modern-card:hover::before {
+        opacity: 1;
     }
 
     .dashboard-card {
-        @apply bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-medium);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
     }
 
-    .form-card {
-        @apply bg-white rounded-lg shadow-lg p-6;
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-large);
+        transform: translateY(-4px);
+    }
+
+    .dashboard-card:hover::before {
+        opacity: 1;
+    }
+
+    .dashboard-card.gradient-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+    }
+
+    .dashboard-card.gradient-card::before {
+        display: none;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .status-badge:hover::before {
+        left: 100%;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+        background: linear-gradient(135deg, var(--danger-color), #dc2626);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-processing {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+
+    .refund-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .refund-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .refund-card:hover {
+        box-shadow: var(--shadow-large);
+        transform: translateY(-3px);
+    }
+
+    .refund-card:hover::before {
+        opacity: 1;
+    }
+
+    .evidence-photo {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 3px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .evidence-photo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(249, 115, 22, 0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .evidence-photo:hover {
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .evidence-photo:hover::before {
+        opacity: 1;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input:hover {
+        border-color: var(--primary-light);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-large);
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+        color: var(--text-primary);
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid var(--border-color);
+        cursor: pointer;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        text-decoration: none;
+        color: var(--text-primary);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: var(--shadow-medium);
+    }
+
+    .product-image-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(249, 115, 22, 0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-image-container:hover::before {
+        opacity: 1;
+    }
+
+    .search-container {
+        position: relative;
+    }
+
+    .search-container .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        z-index: 10;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-medium);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-divider {
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        border-radius: 2px;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: white;
+        border: 3px solid var(--primary-color);
+        border-radius: 50%;
+    }
+
+    .photo-grid-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .photo-grid-item:hover {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-large);
+    }
+
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .admin-note {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        border: 2px solid #3b82f6;
+        border-radius: 16px;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .admin-note::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
     }
 </style>
 @endpush

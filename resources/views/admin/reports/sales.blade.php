@@ -115,28 +115,32 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-xl w-full">
-            <div class="bg-white/20 p-4 rounded-lg mr-5 backdrop-blur-sm">
-                <i class="fas fa-chart-line text-white text-3xl"></i>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold">Laporan Penjualan</h1>
-                <p class="text-white/80 text-sm mt-1">Analisis data penjualan periode {{ $selectedYear }}</p>
-                <div class="flex mt-2 space-x-2">
-                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-                        <i class="fas fa-calendar mr-1"></i> {{ $selectedYear }}
-                    </span>
-                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-                        <i class="fas fa-chart-pie mr-1"></i> Laporan Kinerja
-                    </span>
+    <!-- Header Section with Filter -->
+    <div class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
+            <div class="flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-xl flex-1">
+                <div class="bg-white/20 p-4 rounded-lg mr-5 backdrop-blur-sm">
+                    <i class="fas fa-chart-line text-white text-3xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h1 class="text-2xl font-bold">Laporan Penjualan</h1>
+                    <p class="text-white/80 text-sm mt-1">Analisis data penjualan periode {{ $selectedYear }}</p>
+                    <div class="flex mt-2 space-x-2">
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                            <i class="fas fa-calendar mr-1"></i> {{ $selectedYear }}
+                        </span>
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                            <i class="fas fa-chart-pie mr-1"></i> Laporan Kinerja
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="flex items-center space-x-4 absolute top-6 right-6">
-            <form method="GET" class="flex items-center space-x-2 bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <label for="year" class="text-sm font-medium text-white">Filter:</label>
-                <select name="year" id="year" onchange="this.form.submit()" class="bg-white/20 border-0 text-white text-sm rounded-lg focus:ring-2 focus:ring-white/25 p-2 backdrop-blur-sm appearance-none pr-8" style="background-image: url('data:image/svg+xml;utf8,<svg fill=white xmlns=http://www.w3.org/2000/svg viewBox=0 0 24 24><path d=M7 10l5 5 5-5z/></svg>'); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em;">
+            <form method="GET" class="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-lg border border-gray-200 lg:ml-6">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-filter text-orange-500"></i>
+                    <label for="year" class="text-sm font-medium text-gray-700">Filter Tahun:</label>
+                </div>
+                <select name="year" id="year" onchange="this.form.submit()" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 p-2.5 min-w-[120px] appearance-none pr-8" style="background-image: url('data:image/svg+xml;utf8,<svg fill=%23374151 xmlns=http://www.w3.org/2000/svg viewBox=0 0 24 24><path d=M7 10l5 5 5-5z/></svg>'); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.2em;">
                     @foreach($availableYears as $year)
                         <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>
                             {{ $year }}
@@ -147,55 +151,47 @@
         </div>
     </div>
 
-    <h2 class="dashboard-title">Ringkasan Kinerja {{ $selectedYear }}</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="summary-card revenue group hover:transform hover:-translate-y-2 transition-all duration-300 float-animation" style="animation-delay: 0s">
-            <div class="summary-icon bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300">
-                <i class="fas fa-dollar-sign group-hover:scale-110 transition-transform duration-300"></i>
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl shadow-lg p-8 mb-8">
+        <h2 class="text-3xl font-bold mb-6">Ringkasan Kinerja {{ $selectedYear }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="summary-card revenue group hover:transform hover:-translate-y-2 transition-all duration-300">
+                <div>
+                    <p class="stat-label text-blue-200">
+                        <i class="fas fa-chart-line mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
+                        Total Pendapatan
+                    </p>
+                    <h2 class="stat-value text-white">Rp {{ number_format($summary['total_revenue'], 0, ',', '.') }}</h2>
+                    <p class="stat-desc text-blue-100">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        Periode {{ $selectedYear }}
+                    </p>
+                </div>
             </div>
-            <div>
-                <p class="stat-label text-blue-600">
-                    <i class="fas fa-chart-line mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
-                    Total Pendapatan
-                </p>
-                <h2 class="stat-value">Rp {{ number_format($summary['total_revenue'], 0, ',', '.') }}</h2>
-                <p class="stat-desc">
-                    <i class="fas fa-calendar-alt mr-1"></i>
-                    Periode {{ $selectedYear }}
-                </p>
+            <div class="summary-card orders group hover:transform hover:-translate-y-2 transition-all duration-300">
+                <div>
+                    <p class="stat-label text-green-200">
+                        <i class="fas fa-shopping-cart mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
+                        Jumlah Pesanan
+                    </p>
+                    <h2 class="stat-value text-white">{{ number_format($summary['total_orders']) }}</h2>
+                    <p class="stat-desc text-green-100">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Pesanan selesai {{ $selectedYear }}
+                    </p>
+                </div>
             </div>
-        </div>
-        <div class="summary-card orders group hover:transform hover:-translate-y-2 transition-all duration-300 float-animation" style="animation-delay: 1s">
-            <div class="summary-icon bg-gradient-to-br from-green-500 to-green-700 shadow-lg shadow-green-500/30 group-hover:shadow-green-500/50 transition-all duration-300">
-                <i class="fas fa-shopping-bag group-hover:scale-110 transition-transform duration-300"></i>
-            </div>
-            <div>
-                <p class="stat-label text-green-600">
-                    <i class="fas fa-shopping-cart mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
-                    Jumlah Pesanan
-                </p>
-                <h2 class="stat-value">{{ number_format($summary['total_orders']) }}</h2>
-                <p class="stat-desc">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    Pesanan selesai {{ $selectedYear }}
-                </p>
-            </div>
-        </div>
-        <div class="summary-card average group hover:transform hover:-translate-y-2 transition-all duration-300 float-animation" style="animation-delay: 2s">
-            <div class="summary-icon bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg shadow-purple-500/30 group-hover:shadow-purple-500/50 transition-all duration-300">
-                <i class="fas fa-calculator group-hover:scale-110 transition-transform duration-300"></i>
-            </div>
-            <div>
-                <p class="stat-label text-purple-600">
-                    <i class="fas fa-tag mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
-                    Rata-rata Nilai Pesanan
-                </p>
-                <h2 class="stat-value">Rp {{ number_format($summary['average_order_value'], 0, ',', '.') }}</h2>
-                <p class="stat-desc">
-                    <i class="fas fa-receipt mr-1"></i>
-                    Per transaksi {{ $selectedYear }}
-                </p>
+            <div class="summary-card average group hover:transform hover:-translate-y-2 transition-all duration-300">
+                <div>
+                    <p class="stat-label text-purple-200">
+                        <i class="fas fa-tag mr-1 group-hover:translate-y-[-2px] transition-all duration-300"></i>
+                        Rata-rata Nilai Pesanan
+                    </p>
+                    <h2 class="stat-value text-white">Rp {{ number_format($summary['average_order_value'], 0, ',', '.') }}</h2>
+                    <p class="stat-desc text-purple-100">
+                        <i class="fas fa-receipt mr-1"></i>
+                        Per transaksi {{ $selectedYear }}
+                    </p>
+                </div>
             </div>
         </div>
     </div>

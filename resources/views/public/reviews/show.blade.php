@@ -345,7 +345,7 @@
 </div>
 
 <!-- Photo Modal -->
-<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center">
+<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 items-center justify-center">
     <div class="relative max-w-4xl max-h-full mx-4">
         <button onclick="closePhotoModal()"
                 class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
@@ -377,7 +377,7 @@
 </div>
 
 <!-- Report Modal -->
-<div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+<div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
     <div class="bg-white rounded-lg max-w-md w-full mx-4">
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -460,7 +460,9 @@ function openPhotoModal(index) {
 }
 
 function closePhotoModal() {
-    document.getElementById('photoModal').classList.add('hidden');
+    const modal = document.getElementById('photoModal');
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
 }
 
@@ -611,13 +613,15 @@ function shareReview() {
 
 // Report functionality
 function reportReview() {
-    document.getElementById('reportModal').classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    const modal = document.getElementById('reportModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 }
 
 function closeReportModal() {
-    document.getElementById('reportModal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    const modal = document.getElementById('reportModal');
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
     document.getElementById('reportForm').reset();
 }
 

@@ -350,7 +350,7 @@
 </div>
 
 <!-- Photo Modal -->
-<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center">
+<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 items-center justify-center">
     <div class="relative max-w-4xl max-h-full mx-4">
         <button onclick="closePhotoModal()"
                 class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
@@ -378,6 +378,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    function openPhotoModal() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closePhotoModal() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+</script>
 
 @endsection
 

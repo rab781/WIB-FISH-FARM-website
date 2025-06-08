@@ -195,7 +195,7 @@
             <h2 class="text-5xl font-extrabold text-gray-900 leading-tight">
                 Rp {{ number_format($financialSummary['net_profit'] ?? 0, 0, ',', '.') }}
             </h2>
-            <div class="flex items-center text-sm mt-3 @if(($financialSummary['profit_margin'] ?? 0) >= 0) text-green-600 @else text-red-600 @endif">
+            <div class="flex items-center text-sm mt-3" style="color: {{ ($financialSummary['profit_margin'] ?? 0) >= 0 ? 'green' : 'red' }};">
                 <i class="fas fa-{{ ($financialSummary['profit_margin'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' }} mr-1"></i>
                 <span>{{ number_format(abs($financialSummary['profit_margin'] ?? 0), 2) }}% Margin Profit</span>
             </div>
@@ -244,7 +244,7 @@
             <div>
                 <p class="text-sm font-semibold text-blue-600 uppercase mb-1">Keuntungan Bersih</p>
                 <h2 class="text-3xl font-bold text-gray-900">Rp {{ number_format($financialSummary['net_profit'] ?? 0, 0, ',', '.') }}</h2>
-                <div class="flex items-center text-sm mt-1 @if(($financialSummary['net_profit'] ?? 0) >= 0) text-green-600 @else text-red-600 @endif">
+                <div class="flex items-center text-sm mt-1" style="color: {{ ($financialSummary['net_profit'] ?? 0) >= 0 ? 'green' : 'red' }};">
                     <i class="fas fa-{{ ($financialSummary['net_profit'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' }} mr-1"></i>
                     <span>{{ ($financialSummary['net_profit'] ?? 0) >= 0 ? 'Profit' : 'Loss' }}</span>
                 </div>

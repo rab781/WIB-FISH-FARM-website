@@ -664,23 +664,18 @@
                         <i class="fas fa-tags"></i>
                         <span>Kategori Pengeluaran <span class="required">*</span></span>
                     </label>
-                    <div class="custom-select-wrapper" style="position:relative;">
-                        <select class="form-select" id="category" name="category" required style="appearance: none;">
-                            <option value="" disabled selected>Pilih kategori pengeluaran</option>
-                            <option value="Gaji">💼 Gaji Karyawan</option>
-                            <option value="Sewa">🏢 Sewa Toko/Gudang</option>
-                            <option value="Listrik">⚡ Listrik & Utilitas</option>
-                            <option value="Bahan">📦 Bahan Baku</option>
-                            <option value="Peralatan">🔧 Peralatan</option>
-                            <option value="Transportasi">🚚 Transportasi</option>
-                            <option value="Marketing">📢 Marketing & Iklan</option>
-                            <option value="Administrasi">📋 Administrasi</option>
-                            <option value="Lainnya">📝 Lainnya</option>
-                        </select>
-                        <span class="chevron-animate" id="categoryChevron" style="pointer-events:none;position:absolute;right:1.25rem;top:50%;transform:translateY(-50%) rotate(0deg);transition:transform 0.3s cubic-bezier(.4,2,.6,1);color:var(--primary-orange);font-size:1.2rem;">
-                            <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                    </div>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="" disabled selected>Pilih kategori pengeluaran</option>
+                        <option value="Gaji">💼 Gaji Karyawan</option>
+                        <option value="Sewa">🏢 Sewa Toko/Gudang</option>
+                        <option value="Listrik">⚡ Listrik & Utilitas</option>
+                        <option value="Bahan">📦 Bahan Baku</option>
+                        <option value="Peralatan">🔧 Peralatan</option>
+                        <option value="Transportasi">🚚 Transportasi</option>
+                        <option value="Marketing">📢 Marketing & Iklan</option>
+                        <option value="Administrasi">📋 Administrasi</option>
+                        <option value="Lainnya">📝 Lainnya</option>
+                    </select>
                 </div>
 
                 <!-- Jumlah -->
@@ -874,18 +869,6 @@ document.addEventListener('DOMContentLoaded', function() {
         this.style.height = 'auto';
         this.style.height = Math.max(120, this.scrollHeight) + 'px';
     });
-
-    // Dropdown animasi chevron
-    const categorySelect = document.getElementById('category');
-    const chevron = document.getElementById('categoryChevron');
-    if (categorySelect && chevron) {
-        categorySelect.addEventListener('focus', function() {
-            chevron.style.transform = 'translateY(-50%) rotate(180deg)';
-        });
-        categorySelect.addEventListener('blur', function() {
-            chevron.style.transform = 'translateY(-50%) rotate(0deg)';
-        });
-    }
 });
 </script>
 @endpush
