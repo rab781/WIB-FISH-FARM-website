@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    @if($keluhans->isEmpty())
+    @if($keluhan->isEmpty())
         <div class="bg-white shadow rounded-lg p-6">
             <div class="text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,45 +58,45 @@
         </div>
     @else
         <div class="space-y-4">
-            @foreach($keluhans as $keluhan)
+            @foreach($keluhan as $keluhans)
                 <div class="bg-white shadow rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center space-x-3">
                                     <!-- Status Badge -->
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {{ $keluhan->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' : 
-                                           ($keluhan->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' : 
-                                           ($keluhan->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                                    {{-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {{ $keluhans->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' :
+                                           ($keluhans->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' :
+                                           ($keluhans->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
                                         <svg class="-ml-0.5 mr-1.5 h-2 w-2
-                                            {{ $keluhan->status === 'Belum Diproses' ? 'text-yellow-400' : 
-                                               ($keluhan->status === 'Sedang Diproses' ? 'text-blue-400' : 
-                                               ($keluhan->status === 'Selesai' ? 'text-green-400' : 'text-gray-400')) }}" 
+                                            {{ $keluhans->status === 'Belum Diproses' ? 'text-yellow-400' :
+                                               ($keluhans->status === 'Sedang Diproses' ? 'text-blue-400' :
+                                               ($keluhans->status === 'Selesai' ? 'text-green-400' : 'text-gray-400')) }}"
                                              fill="currentColor" viewBox="0 0 8 8">
                                             <circle cx="4" cy="4" r="3" />
                                         </svg>
-                                        {{ $keluhan->status }}
-                                    </span>
+                                        {{ $keluhans->status }}
+                                    </span> --}}
                                     <span class="text-sm text-gray-500">
-                                        {{ $keluhan->created_at->format('d M Y, H:i') }}
+                                        {{ $keluhans->created_at->format('d M Y, H:i') }}
                                     </span>
                                 </div>
 
-                                <h3 class="mt-3 text-lg font-medium text-gray-900">{{ $keluhan->jenis_keluhan }}</h3>
+                                <h3 class="mt-3 text-lg font-medium text-gray-900">{{ $keluhans->jenis_keluhan }}</h3>
                                 <div class="mt-2 text-sm text-gray-600 line-clamp-2">
-                                    {{ $keluhan->keluhan }}
+                                    {{ $keluhans->keluhan }}
                                 </div>
 
-                                @if($keluhan->respon_admin)
+                                {{-- @if($keluhans->respon_admin)
                                     <div class="mt-3 text-sm">
                                         <span class="text-orange-600 font-medium">Ditanggapi admin</span>
                                     </div>
-                                @endif
+                                @endif --}}
                             </div>
 
                             <div class="ml-4">
-                                <a href="{{ route('keluhan.show', $keluhan->id) }}" 
+                                <a href="{{ route('keluhan.show', $keluhans->id) }}"
                                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
                                     <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -107,7 +107,7 @@
                             </div>
                         </div>
 
-                        @if($keluhan->gambar)
+                        @if($keluhans->gambar)
                             <div class="mt-4 flex items-center text-sm text-gray-500">
                                 <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
@@ -122,7 +122,7 @@
 
         <!-- Pagination -->
         <div class="mt-6">
-            {{ $keluhans->links() }}
+            {{ $keluhan->links() }}
         </div>
     @endif
 </div>

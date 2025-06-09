@@ -26,19 +26,6 @@
         @apply border-purple-500;
     }
 
-    .summary-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 150px;
-        height: 150px;
-        background: radial-gradient(circle, rgba(249,115,22,0.03) 0%, rgba(249,115,22,0) 70%);
-        border-radius: 50%;
-        transform: translate(30%, -30%);
-        z-index: 0;
-    }
-
     .summary-icon {
         @apply w-14 h-14 rounded-lg flex items-center justify-center text-white text-xl flex-shrink-0 mr-4 shadow-md z-10;
     }

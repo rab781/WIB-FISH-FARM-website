@@ -12,12 +12,12 @@
                     <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                         Detail Keluhan #{{ $keluhan->id }}
                     </h2>
-                    <span class="ml-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {{-- <span class="ml-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                         {{ $keluhan->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' :
                            ($keluhan->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' :
                            ($keluhan->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
                         {{ $keluhan->status }}
-                    </span>
+                    </span> --}}
                 </div>
                 <nav class="flex mt-2" aria-label="Breadcrumb">
                     <ol role="list" class="flex items-center space-x-4">
@@ -107,7 +107,7 @@
             </div>
             @endif
 
-            <!-- Admin Response Form -->
+            {{-- <!-- Admin Response Form -->
             <div class="px-4 py-5 sm:px-6 border-t border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Tanggapan Admin</h3>
                 <form action="{{ route('admin.keluhan.respond', $keluhan->id) }}" method="POST" class="mt-4">
@@ -153,7 +153,7 @@
                         </div>
                     </div>
                 </form>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

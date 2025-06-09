@@ -817,6 +817,7 @@ use Carbon\Carbon;
         @endif
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script>

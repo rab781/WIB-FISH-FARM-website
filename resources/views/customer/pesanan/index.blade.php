@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.customer')
 
 @section('title', 'Pesanan Saya')
 
@@ -366,6 +366,7 @@
         </div>
     @endif
 </div>
+@endsection
 
 @push('scripts')
 <script>

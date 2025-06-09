@@ -1293,22 +1293,6 @@
             </div>
         </div>
     </div>
-
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="border-b border-gray-200 px-5 py-4 bg-gray-50">
-            <h3 class="text-base font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-bug mr-2"></i> Debug Info (Admin Only)
-                <button type="button" id="clearLog" class="ml-auto px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100">
-                    Clear Log
-                </button>
-            </h3>
-        </div>
-        <div class="p-5">
-            <div id="debugLog" class="text-xs font-mono bg-gray-900 text-green-500 p-3 rounded-lg h-48 overflow-y-auto">
-                <div>[LOG] Debug mode active - {{ now() }}</div>
-            </div>
-        </div>
-    </div>
 </div>
 @endsection
 

@@ -40,7 +40,7 @@
             <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {{-- <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                             {{ $keluhan->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' :
                                ($keluhan->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' :
                                ($keluhan->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
@@ -52,7 +52,7 @@
                                 <circle cx="4" cy="4" r="3" />
                             </svg>
                             {{ $keluhan->status }}
-                        </span>
+                        </span> --}}
                         <span class="text-sm text-gray-500">
                             Dibuat: {{ $keluhan->created_at->format('d M Y, H:i') }}
                         </span>
@@ -97,7 +97,7 @@
                 </div>
                 @endif
 
-                <!-- Admin Response -->
+                {{-- <!-- Admin Response -->
                 @if($keluhan->respon_admin)
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -134,7 +134,7 @@
                         </div>
                     </div>
                 </div>
-                @endif
+                @endif --}}
             </div>
         </div>
     </div>

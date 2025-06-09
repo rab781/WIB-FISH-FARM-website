@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
+        {{-- <!-- Stats Cards -->
         <div class="grid grid-cols-4 gap-4 mb-6">
             <!-- Total -->
             <div class="bg-white rounded-lg p-4 shadow-sm">
@@ -52,7 +52,7 @@
                 <h3 class="text-violet-500 font-medium text-sm mb-2">SELESAI</h3>
                 <p class="text-2xl font-bold text-gray-900">{{ $keluhans->where('status', 'Selesai')->count() }}</p>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Filters and Search -->
         <div class="mt-6 bg-white shadow rounded-lg">
@@ -81,7 +81,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengirim</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Keluhan</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            {{-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> --}}
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -105,14 +105,14 @@
                                     <div class="text-sm text-gray-900">{{ $keluhan->jenis_keluhan }}</div>
                                     <div class="text-sm text-gray-500">{{ Str::limit($keluhan->keluhan, 50) }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                {{-- <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         {{ $keluhan->status === 'Belum Diproses' ? 'bg-yellow-100 text-yellow-800' :
                                            ($keluhan->status === 'Sedang Diproses' ? 'bg-blue-100 text-blue-800' :
                                            ($keluhan->status === 'Selesai' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
                                         {{ $keluhan->status }}
                                     </span>
-                                </td>
+                                </td> --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $keluhan->created_at->format('d M Y, H:i') }}
                                 </td>
