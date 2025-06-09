@@ -119,7 +119,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('admin.keluhan.show', $keluhan->id) }}"
                                        class="text-orange-600 hover:text-orange-900 ml-3">
-                                        Lihat & Tanggapi
+                                        Lihat Detail Keluhan
                                     </a>
                                 </td>
                             </tr>

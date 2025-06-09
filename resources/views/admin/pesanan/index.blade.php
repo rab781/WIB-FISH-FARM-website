@@ -274,14 +274,14 @@
             <h1 class="text-2xl font-semibold text-gray-800">Daftar Pesanan</h1>
             <p class="text-sm text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Klik pada baris untuk melihat detail pesanan</p>
         </div>
-        <div class="flex space-x-2">
+        {{-- <div class="flex space-x-2">
             <button class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-md flex items-center text-sm" id="refreshBtn">
                 <i class="fas fa-sync-alt mr-2"></i> Refresh
             </button>
             <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md flex items-center text-sm" id="exportBtn">
                 <i class="fas fa-download mr-2"></i> Export Data
             </button>
-        </div>
+        </div> --}}
     </div>
 
     <!-- Order Summary Cards -->

@@ -404,12 +404,12 @@
 
     /* Compact Column Styles */
     .id-column { width: 60px; }
-    .order-column { width: 100px; }
-    .customer-column { width: 140px; }
+    .order-column { width: 200px; }
+    .customer-column { width: 200px; }
     .amount-column { width: 90px; }
-    .complaint-column { width: 180px; }
+    .complaint-column { width: 340px; }
     .status-column { width: 100px; }
-    .date-column { width: 90px; }
+    .date-column { width: 180px; }
     .action-column { width: 120px; }
 
     .order-link {
@@ -1218,18 +1218,20 @@
             <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>Pesanan</th>
-                        <th>Pelanggan</th>
-                        <th>Jumlah Refund</th>
-                        <th>Alasan Keluhan</th>
-                        <th>Status</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Aksi</th>
+                        <th class="id-column">ID</th>
+                        <th class="order-column">Pesanan</th>
+                        <th class="customer-column">Pelanggan</th>
+                        <th class="amount-column">Jumlah Refund</th>
+                        <th class="complaint-column">Alasan Keluhan</th>
+                        <th class="status-column">Status</th>
+                        <th class="date-column">Tanggal Pengajuan</th>
+                        <th class="action-column">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($pengembalian as $item)
                     <tr>
+                        <td class="id-column">{{ $item->id_pengembalian }}</td>
                         <td>
                             <a href="{{ route('admin.pesanan.show', $item->pesanan->id_pesanan) }}" class="order-link">
                                 #{{ $item->pesanan->id_pesanan ?? 'N/A' }}

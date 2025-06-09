@@ -37,9 +37,9 @@
             <a href="{{ route('pesanan.index', ['status' => 'Dibatalkan']) }}" class="px-6 py-4 text-center whitespace-nowrap font-medium {{ request('status') == 'Dibatalkan' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-gray-900' }}">
                 Dibatalkan
             </a>
-            <a href="{{ route('pesanan.index', ['status' => 'Pengembalian']) }}" class="px-6 py-4 text-center whitespace-nowrap font-medium {{ request('status') == 'Pengembalian' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-gray-900' }}">
+            {{-- <a href="{{ route('pesanan.index', ['status' => 'Pengembalian']) }}" class="px-6 py-4 text-center whitespace-nowrap font-medium {{ request('status') == 'Pengembalian' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-gray-900' }}">
                 Pengembalian Barang
-            </a>
+            </a> --}}
         </div>
 
         <!-- Shopee-style Search Bar -->

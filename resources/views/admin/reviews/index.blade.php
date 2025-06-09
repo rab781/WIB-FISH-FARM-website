@@ -513,70 +513,67 @@ function showReviewDetailModal(review) {
 let currentPhotoGallery = [];
 let currentPhotoIndex = 0;
 
-function openPhotoGallery(reviewId, startIndex = 0) {
-    // Show loading
-    Swal.fire({
-        title: 'Memuat Galeri Foto...',
-        html: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
-        }
-    });
 
-    // Fetch photos
-    fetch(`/admin/reviews/${reviewId}/photos`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        console.log('Photo gallery response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Photo gallery response:', data);
-        if (data.success) {
-            if (data.photos && data.photos.length > 0) {
-                currentPhotoGallery = data.photos;
-                currentPhotoIndex = startIndex;
-                showPhotoGalleryModal();
-            } else {
-                Swal.fire({
-                    title: 'Tidak Ada Foto',
-                    text: 'Ulasan ini tidak memiliki foto yang valid',
-                    icon: 'info',
-                    confirmButtonColor: '#ea580c'
-                });
-            }
-        } else {
-            throw new Error(data.message || 'Gagal memuat galeri foto');
-        }
-    })
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: data.message || 'Gagal memuat galeri foto',
-                icon: 'error',
-                confirmButtonColor: '#ea580c'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Photo gallery error:', error);
-        Swal.fire({
-            title: 'Error!',
-            text: 'Terjadi kesalahan saat memuat galeri foto: ' + error.message,
-            icon: 'error',
-            confirmButtonColor: '#ea580c'
-        });
-    });
+function openPhotoGallery(reviewId, startIndex = 0) {
+    // Show loading
+    Swal.fire({
+        title: 'Memuat Galeri Foto...',
+        html: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Fetch photos
+    fetch(`/admin/reviews/${reviewId}/photos`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Photo gallery response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Photo gallery response:', data);
+        if (data.success) {
+            if (data.photos && data.photos.length > 0) {
+                currentPhotoGallery = data.photos;
+                currentPhotoIndex = startIndex;
+                showPhotoGalleryModal();
+            } else {
+                Swal.fire({
+                    title: 'Tidak Ada Foto',
+                    text: 'Ulasan ini tidak memiliki foto yang valid',
+                    icon: 'info',
+                    confirmButtonColor: '#ea580c'
+                });
+            }
+        } else { // <--- 'else' ini adalah pasangan yang benar dari 'if (data.success)'
+            Swal.fire({
+                title: 'Error!',
+                text: data.message || 'Gagal memuat galeri foto',
+                icon: 'error',
+                confirmButtonColor: '#ea580c'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Photo gallery error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat memuat galeri foto: ' + error.message,
+            icon: 'error',
+            confirmButtonColor: '#ea580c'
+        });
+    });
 }
 
 function openPhotoGalleryFromModal(reviewId, startIndex = 0) {
