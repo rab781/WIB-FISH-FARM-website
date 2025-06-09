@@ -15,7 +15,7 @@ class KeluhanController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $keluhans = Keluhan::where('user_id', $user->id)
+        $keluhan = Keluhan::where('user_id', $user->id)
                             ->orderBy('created_at', 'desc')
                             ->paginate(10);
 
