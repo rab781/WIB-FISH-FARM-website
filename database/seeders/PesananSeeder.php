@@ -66,7 +66,7 @@ class PesananSeeder extends Seeder
             'user_id' => 4,
             'id_ongkir' => 2, // Bandung
             'total_harga' => 300000,
-            'status_pesanan' => 'Pengembalian',
+            'status_pesanan' => 'Dikirim',
             'tanggal_pengiriman' => now()->subDays(2),
             'tanggal_diterima' => now()->subDays(1)->subHours(2),
         ]);

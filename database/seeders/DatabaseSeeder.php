@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             DetailPesananSeeder::class, // 7. Detail Pesanan (membutuhkan Pesanan dan Produk)
             PembayaranSeeder::class,    // 8. Pembayaran (membutuhkan Pesanan)
             UlasanSeeder::class,        // 9. Ulasan (membutuhkan User dan Produk)
-            RefundRequestSeeder::class,  // 10. Refund Requests (membutuhkan Pesanan)
+            // RefundRequestSeeder::class,  // 10. Refund Requests (membutuhkan Pesanan)
             KeluhanSeeder::class,        // 11. Keluhan (membutuhkan User)
         ]);
 

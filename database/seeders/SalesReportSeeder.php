@@ -76,7 +76,7 @@ class SalesReportSeeder extends Seeder
                     'total_harga' => $totalHarga,
                     'ongkir_biaya' => $ongkir->biaya,
                     'status_pesanan' => $status,
-                    'metode_pembayaran' => $faker->randomElement(['Transfer Bank', 'COD', 'E-Wallet']),                    'alamat_pengiriman' => $faker->address,
+                    'metode_pembayaran' => $faker->randomElement(['Transfer Bank', 'E-Wallet']),                    'alamat_pengiriman' => $faker->address,
                     'catatan_penerimaan' => $faker->optional(0.3)->sentence(),
                     'created_at' => $orderDate,
                     'updated_at' => $orderDate,
@@ -167,7 +167,6 @@ class SalesReportSeeder extends Seeder
             'Selesai',
             'Selesai',
             'Dibatalkan',
-            'Refund Processed'
         ])->random();
     }
 
