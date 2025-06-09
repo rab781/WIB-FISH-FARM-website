@@ -1190,21 +1190,6 @@
                                         <i class="fas fa-image fa-sm mr-2"></i> Lihat Bukti Pembayaran
                                     </button>
                                     <div class="text-xs text-gray-500 mt-1">Klik untuk melihat bukti pembayaran</div>
-
-                                    <div class="border border-orange-200 rounded-md p-2 mt-2 bg-orange-50">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-xs text-gray-500">File: {{ basename($pesanan->bukti_pembayaran) }}</span>
-                                            <a href="{{ route('admin.pesanan.payment-proof', ['id' => $pesanan->id_pesanan]) }}" target="_blank" class="text-xs text-blue-600 hover:underline">
-                                                <i class="fas fa-external-link-alt"></i> Buka di Tab Baru
-                                            </a>
-                                        </div>
-
-                                        <div class="mt-2 pt-2 border-t border-orange-200">
-                                            <a href="{{ route('admin.diagnostic.payment-proofs', ['id' => $pesanan->id_pesanan]) }}" target="_blank" class="text-xs text-gray-600 hover:text-orange-600 flex items-center justify-center">
-                                                <i class="fas fa-tools mr-1"></i> Diagnosa Gambar
-                                            </a>
-                                        </div>
-                                    </div>
                                 </div>
                             @endif
                         </div>

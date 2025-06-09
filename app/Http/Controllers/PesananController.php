@@ -1187,9 +1187,11 @@ class PesananController extends Controller
             'completed' => Pesanan::where('user_id', $userId)
                                  ->where('status_pesanan', 'Selesai')
                                  ->count(),
-            'refunded' => Pesanan::where('user_id', $userId)
-                                ->where('status_refund', 'processed')
-                                ->count()
+            'refunded' => \App\Models\Pengembalian::whereHas('pesanan', function($q) use ($userId) {
+                                $q->where('user_id', $userId);
+                            })
+                            ->where('status_pengembalian', 'Selesai')
+                            ->count()
         ];
 
         $recentOrders = Pesanan::where('user_id', $userId)

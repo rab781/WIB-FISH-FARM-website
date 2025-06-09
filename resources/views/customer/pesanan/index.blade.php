@@ -113,8 +113,8 @@
                         } elseif ($p->status_pesanan == 'Dibatalkan') {
                             $statusText = 'DIBATALKAN';
                             $statusColor = 'text-red-500';
-                        } elseif ($p->status_pesanan == 'Karantina') {
-                            $statusText = 'KARANTINA';
+                        } elseif ($p->status_pesanan == 'Pengembalian') {
+                            $statusText = 'PENGEMBALIAN';
                             $statusColor = 'text-yellow-500';
                         } elseif ($p->status_pesanan == 'Pengembalian') {
                             $statusText = 'PENGEMBALIAN';
@@ -366,7 +366,6 @@
         </div>
     @endif
 </div>
-@endsection
 
 @push('scripts')
 <script>

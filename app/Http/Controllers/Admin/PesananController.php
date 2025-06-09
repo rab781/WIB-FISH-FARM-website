@@ -631,8 +631,7 @@ class PesananController extends Controller
             'shipped' => Pesanan::where('status_pesanan', 'Dikirim')->count(),
             'completed' => Pesanan::where('status_pesanan', 'Selesai')->count(),
             'cancelled' => Pesanan::where('status_pesanan', 'Dibatalkan')->count(),
-            'refund_requests' => Pesanan::where('status_refund', 'requested')->count(),
-            'active_quarantines' => Pesanan::where('is_karantina_active', true)->count()
+            'refund_requests' => \App\Models\Pengembalian::where('status_pengembalian', 'pending')->count(),
         ];
 
         $recentOrders = Pesanan::with(['user', 'detailPesanan'])
@@ -697,7 +696,7 @@ class PesananController extends Controller
                     $order->created_at->format('Y-m-d H:i:s'),
                     $order->tanggal_pembayaran?->format('Y-m-d H:i:s'),
                     $order->no_resi,
-                    $order->status_refund
+                    $order->pengembalian->count() > 0 ? 'has_refund' : 'none'
                 ]);
             }
 

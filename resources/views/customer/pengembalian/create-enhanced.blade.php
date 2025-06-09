@@ -753,7 +753,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 @push('scripts')
 <!-- SweetAlert2 JS -->

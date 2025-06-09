@@ -4,7 +4,7 @@
 
 @push('styles')
 <!-- Font Awesome CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
@@ -56,7 +56,6 @@
         overflow: hidden;
         margin-bottom: 2rem;
         box-shadow: var(--shadow-large);
-        animation: heroSlideIn 1s ease-out;
     }
 
     .hero-header::before {
@@ -70,98 +69,10 @@
         animation: heroFloat 25s ease-in-out infinite;
     }
 
-    .hero-header::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        animation: shimmerEffect 3s ease-in-out infinite;
-    }
-
-    @keyframes heroSlideIn {
-        0% { 
-            opacity: 0; 
-            transform: translateY(-30px) scale(0.95); 
-        }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
-        }
-    }
-
     @keyframes heroFloat {
         0%, 100% { transform: translateX(0px) translateY(0px); }
         33% { transform: translateX(-20px) translateY(-10px); }
         66% { transform: translateX(20px) translateY(10px); }
-    }
-
-    @keyframes shimmerEffect {
-        0% { left: -100%; }
-        50% { left: 100%; }
-        100% { left: 100%; }
-    }
-
-    .hero-icon {
-        animation: iconBounce 2s ease-in-out infinite;
-        transition: all 0.3s ease;
-    }
-
-    .hero-icon:hover {
-        transform: scale(1.1) rotate(10deg);
-        animation-play-state: paused;
-    }
-
-    @keyframes iconBounce {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-5px); }
-    }
-
-    .hero-title {
-        animation: titleSlideUp 1.2s ease-out 0.3s both;
-    }
-
-    .hero-subtitle {
-        animation: subtitleFadeIn 1.5s ease-out 0.6s both;
-    }
-
-    .hero-divider {
-        animation: dividerExpand 1.8s ease-out 0.9s both;
-    }
-
-    @keyframes titleSlideUp {
-        0% { 
-            opacity: 0; 
-            transform: translateY(20px); 
-        }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-    }
-
-    @keyframes subtitleFadeIn {
-        0% { 
-            opacity: 0; 
-            transform: translateY(15px); 
-        }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-    }
-
-    @keyframes dividerExpand {
-        0% { 
-            width: 0; 
-            opacity: 0;
-        }
-        100% { 
-            width: 6rem; 
-            opacity: 1;
-        }
     }
 
     .stats-card {
@@ -172,21 +83,8 @@
         border: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s ease;
         box-shadow: var(--shadow-light);
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    .stats-card.slide-up {
-        animation: slideUpStats 0.6s ease-out forwards;
-    }
-
-    @keyframes slideUpStats {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
     }
 
     .stats-card::before {
@@ -493,35 +391,21 @@
     }
 
     .fade-in {
-        animation: fadeIn 0.8s ease-out;
+        animation: fadeIn 0.5s ease-in;
     }
 
     @keyframes fadeIn {
-        from { 
-            opacity: 0; 
-            transform: translateY(20px); 
-        }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .slide-up {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: slideUp 0.6s ease-out forwards;
+        animation: slideUp 0.4s ease-out;
     }
 
     @keyframes slideUp {
-        from { 
-            opacity: 0; 
-            transform: translateY(30px); 
-        }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 @endpush
@@ -533,20 +417,20 @@
         <div class="hero-header p-8 mb-8 fade-in">
             <div class="relative z-10">
                 <div class="text-center">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-6 backdrop-blur-sm hero-icon">
-                        <i class="fas fa-undo text-3xl text-white"></i>
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-6 backdrop-blur-sm">
+                        <i class="fas fa-undo text-3xl" style="color: #f97316;"></i>
                     </div>
-                    <h1 class="text-4xl font-bold text-white mb-4 hero-title">Kelola Refund</h1>
-                    <p class="text-orange-100 text-lg mb-6 hero-subtitle">Pantau status refund dan ajukan pengembalian baru</p>
+                    <h1 class="text-4xl font-bold text-white mb-4">Kelola Refund</h1>
+                    <p class="text-orange-100 text-lg mb-6">Pantau status refund dan ajukan pengembalian baru</p>
                     <div class="flex justify-center">
-                        <div class="w-24 h-1 bg-white bg-opacity-50 rounded-full hero-divider"></div>
+                        <div class="w-24 h-1 bg-white bg-opacity-50 rounded-full"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             <div class="stats-card slide-up" style="animation-delay: 0.1s">
                 <div class="stats-icon bg-gradient-to-br from-blue-400 to-blue-600">
                     <i class="fas fa-list text-xl text-white"></i>
@@ -636,7 +520,7 @@
                                             $statusClasses = [
                                                 'Menunggu Review' => 'status-pending',
                                                 'Disetujui' => 'status-approved',
-                                                'Ditolak' => 'status-rejected'
+                                                'Ditolak' => 'status-rejected',
                                             ];
                                             $statusClass = $statusClasses[$refund->status_pengembalian] ?? 'status-pending';
                                         @endphp
@@ -656,7 +540,7 @@
                                                     <i class="fas fa-times mr-2"></i>Ditolak
                                                     @break
                                                 @case('Dana Dikembalikan')
-                                                    <i class="fas fa-money-bill-wave mr-2"></i>Dana Dikembalikan
+                                                    <i class="fas fa-money-bill mr-2"></i>Dana Dikembalikan
                                                     @break
                                                 @case('Selesai')
                                                     <i class="fas fa-star mr-2"></i>Selesai
@@ -696,7 +580,7 @@
                                     @if($refund->pesanan->detailPesanan->count() > 0)
                                         <div class="flex items-center space-x-3 mb-4">
                                             <div class="text-sm text-gray-600">
-                                                <i class="fas fa-box mr-1 text-orange-500"></i>
+                                                <i class="fas fa-fish mr-1 text-orange-500"></i>
                                                 {{ $refund->pesanan->detailPesanan->count() }} produk
                                             </div>
                                             <div class="text-sm text-gray-600">
@@ -765,7 +649,7 @@
                     Tidak ditemukan refund yang sesuai dengan pencarian atau filter Anda.
                 </p>
                 <button onclick="clearSearch()" class="btn-modern">
-                    <i class="fas fa-rotate-left mr-2"></i>
+                    <i class="fas fa-refresh mr-2"></i>
                     Reset Pencarian
                 </button>
             </div>
@@ -778,48 +662,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize hero animations
-    setTimeout(() => {
-        document.querySelector('.hero-header').style.opacity = '1';
-    }, 100);
-
-    // Initialize stats cards animations
-    const statsCards = document.querySelectorAll('.stats-card');
-    statsCards.forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('slide-up');
-        }, (index * 150) + 500); // Start after hero animation
-    });
-
-    // Initialize refund cards animations
-    const refundCards = document.querySelectorAll('.refund-card.slide-up');
-    refundCards.forEach((card, index) => {
+    // Initialize animations
+    const cards = document.querySelectorAll('.slide-up');
+    cards.forEach((card, index) => {
         setTimeout(() => {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
-        }, (index * 100) + 1000); // Start after stats cards
-    });
-
-    // Add scroll reveal effect
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Observe elements that need scroll animation
-    document.querySelectorAll('.fade-in, .slide-up').forEach(el => {
-        if (!el.classList.contains('stats-card')) { // Skip stats cards as they have their own timing
-            observer.observe(el);
-        }
+        }, index * 100);
     });
 });
 

@@ -21,7 +21,7 @@ class DashboardController extends Controller
         // Revenue and Expense statistics
         $totalRevenue = Pesanan::whereIn('status_pesanan', ['Selesai', 'Dikirim'])
             ->sum('total_harga');
-            
+
         $totalExpenses = Expense::sum('amount');
         $netIncome = $totalRevenue - $totalExpenses;
 
@@ -42,7 +42,7 @@ class DashboardController extends Controller
         // Calculate revenue growth
         $revenueGrowth = $lastMonthRevenue > 0 ?
             (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
-            
+
         $currentMonthExpenses = Expense::whereMonth('expense_date', $currentMonth->month)
             ->whereYear('expense_date', $currentMonth->year)
             ->sum('amount');
@@ -134,8 +134,8 @@ class DashboardController extends Controller
         $pendingRevenue = Pesanan::whereIn('status_pesanan', ['Menunggu Pembayaran', 'Diproses'])
             ->sum('total_harga');
 
-        $refundedAmount = Pesanan::where('status_refund', 'processed')
-            ->sum('jumlah_refund');
+        $refundedAmount = \App\Models\Pengembalian::where('status_pengembalian', 'Selesai')
+            ->sum('jumlah_klaim');
 
         $averageOrderValue = Pesanan::whereIn('status_pesanan', ['Selesai', 'Dikirim'])
             ->avg('total_harga');
@@ -270,19 +270,19 @@ class DashboardController extends Controller
             'pending_revenue' => Pesanan::whereIn('status_pesanan', ['Menunggu Pembayaran', 'Diproses'])
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->sum('total_harga'),
-            'refunded_amount' => Pesanan::where('status_refund', 'processed')
+            'refunded_amount' => \App\Models\Pengembalian::where('status_pengembalian', 'Selesai')
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('jumlah_refund'),
+                ->sum('jumlah_klaim'),
             'total_expenses' => $totalExpenses,
             'net_revenue' => 0
         ];
 
         $financialSummary['net_revenue'] = $financialSummary['total_revenue'] - $financialSummary['refunded_amount'] - $financialSummary['total_expenses'];
-        
+
         // Payment method analysis - Get data from PembayaranController
         $pembayaranController = new \App\Http\Controllers\PembayaranController();
         $paymentMethodAnalysis = $pembayaranController->getPaymentMethodAnalysis();
-        
+
         // Monthly revenue data
         $monthlyRevenue = Pesanan::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(total_harga) as total')
             ->whereIn('status_pesanan', ['Selesai', 'Dikirim'])
@@ -290,7 +290,7 @@ class DashboardController extends Controller
             ->groupBy('month')
             ->orderBy('month', 'asc')
             ->get();
-        
+
         return view('admin.reports.financial', compact(
             'financialSummary',
             'paymentMethodAnalysis',

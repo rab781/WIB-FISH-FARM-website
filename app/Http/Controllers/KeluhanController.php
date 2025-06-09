@@ -20,7 +20,7 @@ class KeluhanController extends Controller
                             ->paginate(10);
 
         // Path view yang benar berdasarkan controller Anda
-        return view('customer.keluhan.index', compact('keluhans'));
+        return view('customer.keluhan.index', compact('keluhan'));
     }
 
     /**

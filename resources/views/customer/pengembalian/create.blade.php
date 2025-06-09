@@ -485,36 +485,89 @@
                 <h3 class="text-2xl font-bold text-gray-900">Informasi Pesanan</h3>
             </div>
 
-            <div class="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl">
-                @if($pesanan->produk && $pesanan->produk->gambar)
-                <div class="product-image-container flex-shrink-0">
-                    <img src="{{ asset('storage/' . $pesanan->produk->gambar) }}"
-                         alt="{{ $pesanan->produk->nama }}"
-                         class="w-32 h-32 object-cover">
+            <!-- Professional Order Information Card -->
+            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-6">
+                <!-- Header with Order ID and Status -->
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="text-lg font-bold">Pesanan #{{ $pesanan->id_pesanan }}</h4>
+                            <p class="text-orange-100 text-sm">{{ $pesanan->created_at->format('d M Y, H:i') }} WIB</p>
+                        </div>
+                        <div class="text-right">
+                            @php
+                                $statusBadge = [
+                                    'Menunggu Pembayaran' => 'bg-yellow-100 text-yellow-800',
+                                    'Pembayaran Dikonfirmasi' => 'bg-blue-100 text-blue-800',
+                                    'Diproses' => 'bg-indigo-100 text-indigo-800',
+                                    'Dikirim' => 'bg-purple-100 text-purple-800',
+                                    'Selesai' => 'bg-green-100 text-green-800',
+                                    'Dibatalkan' => 'bg-red-100 text-red-800',
+                                ][$pesanan->status_pesanan] ?? 'bg-gray-100 text-gray-800';
+                            @endphp
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium {{ $statusBadge }}">
+                                {{ $pesanan->status_pesanan }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                @else
-                <div class="w-32 h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-fish text-4xl text-gray-400"></i>
-                </div>
-                @endif
 
-                <div class="flex-grow space-y-3">
-                    <h4 class="text-xl font-bold text-gray-900">{{ $pesanan->produk->nama ?? 'Produk' }}</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div class="flex items-center">
-                            <i class="fas fa-fish text-orange-500 mr-2"></i>
-                            <span class="text-gray-600">Kuantitas:</span>
-                            <span class="font-semibold ml-1">{{ $pesanan->kuantitas }} ekor</span>
+                <!-- Product Details -->
+                <div class="p-6">
+                    @foreach($pesanan->detailPesanan as $detail)
+                        <div class="flex items-start space-x-4 {{ !$loop->last ? 'border-b border-gray-100 pb-4 mb-4' : '' }}">
+                            <!-- Product Image -->
+                            <div class="flex-shrink-0">
+                                @if($detail->produk && $detail->produk->gambar)
+                                    <img src="{{ asset($detail->produk->gambar) }}"
+                                         alt="{{ $detail->produk->nama_ikan }}"
+                                         class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                                @else
+                                    <div class="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-fish text-2xl text-gray-400"></i>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="flex-grow">
+                                <h5 class="font-semibold text-gray-900 mb-1">{{ $detail->produk->nama_ikan ?? 'Produk' }}</h5>
+                                <p class="text-sm text-gray-600 mb-2">{{ $detail->produk->deskripsi ?? '' }}</p>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4 text-sm">
+                                        <span class="flex items-center text-gray-600">
+                                            <i class="fas fa-fish text-orange-500 mr-1"></i>
+                                            {{ $detail->kuantitas }} ekor
+                                        </span>
+                                        <span class="flex items-center text-gray-600">
+                                            <i class="fas fa-tag text-orange-500 mr-1"></i>
+                                            Rp {{ number_format($detail->harga, 0, ',', '.') }}/ekor
+                                        </span>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-900">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-money-bill-wave text-orange-500 mr-2"></i>
-                            <span class="text-gray-600">Total:</span>
-                            <span class="font-bold text-orange-600 ml-1">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-info-circle text-orange-500 mr-2"></i>
-                            <span class="text-gray-600">Status:</span>
-                            <span class="status-indicator bg-blue-100 text-blue-800 ml-1">{{ $pesanan->status_pesanan }}</span>
+                    @endforeach
+
+                    <!-- Order Summary -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Subtotal ({{ $pesanan->detailPesanan->sum('kuantitas') }} produk)</span>
+                                <span class="font-medium">Rp {{ number_format($pesanan->detailPesanan->sum('subtotal'), 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Ongkos Kirim</span>
+                                <span class="font-medium">Rp {{ number_format($pesanan->ongkir_biaya ?? 0, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <span class="font-semibold text-gray-900">Total Pembayaran</span>
+                                <span class="font-bold text-lg text-orange-600">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -542,7 +595,7 @@
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="radio-option p-6 hover:shadow-lg transition-all duration-300">
-                            <input type="radio" name="jenis_refund" value="kerusakan" required class="sr-only">
+                            <input type="radio" name="jenis_keluhan" value="Barang Rusak" required class="sr-only">
                             <div class="text-center">
                                 <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
                                 <div class="font-bold text-gray-900 mb-2">Produk Rusak/Cacat</div>
@@ -551,34 +604,37 @@
                         </label>
 
                         <label class="radio-option p-6 hover:shadow-lg transition-all duration-300">
-                            <input type="radio" name="jenis_refund" value="tidak_sesuai" required class="sr-only">
+                            <input type="radio" name="jenis_keluhan" value="Barang Tidak Sesuai" required class="sr-only">
                             <div class="text-center">
                                 <i class="fas fa-times-circle text-3xl text-orange-500 mb-3"></i>
-                                <div class="font-bold text-gray-900 mb-2">Barang yang Diterima Salah</div>
+                                <div class="font-bold text-gray-900 mb-2">Barang Tidak Sesuai</div>
                                 <div class="text-sm text-gray-600">Ikan yang diterima tidak sesuai pesanan</div>
                             </div>
                         </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="jenis_refund" value="tidak_sesuai" required class="mr-3 accent-orange-500">
-                        <div>
-                            <div class="font-medium text-gray-900">Tidak Sesuai Deskripsi</div>
-                            <div class="text-sm text-gray-600">Ikan tidak sesuai dengan deskripsi produk</div>
-                        </div>
-                    </label>
+                        <label class="radio-option p-6 hover:shadow-lg transition-all duration-300">
+                            <input type="radio" name="jenis_keluhan" value="Barang Kurang" required class="sr-only">
+                            <div class="text-center">
+                                <i class="fas fa-minus-circle text-3xl text-yellow-500 mb-3"></i>
+                                <div class="font-bold text-gray-900 mb-2">Barang Kurang</div>
+                                <div class="text-sm text-gray-600">Jumlah ikan yang diterima kurang dari pesanan</div>
+                            </div>
+                        </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="jenis_refund" value="kematian_ikan" required class="mr-3 accent-orange-500">
-                        <div>
-                            <div class="font-medium text-gray-900">Ikan Mati saat Diterima</div>
-                            <div class="text-sm text-gray-600">Ikan sudah mati saat paket diterima</div>
-                        </div>
-                    </label>
+                        <label class="radio-option p-6 hover:shadow-lg transition-all duration-300">
+                            <input type="radio" name="jenis_keluhan" value="Kualitas Buruk" required class="sr-only">
+                            <div class="text-center">
+                                <i class="fas fa-thumbs-down text-3xl text-purple-500 mb-3"></i>
+                                <div class="font-bold text-gray-900 mb-2">Kualitas Buruk</div>
+                                <div class="text-sm text-gray-600">Kualitas ikan tidak sesuai ekspektasi</div>
+                            </div>
+                        </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm md:col-span-2">
-                        <input type="radio" name="jenis_refund" value="lainnya" required class="mr-3 accent-orange-500">
-                        <div>
-                            <div class="font-medium text-gray-900">Lainnya</div>
+                        <label class="radio-option p-6 hover:shadow-lg transition-all duration-300 md:col-span-2">
+                            <input type="radio" name="jenis_keluhan" value="Lainnya" required class="sr-only">
+                            <div class="text-center">
+                                <i class="fas fa-ellipsis-h text-3xl text-gray-500 mb-3"></i>
+                                <div class="font-bold text-gray-900 mb-2">Lainnya</div>
                             <div class="text-sm text-gray-600">Alasan lain (akan dijelaskan di deskripsi)</div>
                         </div>
                     </label>
@@ -590,12 +646,12 @@
 
             <!-- Amount -->
             <div class="mb-6">
-                <label for="jumlah_diminta" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
+                <label for="jumlah_klaim" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-500 sm:text-sm">Rp</span>
                     </div>
-                    <input type="number" id="amount" name="jumlah_diminta" value="{{ $pesanan->total_harga }}"
+                    <input type="number" id="amount" name="jumlah_klaim" value="{{ old('jumlah_klaim', $pesanan->total_harga) }}"
                            min="1" max="{{ $pesanan->total_harga }}" required
                            class="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-orange-300">
                 </div>
@@ -603,7 +659,7 @@
                     <i class="fas fa-info-circle mr-1 text-orange-500"></i>
                     Maksimal: Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}
                 </div>
-                @error('jumlah_diminta')
+                @error('jumlah_klaim')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -623,30 +679,37 @@
                 @enderror
             </div>
 
-            <!-- Evidence Photos -->
+            <!-- Evidence Photos with Working Upload -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto</label>
-                <div class="upload-area" id="uploadArea">
-                    <input type="file" id="photoInput" name="bukti_pendukung[]" multiple accept="image/*" class="hidden">
-                    <div class="upload-content">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-camera text-orange-500 mr-2"></i>
+                    Bukti Foto (Opsional)
+                </label>
+
+                <!-- Upload Area -->
+                <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50"
+                     id="uploadArea" onclick="document.getElementById('photoInput').click()">
+                    <input type="file" id="photoInput" name="foto_bukti[]" multiple accept="image/jpeg,image/png,image/jpg" class="hidden">
+                    <div class="upload-content" id="uploadContent">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-lg font-medium text-gray-700 mb-2">Klik atau seret foto ke sini</p>
-                        <p class="text-sm text-gray-500">Maksimal 5 foto, ukuran masing-masing maksimal 5MB</p>
-                        <p class="text-sm text-gray-500">Format: JPG, PNG, JPEG</p>
+                        <p class="text-lg font-medium text-gray-700 mb-2">Klik untuk upload foto bukti</p>
+                        <p class="text-sm text-gray-500 mb-1">Atau seret dan letakkan foto di sini</p>
+                        <p class="text-xs text-gray-400">Maksimal 5 foto, masing-masing maksimal 2MB</p>
+                        <p class="text-xs text-gray-400">Format: JPG, PNG, JPEG</p>
                     </div>
                 </div>
 
                 <!-- Photo Previews -->
-                <div id="photoPreview" class="mt-4 flex flex-wrap gap-4"></div>
+                <div id="photoPreview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4" style="display: none;"></div>
 
                 <div class="mt-2 text-sm text-gray-500 flex items-center">
                     <i class="fas fa-info-circle mr-1 text-orange-500"></i>
                     Foto bukti akan membantu mempercepat proses review refund Anda
                 </div>
-                @error('bukti_pendukung')
+                @error('foto_bukti')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                @error('bukti_pendukung.*')
+                @error('foto_bukti.*')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -656,7 +719,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-3">Metode Refund Pilihan <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="metode_refund" value="bank_transfer" required class="mr-3 accent-orange-500">
+                        <input type="radio" name="metode_refund" value="bank_transfer" required class="mr-3 accent-orange-500" onchange="toggleRefundMethod()">
                         <div class="text-center w-full">
                             <i class="fas fa-university text-3xl text-blue-500 mb-2"></i>
                             <div class="font-medium text-gray-900">Transfer Bank</div>
@@ -664,14 +727,12 @@
                     </label>
 
                     <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="metode_refund" value="e_wallet" required class="mr-3 accent-orange-500">
+                        <input type="radio" name="metode_refund" value="e_wallet" required class="mr-3 accent-orange-500" onchange="toggleRefundMethod()">
                         <div class="text-center w-full">
                             <i class="fas fa-mobile-alt text-3xl text-green-500 mb-2"></i>
                             <div class="font-medium text-gray-900">E-Wallet</div>
                         </div>
                     </label>
-
-
                 </div>
                 <div class="mt-2 text-sm text-gray-500 flex items-center">
                     <i class="fas fa-info-circle mr-1 text-orange-500"></i>
@@ -682,19 +743,95 @@
                 @enderror
             </div>
 
-            <!-- Refund Details -->
-            <div class="mb-6">
-                <label for="detail_refund" class="block text-sm font-medium text-gray-700 mb-2">Detail Refund <span class="text-red-500">*</span></label>
-                <textarea id="detail_refund" name="detail_refund" rows="2" required
-                          placeholder="Masukkan detail metode refund (contoh: nomor rekening bank, nomor e-wallet, dll)..."
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-orange-300">{{ old('detail_refund') }}</textarea>
-                <div class="mt-1 text-sm text-gray-500 flex items-center">
-                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
-                    Untuk transfer bank, masukkan nama bank, nomor rekening, dan nama pemilik rekening.
+            <!-- Bank Account Information -->
+            <div class="form-group" id="bankForm" style="display: none;">
+                <label class="form-label">
+                    <i class="fas fa-university text-orange-500 mr-2"></i>
+                    Informasi Rekening Bank <span class="text-red-500">*</span>
+                </label>
+                <div class="space-y-4">
+                    <div>
+                        <label for="nama_bank" class="block text-sm font-medium text-gray-700 mb-1">Nama Bank</label>
+                        <input type="text" id="nama_bank" name="nama_bank" value="{{ old('nama_bank') }}"
+                               placeholder="Contoh: Bank BCA, Bank Mandiri, Bank BRI"
+                               class="form-input">
+                        @error('nama_bank')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="nomor_rekening" class="block text-sm font-medium text-gray-700 mb-1">Nomor Rekening</label>
+                        <input type="text" id="nomor_rekening" name="nomor_rekening" value="{{ old('nomor_rekening') }}"
+                               placeholder="Masukkan nomor rekening tanpa spasi"
+                               class="form-input">
+                        @error('nomor_rekening')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="nama_pemilik_rekening" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemilik Rekening</label>
+                        <input type="text" id="nama_pemilik_rekening" name="nama_pemilik_rekening" value="{{ old('nama_pemilik_rekening') }}"
+                               placeholder="Nama lengkap sesuai rekening bank"
+                               class="form-input">
+                        @error('nama_pemilik_rekening')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-                @error('detail_refund')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <div class="mt-2 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
+                    Pastikan informasi rekening benar untuk proses refund yang lancar.
+                </div>
+            </div>
+
+            <!-- E-Wallet Information -->
+            <div class="form-group" id="ewalletForm" style="display: none;">
+                <label class="form-label">
+                    <i class="fas fa-mobile-alt text-orange-500 mr-2"></i>
+                    Informasi E-Wallet <span class="text-red-500">*</span>
+                </label>
+                <div class="space-y-4">
+                    <div>
+                        <label for="nama_ewallet" class="block text-sm font-medium text-gray-700 mb-1">Nama E-Wallet</label>
+                        <select id="nama_ewallet" name="nama_ewallet" class="form-input">
+                            <option value="">Pilih E-Wallet</option>
+                            <option value="GoPay">GoPay</option>
+                            <option value="OVO">OVO</option>
+                            <option value="DANA">DANA</option>
+                            <option value="ShopeePay">ShopeePay</option>
+                            <option value="LinkAja">LinkAja</option>
+                        </select>
+                        @error('nama_ewallet')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="nomor_ewallet" class="block text-sm font-medium text-gray-700 mb-1">Nomor E-Wallet</label>
+                        <input type="text" id="nomor_ewallet" name="nomor_ewallet" value="{{ old('nomor_ewallet') }}"
+                               placeholder="Masukkan nomor telepon atau ID e-wallet"
+                               class="form-input">
+                        @error('nomor_ewallet')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="nama_pemilik_ewallet" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemilik E-Wallet</label>
+                        <input type="text" id="nama_pemilik_ewallet" name="nama_pemilik_ewallet" value="{{ old('nama_pemilik_ewallet') }}"
+                               placeholder="Nama lengkap sesuai akun e-wallet"
+                               class="form-input">
+                        @error('nama_pemilik_ewallet')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-1 text-orange-500"></i>
+                    Pastikan informasi e-wallet benar untuk proses refund yang lancar.
+                </div>
             </div>
 
             <!-- Terms Agreement -->
@@ -729,7 +866,6 @@
         </form>
     </div>
 </div>
-@endsection
 
 @push('scripts')
 <!-- SweetAlert2 JS -->
@@ -812,14 +948,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const previewDiv = document.createElement('div');
-            previewDiv.className = 'preview-image';
+            previewDiv.className = 'preview-image relative inline-block m-2';
             previewDiv.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <div class="remove-btn" onclick="removePhoto(${index})">
+                <img src="${e.target.result}" alt="Preview" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-300">
+                <div class="remove-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-red-600 text-xs" onclick="removePhoto(${index})">
                     <i class="fas fa-times"></i>
                 </div>
             `;
             photoPreview.appendChild(previewDiv);
+            photoPreview.style.display = 'grid';
         };
         reader.readAsDataURL(file);
     }
@@ -838,9 +975,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function refreshPreviews() {
         photoPreview.innerHTML = '';
-        selectedFiles.forEach((file, index) => {
-            displayPreview(file, index);
-        });
+        if (selectedFiles.length === 0) {
+            photoPreview.style.display = 'none';
+        } else {
+            selectedFiles.forEach((file, index) => {
+                displayPreview(file, index);
+            });
+            photoPreview.style.display = 'grid';
+        }
     }
 
     // Initialize modal
@@ -897,7 +1039,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         // Validate form
-        const reason = document.querySelector('input[name="jenis_refund"]:checked');
+        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
         if (!reason) {
             Swal.fire({
                 title: 'Error',
@@ -930,17 +1072,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const detailRefund = document.getElementById('detail_refund').value;
-        if (!detailRefund || detailRefund.length < 5) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Detail refund harus diisi dengan lengkap',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return;
-        }
-
         const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
         if (!refundMethod) {
             Swal.fire({
@@ -950,6 +1081,77 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButtonColor: '#f97316'
             });
             return;
+        }
+
+        // Validate refund method specific information
+        if (refundMethod.value === 'bank_transfer') {
+            const namaBank = document.getElementById('nama_bank').value;
+            const nomorRekening = document.getElementById('nomor_rekening').value;
+            const namaPemilik = document.getElementById('nama_pemilik_rekening').value;
+
+            if (!namaBank || namaBank.length < 3) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nama bank harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
+
+            if (!nomorRekening || nomorRekening.length < 5) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nomor rekening harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
+
+            if (!namaPemilik || namaPemilik.length < 3) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nama pemilik rekening harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
+        } else if (refundMethod.value === 'e_wallet') {
+            const namaEwallet = document.getElementById('nama_ewallet').value;
+            const nomorEwallet = document.getElementById('nomor_ewallet').value;
+            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet').value;
+
+            if (!namaEwallet) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Silakan pilih jenis e-wallet',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
+
+            if (!nomorEwallet || nomorEwallet.length < 5) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nomor e-wallet harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
+
+            if (!namaPemilikEwallet || namaPemilikEwallet.length < 3) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nama pemilik e-wallet harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
+            }
         }
 
         const agreeTerms = document.querySelector('input[name="agree_terms"]:checked');
@@ -963,17 +1165,109 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show confirmation
+        // Show comprehensive confirmation dialog
+        let paymentDetails = '';
+        if (refundMethod.value === 'bank_transfer') {
+            const bankName = document.getElementById('nama_bank').value;
+            const accountNumber = document.getElementById('nomor_rekening').value;
+            const accountHolder = document.getElementById('nama_pemilik_rekening').value;
+            paymentDetails = `
+                <div class="text-left bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                        <i class="fas fa-university mr-2"></i>Transfer Bank
+                    </h4>
+                    <div class="space-y-1 text-sm text-blue-700">
+                        <p><span class="font-medium">Bank:</span> ${bankName}</p>
+                        <p><span class="font-medium">Rekening:</span> ${accountNumber}</p>
+                        <p><span class="font-medium">Atas Nama:</span> ${accountHolder}</p>
+                    </div>
+                </div>
+            `;
+        } else if (refundMethod.value === 'e_wallet') {
+            const walletName = document.getElementById('nama_ewallet').value;
+            const walletNumber = document.getElementById('nomor_ewallet').value;
+            const walletHolder = document.getElementById('nama_pemilik_ewallet').value;
+            paymentDetails = `
+                <div class="text-left bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                        <i class="fas fa-mobile-alt mr-2"></i>E-Wallet
+                    </h4>
+                    <div class="space-y-1 text-sm text-green-700">
+                        <p><span class="font-medium">Platform:</span> ${walletName}</p>
+                        <p><span class="font-medium">Nomor:</span> ${walletNumber}</p>
+                        <p><span class="font-medium">Atas Nama:</span> ${walletHolder}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const photoCount = selectedFiles.length;
+        const reasonText = document.querySelector('input[name="jenis_keluhan"]:checked').value;
+        const descriptionText = document.getElementById('description').value;
+        const amountValue = document.getElementById('amount').value;
+
         const result = await Swal.fire({
             title: 'Konfirmasi Pengajuan Refund',
-            text: 'Apakah Anda yakin ingin mengajukan refund untuk pesanan ini? Pastikan semua informasi yang Anda berikan sudah benar.',
+            html: `
+                <div class="text-left space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-orange-800 mb-3 flex items-center">
+                            <i class="fas fa-file-alt mr-2"></i>Detail Pengajuan
+                        </h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between py-1 border-b border-orange-100">
+                                <span class="text-gray-600">Pesanan:</span>
+                                <span class="font-medium">#{{ $pesanan->nomor_pesanan }}</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-orange-100">
+                                <span class="text-gray-600">Alasan:</span>
+                                <span class="font-medium">${reasonText}</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-orange-100">
+                                <span class="text-gray-600">Jumlah Refund:</span>
+                                <span class="font-medium text-orange-600">Rp ${parseInt(amountValue).toLocaleString('id-ID')}</span>
+                            </div>
+                            <div class="flex justify-between py-1">
+                                <span class="text-gray-600">Foto Bukti:</span>
+                                <span class="font-medium">${photoCount} foto</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${paymentDetails}
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-comment-alt mr-2"></i>Deskripsi Masalah
+                        </h4>
+                        <p class="text-sm text-gray-700 italic bg-white p-2 rounded border">"${descriptionText}"</p>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-0.5 mr-2"></i>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800">Perhatian</p>
+                                <p class="text-xs text-yellow-700 mt-1">
+                                    Pastikan semua informasi sudah benar. Pengajuan yang sudah dikirim tidak dapat diubah dan akan diproses dalam 1-3 hari kerja.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#f97316',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'OKE',
-            cancelButtonText: 'BATAL',
-            reverseButtons: true
+            confirmButtonText: '<i class="fas fa-paper-plane mr-2"></i>Ya, Ajukan Refund',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Batalkan',
+            width: '650px',
+            customClass: {
+                popup: 'rounded-xl shadow-2xl',
+                title: 'text-lg font-bold text-gray-800',
+                content: 'text-left'
+            }
         });
 
         if (!result.isConfirmed) {
@@ -1111,6 +1405,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Dynamic form method toggle function
+    window.toggleRefundMethod = function() {
+        const bankForm = document.getElementById('bankForm');
+        const ewalletForm = document.getElementById('ewalletForm');
+        const selectedMethod = document.querySelector('input[name="metode_refund"]:checked');
+
+        if (!selectedMethod) {
+            bankForm.style.display = 'none';
+            ewalletForm.style.display = 'none';
+            return;
+        }
+
+        // Add smooth transition effect
+        bankForm.style.transition = 'all 0.3s ease';
+        ewalletForm.style.transition = 'all 0.3s ease';
+
+        if (selectedMethod.value === 'bank_transfer') {
+            bankForm.style.display = 'block';
+            ewalletForm.style.display = 'none';
+
+            // Set required attributes for bank fields
+            document.getElementById('nama_bank').required = true;
+            document.getElementById('nomor_rekening').required = true;
+            document.getElementById('nama_pemilik_rekening').required = true;
+
+            // Remove required attributes from e-wallet fields
+            const namaEwallet = document.getElementById('nama_ewallet');
+            const nomorEwallet = document.getElementById('nomor_ewallet');
+            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
+            if (namaEwallet) namaEwallet.required = false;
+            if (nomorEwallet) nomorEwallet.required = false;
+            if (namaPemilikEwallet) namaPemilikEwallet.required = false;
+
+            // Smooth show animation
+            setTimeout(() => {
+                bankForm.style.opacity = '1';
+                bankForm.style.transform = 'translateY(0)';
+            }, 100);
+
+        } else if (selectedMethod.value === 'e_wallet') {
+            bankForm.style.display = 'none';
+            ewalletForm.style.display = 'block';
+
+            // Set required attributes for e-wallet fields
+            const namaEwallet = document.getElementById('nama_ewallet');
+            const nomorEwallet = document.getElementById('nomor_ewallet');
+            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
+            if (namaEwallet) namaEwallet.required = true;
+            if (nomorEwallet) nomorEwallet.required = true;
+            if (namaPemilikEwallet) namaPemilikEwallet.required = true;
+
+            // Remove required attributes from bank fields
+            document.getElementById('nama_bank').required = false;
+            document.getElementById('nomor_rekening').required = false;
+            document.getElementById('nama_pemilik_rekening').required = false;
+
+            // Smooth show animation
+            setTimeout(() => {
+                ewalletForm.style.opacity = '1';
+                ewalletForm.style.transform = 'translateY(0)';
+            }, 100);
+        }
+    };
+
     // Update amount display
     document.getElementById('amount').addEventListener('input', function() {
         const amount = parseInt(this.value) || 0;
@@ -1128,3 +1486,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+@endsection

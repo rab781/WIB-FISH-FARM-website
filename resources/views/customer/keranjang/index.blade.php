@@ -58,12 +58,6 @@
                         <div class="md:ml-4">
                             <h3 class="text-base font-medium text-gray-900">{{ $item->produk->nama_ikan }}</h3>
                             <p class="text-sm text-gray-500">{{ $item->produk->jenis_ikan }}</p>
-                            @if($item->ukuran)
-                                <p class="text-sm text-gray-500">Ukuran: {{ $item->ukuran->ukuran }}</p>
-                                <p class="text-xs text-gray-400">Stok: {{ $item->ukuran->stok }}</p>
-                            @else
-                                <p class="text-xs text-gray-400">Stok: {{ $item->produk->stok }}</p>
-                            @endif
                         </div>
                     </div>
                 </div>

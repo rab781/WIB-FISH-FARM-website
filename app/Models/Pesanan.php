@@ -14,10 +14,6 @@ class Pesanan extends Model
         'created_at',
         'updated_at',
         'batas_waktu',
-        'karantina_mulai',
-        'karantina_selesai',
-        'tanggal_refund_request',
-        'tanggal_refund_processed',
         'tanggal_pengiriman',
         'tanggal_diterima'
     ];
@@ -29,17 +25,11 @@ class Pesanan extends Model
      */
     protected $casts = [
         'batas_waktu' => 'datetime',
-        'karantina_mulai' => 'datetime',
-        'karantina_selesai' => 'datetime',
-        'tanggal_refund_request' => 'datetime',
-        'tanggal_refund_processed' => 'datetime',
         'tanggal_pengiriman' => 'datetime',
         'tanggal_diterima' => 'datetime',
         'tracking_history' => 'array',
-        'is_karantina_active' => 'boolean',
         'total_harga' => 'decimal:2',
         'ongkir_biaya' => 'decimal:2',
-        'jumlah_refund' => 'decimal:2',
     ];
 
     // Nama tabel yang digunakan
@@ -63,14 +53,6 @@ class Pesanan extends Model
         'ongkir_biaya',
         'berat_total',
         'jumlah_box',
-        // Refund fields
-        'status_refund',
-        'alasan_refund',
-        'bukti_kerusakan',
-        'catatan_admin_refund',
-        'tanggal_refund_request',
-        'tanggal_refund_processed',
-        'jumlah_refund',
         // Tracking fields
         'no_resi',
         'tanggal_pengiriman',
@@ -115,10 +97,6 @@ class Pesanan extends Model
 
     // Enhanced relationships for new features
     // Use pengembalian for all refund/return functionality
-    public function refundRequests()
-    {
-        return $this->hasMany(Pengembalian::class, 'id_pesanan', 'id_pesanan');
-    }
 
     public function pengembalian()
     {
@@ -131,55 +109,6 @@ class Pesanan extends Model
                    ->orderBy('created_at');
     }
 
-    public function quarantineLog()
-    {
-        return $this->hasOne(QuarantineLog::class, 'id_pesanan', 'id_pesanan');
-    }
-
-    public function activeQuarantineLog()
-    {
-        return $this->hasOne(QuarantineLog::class, 'id_pesanan', 'id_pesanan')
-                   ->where('status', 'active');
-    }
-
-    // Relationship untuk mendapatkan semua reviews/ulasan untuk pesanan ini
-    public function reviews()
-    {
-        return $this->hasManyThrough(
-            Ulasan::class,
-            DetailPesanan::class,
-            'id_pesanan', // Foreign key di detail_pesanan
-            'id_Produk', // Foreign key di ulasan
-            'id_pesanan', // Local key di pesanan
-            'id_Produk' // Local key di detail_pesanan
-        )->where('ulasan.user_id', $this->user_id);
-    }
-
-    // Relationship alternatif untuk ulasan yang sudah verified purchase
-    public function verifiedReviews()
-    {
-        return $this->hasManyThrough(
-            Ulasan::class,
-            DetailPesanan::class,
-            'id_pesanan',
-            'id_Produk',
-            'id_pesanan',
-            'id_Produk'
-        )->where('ulasan.user_id', $this->user_id)
-         ->where('ulasan.is_verified_purchase', true);
-    }
-
-    // Method untuk mendapatkan semua review untuk pesanan ini (backward compatibility)
-    public function getOrderReviews()
-    {
-        $productIds = $this->detailPesanan->pluck('id_Produk');
-        return \App\Models\Ulasan::where('user_id', $this->user_id)
-            ->whereIn('id_Produk', $productIds)
-            ->where('is_verified_purchase', true)
-            ->with(['user', 'produk'])
-            ->get();
-    }
-
     // Status management methods
     public function getStatusColorAttribute(): string
     {
@@ -187,12 +116,10 @@ class Pesanan extends Model
             'Menunggu Pembayaran' => 'warning',
             'Pembayaran Dikonfirmasi' => 'info',
             'Diproses' => 'orange',
-            'Karantina' => 'purple',
             'Pengembalian' => 'orange',
             'Dikirim' => 'primary',
             'Selesai' => 'success',
             'Dibatalkan' => 'danger',
-            'Refund Requested', 'Refund Approved', 'Refund Rejected', 'Refund Processed' => 'secondary',
             default => 'dark'
         };
     }
@@ -202,92 +129,6 @@ class Pesanan extends Model
         $color = $this->status_color;
         return "<span class='badge bg-{$color}'>{$this->status_pesanan}</span>";
     }
-
-    // Quarantine methods
-    public function startQuarantine(): void
-    {
-        $startDate = now();
-        $endDate = $startDate->copy()->addDays(7);
-
-        $this->update([
-            'status_pesanan' => 'Karantina',
-            'karantina_mulai' => $startDate,
-            'karantina_selesai' => $endDate,
-            'is_karantina_active' => true
-        ]);
-
-        // Create quarantine log
-        $this->quarantineLog()->create([
-            'started_at' => $startDate,
-            'scheduled_end_at' => $endDate,
-            'status' => 'active',
-            'notes' => 'Karantina 7 hari dimulai untuk memastikan kesehatan ikan'
-        ]);
-
-        // Add timeline entry
-        $this->addTimelineEntry('Karantina', 'Karantina Dimulai',
-            'Ikan memasuki periode karantina 7 hari untuk memastikan kesehatan');
-    }
-
-    public function completeQuarantine(): void
-    {
-        $this->update([
-            'status_pesanan' => 'Dikirim',
-            'is_karantina_active' => false
-        ]);
-
-        $this->quarantineLog()->update([
-            'status' => 'completed',
-            'completed_at' => now()
-        ]);
-
-        $this->addTimelineEntry('Dikirim', 'Karantina Selesai',
-            'Periode karantina telah selesai, pesanan siap dikirim');
-    }
-
-    // Timeline management
-    public function addTimelineEntry(string $status, string $title, string $description, array $metadata = [], bool $isCustomerVisible = true): void
-    {
-        $this->timeline()->create([
-            'status' => $status,
-            'title' => $title,
-            'description' => $description,
-            'metadata' => $metadata,
-            'is_customer_visible' => $isCustomerVisible,
-            'created_by' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::id() : $this->user_id
-        ]);
-    }
-
-    // Refund methods
-    public function canRequestRefund(): bool
-    {
-        return in_array($this->status_pesanan, ['Dikirim', 'Selesai']) &&
-               $this->status_refund === 'none' &&
-               !$this->pengembalian()->where('status_pengembalian', 'Menunggu Review')->exists();
-    }
-
-    // Use pengembalian model for all refund/return functionality
-    /* public function requestRefund(array $data): RefundRequest
-    {
-        $refund = $this->refundRequests()->create($data);
-
-        $this->update([
-            'status_refund' => 'requested',
-            'tanggal_refund_request' => now()
-        ]);
-
-        // Create timeline entry with user ID explicitly provided
-        $this->timeline()->create([
-            'status' => 'Refund Requested',
-            'title' => 'Refund Diminta',
-            'description' => 'Customer mengajukan permintaan refund: ' . $data['deskripsi_masalah'],
-            'metadata' => [],
-            'is_customer_visible' => true,
-            'created_by' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::id() : $this->user_id
-        ]);
-
-        return $refund;
-    } */
 
     // Tracking and shipping methods
     public function updateTracking(array $trackingData): void
@@ -355,7 +196,7 @@ class Pesanan extends Model
         // 2. Belum ada pengajuan pengembalian sebelumnya
         // 3. Masih dalam waktu yang ditentukan (24 jam setelah diterima)
         return $this->status_pesanan === 'Selesai' &&
-               !$this->refundRequests()->exists() &&
+               !$this->pengembalian()->exists() &&
                $this->tanggal_diterima &&
                $this->tanggal_diterima->copy()->addHours(24)->isFuture();
     }
@@ -367,6 +208,12 @@ class Pesanan extends Model
         return \App\Models\Ulasan::where('user_id', $this->user_id)
             ->whereIn('id_Produk', $productIds)
             ->get();
+    }
+
+    public function getOrderReviews()
+    {
+        // Alias method for getUlasanAttribute() for consistency with view expectations
+        return $this->ulasan;
     }
 
     public function getReviewableProductsAttribute()

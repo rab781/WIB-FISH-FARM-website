@@ -3,69 +3,204 @@
 @section('title', 'Manajemen Pengembalian')
 
 @push('styles')
-{{-- Modern CSS Design System --}}
 <style>
     /* CSS Custom Properties */
     :root {
-        --primary-color: #ff8c00;
-        --primary-dark: #e67e00;
-        --primary-light: #ffb74d;
-        --secondary-color: #1a1a1a;
-        --accent-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
-        --light-color: #f8f9fa;
-        --dark-color: #343a40;
-        --gradient-primary: linear-gradient(135deg, #ff8c00 0%, #e67e00 100%);
+        --primary-color: #f97316; /* Tailwind orange-500 */
+        --primary-dark: #ea580c; /* Tailwind orange-600 */
+        --primary-light: #fed7aa; /* Tailwind orange-200 */
+        --secondary-color: #4b5563; /* Tailwind gray-700 */
+        --accent-color: #10b981; /* Tailwind green-500 */
+        --warning-color: #f59e0b; /* Tailwind yellow-500 */
+        --danger-color: #ef4444; /* Tailwind red-500 */
+        --info-color: #3b82f6; /* Tailwind blue-500 */
+        --light-color: #f8fafc; /* Tailwind gray-50 */
+        --dark-color: #1f2937; /* Tailwind gray-900 */
+        --border-color: #e5e7eb; /* Tailwind gray-200 */
+
+        --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         --gradient-secondary: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        --gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        --gradient-warning: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-        --gradient-danger: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        --gradient-info: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        --gradient-success: linear-gradient(135deg, var(--accent-color) 0%, #059669 100%);
+        --gradient-warning: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+        --gradient-danger: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+        --gradient-info: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%);
+        --gradient-dark: linear-gradient(135deg, var(--dark-color) 0%, #111827 100%);
+
         --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --box-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+        --border-radius-sm: 0.5rem;
         --border-radius: 0.75rem;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --border-radius-lg: 1.5rem;
+
+        --transition-fast: all 0.2s ease-out;
+        --transition-normal: all 0.3s ease-in-out;
+        --transition-slow: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* Header with Animated Background */
-    .page-header {
+    /* Base Styles */
+    body {
+        background-color: var(--light-color);
+        font-family: 'Inter', sans-serif;
+        color: var(--secondary-color);
+    }
+
+    .container-fluid {
+        padding: 1.5rem;
+    }
+
+    /* Page Header */
+    .animated-header {
         background: var(--gradient-primary);
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
+        color: white;
+        padding: 2.5rem;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 2.5rem;
         position: relative;
         overflow: hidden;
-        animation: slideInDown 0.6s ease-out;
+        animation: slideInDown var(--transition-slow) forwards;
+        box-shadow: var(--shadow-heavy);
+        backdrop-filter: blur(5px);
     }
 
-    .page-header::before {
+    .animated-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .animated-header::after {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-image:
-            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
-        animation: backgroundShift 8s ease-in-out infinite;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        pointer-events: none;
+        opacity: 0.6;
     }
 
-    /* Modern Cards */
-    .card-modern {
+    /* Animations for Header */
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+    }
+
+    /* Stats Grid - Compact Design */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1rem;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        animation: fadeInUp var(--transition-slow) forwards;
+        animation-fill-mode: both;
+        cursor: pointer;
+        text-align: center;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-heavy);
+        border-color: rgba(249, 115, 22, 0.3);
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        margin-bottom: 0.75rem;
+        background: var(--gradient-primary);
+        transition: var(--transition-normal);
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+        display: block;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--secondary-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    /* Specific stat-icon colors */
+    .stat-card.menunggu .stat-icon { background: var(--gradient-warning); }
+    .stat-card.disetujui .stat-icon { background: var(--gradient-success); }
+    .stat-card.ditolak .stat-icon { background: var(--gradient-danger); }
+    .stat-card.total .stat-icon { background: var(--gradient-info); }
+
+    /* Filter Form - Simple & Clean */
+    .filter-form-card {
         background: white;
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
-        overflow: hidden;
-        transition: var(--transition);
-        animation: fadeInUp 0.6s ease-out;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+        animation: slideInLeft var(--transition-normal) forwards;
+        animation-delay: 0.5s;
         position: relative;
+        overflow: hidden;
     }
 
-    .card-modern::before {
+    .filter-form-card::before {
         content: '';
         position: absolute;
         top: 0;
@@ -75,1265 +210,1218 @@
         background: var(--gradient-primary);
     }
 
-    .card-modern:hover {
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .form-group-filter {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label-filter {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0.75rem;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .form-control-filter {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: var(--border-radius-sm);
+        background: #f8fafc;
+        font-size: 0.95rem;
+        color: var(--dark-color);
+        transition: var(--transition-normal);
+        font-weight: 500;
+    }
+
+    .form-control-filter:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    .btn-filter {
+        padding: 1rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: var(--transition-normal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        min-height: 48px;
+    }
+
+    .btn-filter-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+    }
+
+    .btn-filter-primary:hover {
         transform: translateY(-2px);
-        box-shadow: var(--box-shadow-lg);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        color: white;
+        text-decoration: none;
     }
 
-    .card-header-modern {
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        position: relative;
+    .btn-filter-secondary {
+        background: #f1f5f9;
+        color: var(--secondary-color);
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    /* Status Cards */
-    .stat-card {
+    .btn-filter-secondary:hover {
+        transform: translateY(-1px);
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        color: var(--secondary-color);
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Main Table */
+    .main-table-card {
         background: white;
         border-radius: var(--border-radius);
-        padding: 1.5rem;
         box-shadow: var(--box-shadow);
-        transition: var(--transition);
-        position: relative;
         overflow: hidden;
-        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid var(--border-color);
+        animation: slideInRight var(--transition-normal) forwards;
+        animation-delay: 0.6s;
+        margin-bottom: 2rem;
     }
 
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--box-shadow-lg);
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(30px); }
+        to { opacity: 1; transform: translateX(0); }
     }
 
-    .stat-card.border-blue-500::before {
+    .table-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-header h5 {
+        color: var(--dark-color);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .table-header h5::before {
+        content: '\f0c5';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .table th {
+        padding: 0.75rem 0.5rem;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--secondary-color);
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-bottom: 2px solid var(--border-color);
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .table th::after {
         content: '';
         position: absolute;
-        top: 0;
+        bottom: 0;
         left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient-info);
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        opacity: 0.3;
     }
 
-    .stat-card.border-yellow-500::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient-warning);
+    .table td {
+        padding: 0.75rem 0.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.8rem;
+        color: var(--dark-color);
+        transition: var(--transition-fast);
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .stat-card.border-indigo-500::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    .table tbody tr {
+        transition: var(--transition-fast);
+        border-left: 3px solid transparent;
     }
 
-    .stat-card.border-green-500::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient-success);
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.03) 0%, rgba(249, 115, 22, 0.08) 100%);
+        border-left-color: var(--primary-color);
+        transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .stat-card.border-gray-500::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient-secondary);
+    /* User Avatar - Compact */
+    .user-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        border: 2px solid white;
     }
 
-    .stat-card.border-red-500::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient-danger);
+    /* Compact Column Styles */
+    .id-column { width: 60px; }
+    .order-column { width: 100px; }
+    .customer-column { width: 140px; }
+    .amount-column { width: 90px; }
+    .complaint-column { width: 180px; }
+    .status-column { width: 100px; }
+    .date-column { width: 90px; }
+    .action-column { width: 120px; }
+
+    .order-link {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.85rem;
     }
 
-    /* Status Badges with Gradients */
-    .status-badge {
+    .order-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .refund-amount {
+        color: var(--danger-color);
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .complaint-info span {
+        font-size: 0.8rem;
+        line-height: 1.3;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .photo-badge {
+        background: var(--info-color);
+        color: white !important; /* Force white color */
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    /* Status Badges within Table */
+    .table-status-badge {
         padding: 0.5rem 1rem;
         border-radius: 1.5rem;
         font-size: 0.75rem;
         font-weight: 600;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        animation: shimmer 2s infinite;
-        box-shadow: var(--box-shadow);
-        transition: var(--transition);
-        display: inline-block;
-        margin: 0.125rem;
-    }
-
-    .status-pending {
-        background: var(--gradient-warning);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-approved {
-        background: var(--gradient-success);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-rejected {
-        background: var(--gradient-danger);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-processing {
-        background: var(--gradient-info);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-completed {
-        background: var(--gradient-secondary);
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Table Enhancements */
-    .table-header-custom {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: var(--secondary-color);
         text-transform: uppercase;
-        font-size: 0.75rem;
-        font-weight: 600;
         letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .table-row-hover:hover {
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        transition: var(--transition);
+    .table-status-badge.menunggu, .table-status-badge.menunggu-review {
+        background: #fef3c7;
+        color: #a16207;
+    }
+    .table-status-badge.disetujui {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .table-status-badge.ditolak {
+        background: #fee2e2;
+        color: #b91c1c;
     }
 
-    /* Form Inputs */
-    .filter-input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #d1d5db;
-        border-radius: var(--border-radius);
-        transition: var(--transition);
-        font-size: 0.875rem;
-    }
-
-    .filter-input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
-    }
-
-    /* Buttons with Gradients */
-    .btn-primary-custom {
-        background: var(--gradient-primary);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--border-radius);
+    /* Action Buttons within Table - Compact */
+    .btn-action-table {
+        padding: 0.4rem 0.6rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.7rem;
         font-weight: 600;
-        transition: var(--transition);
-        box-shadow: var(--box-shadow);
+        transition: var(--transition-normal);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
         border: none;
         cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        position: relative;
-        overflow: hidden;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        min-width: 28px;
+        height: 28px;
     }
 
-    .btn-primary-custom::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
+    .btn-action-table.view {
+        background: var(--info-color);
+        color: white;
     }
-
-    .btn-primary-custom:hover {
+    .btn-action-table.view:hover {
+        background: #2563eb;
         transform: translateY(-2px);
-        box-shadow: var(--box-shadow-lg);
-    }
-
-    .btn-primary-custom:hover::before {
-        left: 100%;
-    }
-
-    .btn-secondary-custom {
-        background: var(--gradient-secondary);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--border-radius);
-        font-weight: 600;
-        transition: var(--transition);
-        box-shadow: var(--box-shadow);
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-secondary-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--box-shadow-lg);
-    }
-
-    /* Action Buttons */
-    .btn-action-outline {
-        padding: 0.5rem;
-        border-radius: var(--border-radius);
-        border: 1px solid;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: var(--transition);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 2.5rem;
-        height: 2.5rem;
-    }
-
-    .btn-action-outline-primary {
-        border-color: #3b82f6;
-        color: #3b82f6;
-        background: rgba(59, 130, 246, 0.05);
-    }
-
-    .btn-action-outline-primary:hover {
-        background: rgba(59, 130, 246, 0.1);
-        transform: scale(1.05);
-    }
-
-    .btn-action-outline-success {
-        border-color: #10b981;
-        color: #10b981;
-        background: rgba(16, 185, 129, 0.05);
-    }
-
-    .btn-action-outline-success:hover {
-        background: rgba(16, 185, 129, 0.1);
-        transform: scale(1.05);
-    }
-
-    .btn-action-outline-danger {
-        border-color: #ef4444;
-        color: #ef4444;
-        background: rgba(239, 68, 68, 0.05);
-    }
-
-    .btn-action-outline-danger:hover {
-        background: rgba(239, 68, 68, 0.1);
-        transform: scale(1.05);
-    }
-
-    /* Avatar */
-    .user-avatar {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-right: 0.5rem;
-        box-shadow: var(--box-shadow);
-    }
-
-    /* Modal Enhancements */
-    .modal-backdrop {
-        backdrop-filter: blur(8px);
-        transition: var(--transition);
-    }
-
-    .modal-content {
-        animation: modalSlideIn 0.3s ease-out;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes slideInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes shimmer {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.8; }
-    }
-
-    @keyframes backgroundShift {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.8; }
-    }
-
-    @keyframes modalSlideIn {
-        from {
-            opacity: 0;
-            transform: scale(0.9) translateY(-50px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-
-    /* Toast notifications */
-    .toast-notification {
-        min-width: 250px;
-        max-width: 350px;
-        transition: var(--transition);
-        box-shadow: var(--box-shadow-lg);
-        border-radius: var(--border-radius);
-    }
-
-    /* Grid Layouts */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    /* Section Dividers */
-    .section-divider {
-        height: 2px;
-        background: var(--gradient-primary);
-        border-radius: 1px;
-        margin: 2rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .section-divider::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-        animation: shimmerLine 2s infinite;
-    }
-
-    @keyframes shimmerLine {
-        0% { left: -100%; }
-        100% { left: 100%; }
-    }
-</style>
-@endpush
-
-    /* Action Buttons */
-    .btn-action-outline {
-        padding: 0.5rem;
-        border-radius: var(--border-radius);
-        border: 1px solid #d1d5db;
-        background: white;
-        color: #6b7280;
-        transition: var(--transition);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 2rem;
-        min-height: 2rem;
-        font-size: 0.875rem;
-    }
-
-    .btn-action-outline:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--box-shadow);
-    }
-
-    .btn-action-outline-primary {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-    }
-
-    .btn-action-outline-primary:hover {
-        background: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         color: white;
     }
 
-    .btn-action-outline-success {
-        border-color: var(--accent-color);
-        color: var(--accent-color);
-    }
-
-    .btn-action-outline-success:hover {
+    .btn-action-table.approve {
         background: var(--accent-color);
         color: white;
     }
-
-    .btn-action-outline-danger {
-        border-color: var(--danger-color);
-        color: var(--danger-color);
+    .btn-action-table.approve:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        color: white;
     }
 
-    .btn-action-outline-danger:hover {
+    .btn-action-table.reject {
         background: var(--danger-color);
         color: white;
     }
+    /* Table Content Styling */
+    .order-link {
+        color: var(--info-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-fast);
+    }
 
-    /* User Avatar */
-    .user-avatar {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        background: var(--gradient-primary);
-        color: white;
-        display: flex;
+    .order-link:hover {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .refund-amount {
+        color: var(--danger-color);
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    .complaint-info {
+        color: var(--secondary-color);
+        line-height: 1.4;
+    }
+
+    .photo-badge {
+        color: var(--info-color);
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.875rem;
-        margin-right: 0.75rem;
-        flex-shrink: 0;
+        gap: 0.25rem;
+    }
+
+    .photo-badge::before {
+        content: '\f03e';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
     }
 
     /* Pagination */
-    .pagination-modern {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1.5rem 0;
+    .pagination-container {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
     }
 
-    .pagination-modern .page-link {
-        padding: 0.5rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: var(--border-radius);
-        color: #374151;
-        text-decoration: none;
-        transition: var(--transition);
-        background: white;
-        min-width: 2.5rem;
+    .pagination-info {
+        font-size: 0.9rem;
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    /* Empty State */
+    .empty-state {
         text-align: center;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
-    .pagination-modern .page-link:hover {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-        transform: translateY(-1px);
+    .empty-state i {
+        color: #cbd5e1;
+        margin-bottom: 1.5rem;
+        display: block;
     }
 
-    .pagination-modern .page-link.active {
-        background: var(--gradient-primary);
-        color: white;
-        border-color: var(--primary-color);
+    .empty-state h5 {
+        color: var(--secondary-color);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
     }
 
-    .pagination-modern .page-link.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .pagination-modern .page-link.disabled:hover {
-        background: white;
-        color: #374151;
-        transform: none;
-    }
-
-    /* Modal Enhancements */
-    .modal-backdrop {
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    .modal-content-modern {
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow-lg);
-        overflow: hidden;
-        animation: modalSlideIn 0.4s ease-out;
-        max-width: 32rem;
-        width: 100%;
+    .empty-state p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        max-width: 400px;
         margin: 0 auto;
     }
 
-    .modal-header-modern {
-        padding: 1.5rem;
+    /* Enhanced Header Elements Styling */
+    .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
         position: relative;
+        padding: 0 1rem;
+        min-height: 120px;
     }
 
-    .modal-header-success {
-        background: var(--gradient-success);
-        color: white;
-    }
-
-    .modal-header-danger {
-        background: var(--gradient-danger);
-        color: white;
-    }
-
-    .modal-header-primary {
-        background: var(--gradient-primary);
-        color: white;
-    }
-
-    .modal-body-modern {
-        padding: 1.5rem;
-    }
-
-    .modal-footer-modern {
-        padding: 1.5rem;
-        background: #f8f9fa;
+    .header-icon-container {
+        position: relative;
         display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin-right: 2rem;
     }
 
-    .form-input-modern {
+    .header-icon-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        animation: iconFloat 3s ease-in-out infinite;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-main-icon {
+        font-size: 3rem;
+        color: white;
+        z-index: 2;
+        position: relative;
+        animation: iconPulse 2s ease-in-out infinite;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon-pulse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #d1d5db;
-        border-radius: var(--border-radius);
-        transition: var(--transition);
-        font-size: 0.875rem;
-        resize: vertical;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
-    .form-input-modern:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+    .header-text {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        max-width: 600px;
     }
 
-    .form-label-modern {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
+    .header-title {
+        font-size: 3rem;
+        font-weight: 900;
+        line-height: 1.1;
+        margin: 0 0 1rem 0;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        letter-spacing: -0.02em;
     }
 
-    .form-help-text {
+    .title-primary {
+        color: white;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+    }
+
+    .title-secondary {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1.6;
+        margin: 0 0 1.5rem 0;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-weight: 400;
+        max-width: 500px;
+    }
+
+    .header-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .feature-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 30px;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        backdrop-filter: blur(15px);
+        transition: all 0.3s ease;
+        animation: badgeFloat 4s ease-in-out infinite;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-badge:nth-child(even) {
+        animation-delay: 0.5s;
+    }
+
+    .feature-badge:nth-child(3n) {
+        animation-delay: 1s;
+    }
+
+    .feature-badge:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .header-actions {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        backdrop-filter: blur(15px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        min-width: 180px;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
+        border-color: rgba(16, 185, 129, 0.6);
+    }
+
+    .action-btn.primary:hover {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.8);
+    }
+
+    .action-btn.secondary {
+        background: rgba(107, 114, 128, 0.8);
+        border-color: rgba(107, 114, 128, 0.6);
+    }
+
+    .action-btn.secondary:hover {
+        background: rgba(107, 114, 128, 0.9);
+        border-color: rgba(107, 114, 128, 0.8);
+    }
+
+    .quick-stats-mini {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .mini-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: white;
+        backdrop-filter: blur(10px);
+        animation: miniStatPulse 3s ease-in-out infinite;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .mini-number {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: white;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .mini-label {
         font-size: 0.75rem;
-        color: #6b7280;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-top: 0.25rem;
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+    .header-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .floating-element {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.08);
+        font-size: 2rem;
+        animation: elementFloat 8s ease-in-out infinite;
+    }
+
+    .floating-element::before {
+        content: '\f53a'; /* Money bill wave icon */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    .element-1 {
+        top: 15%;
+        right: 12%;
+        animation-delay: 0s;
+        font-size: 2.5rem;
+    }
+
+    .element-1::before {
+        content: '\f53a'; /* Money bill wave */
+    }
+
+    .element-2 {
+        top: 65%;
+        right: 20%;
+        font-size: 1.8rem;
+        animation-delay: 2s;
+    }
+
+    .element-2::before {
+        content: '\f2b5'; /* Handshake */
+    }
+
+    .element-3 {
+        top: 35%;
+        left: 8%;
+        font-size: 2.2rem;
+        animation-delay: 4s;
+    }
+
+    .element-3::before {
+        content: '\f080'; /* Chart bar */
+    }
+
+    /* Header Animations - Simplified */
+    @keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+        }
+        50% {
+            transform: translateY(-5px) scale(1.05);
+        }
+    }
+
+    @keyframes iconPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.95; }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.8;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    @keyframes badgeFloat {
+        0%, 100% {
+            transform: translateY(0px);
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(-3px);
+            opacity: 0.95;
+        }
+    }
+
+    @keyframes miniStatPulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+    }
+
+    @keyframes elementFloat {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.05;
+        }
+        50% {
+            transform: translateY(-10px) scale(1.1);
+            opacity: 0.1;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .animated-header {
+            padding: 1.5rem;
+        }
+
+        .header-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            text-align: center;
+            min-height: auto;
+            padding: 0;
+        }
+
+        .header-text {
+            text-align: center;
+            max-width: 100%;
+            order: 1;
+        }
+
+        .header-title {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            max-width: 100%;
+        }
+
+        .header-badges {
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .feature-badge {
+            font-size: 0.8rem;
+            padding: 0.6rem 1rem;
+        }
+
+        .header-actions {
+            align-items: center;
+            width: 100%;
+            order: 2;
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .action-btn {
+            min-width: 150px;
+            font-size: 0.85rem;
+            padding: 0.8rem 1.2rem;
+        }
+
+        .quick-stats-mini {
+            flex-direction: row;
+            justify-content: center;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .mini-stat {
+            min-width: 100px;
+            padding: 0.6rem 0.8rem;
+        }
+
+        .mini-number {
+            font-size: 1rem;
+        }
+
+        .mini-label {
+            font-size: 0.7rem;
+        }
+
+        .floating-element {
+            font-size: 1.5rem;
+        }
+
+        .element-1 {
+            top: 10%;
+            right: 5%;
+            font-size: 1.8rem;
+        }
+
+        .element-2 {
+            top: 70%;
+            right: 10%;
+            font-size: 1.4rem;
+        }
+
+        .element-3 {
+            top: 40%;
+            left: 5%;
+            font-size: 1.6rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            min-height: 100px;
+        }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+        }
+
+        .filter-form-card {
+            padding: 1rem;
+        }
+        .form-group-filter {
+            margin-bottom: 0.75rem;
+        }
+        .btn-filter {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .table th, .table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+        }
+        .table-status-badge {
+            font-size: 0.65rem;
+            padding: 0.4rem 0.8rem;
+        }
+        .btn-action-table {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+        }
+        .user-avatar-placeholder {
+            width: 35px;
+            height: 35px;
+            font-size: 0.8rem;
+        }
+        .refund-amount {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header-title {
+            font-size: 1.8rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .feature-badge {
+            font-size: 0.75rem;
+            padding: 0.5rem 0.8rem;
+        }
+
+        .action-btn {
+            min-width: 120px;
+            font-size: 0.8rem;
+        }
+
+        .header-icon-wrapper {
+            width: 70px;
+            height: 70px;
+        }
+
+        .header-main-icon {
+            font-size: 2rem;
+        }
     }
 </style>
 @endpush
 
 @section('content')
-<div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
-    <div class="page-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; position: relative; z-index: 2;">
-            <div>
-                <h1 style="font-size: 2rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">Manajemen Pengembalian</h1>
-                <p style="color: rgba(255, 255, 255, 0.9); margin: 0;">Kelola semua pengajuan pengembalian dana dari pelanggan Anda.</p>
+<div class="container-fluid">
+    <div class="animated-header">
+        <div class="header-container">
+            <!-- Header Text Content -->
+            <div class="header-text">
+                <h1 class="header-title">
+                    <span class="title-primary">Manajemen</span>
+                    <span class="title-secondary">Pengembalian</span>
+                </h1>
+                <p class="header-subtitle">Kelola & monitor seluruh pengajuan pengembalian dana dengan sistem terintegrasi</p>
             </div>
-            <div style="display: flex; gap: 0.75rem;">
-                <button class="btn-secondary-custom" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="btn-primary-custom" onclick="exportData()">
-                    <i class="fas fa-download"></i> Export Data
-                </button>
+
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <div class="action-buttons">
+                    <a href="{{ route('admin.reports.financial') }}" class="action-btn primary">
+                        <i class="fas fa-money-bill"></i>
+                        <span>Catatan Keuangan</span>
+                    </a>
+                </div>
+
+                <!-- Quick Stats Mini -->
+                <div class="quick-stats-mini">
+                    <div class="mini-stat">
+                        <span class="mini-number">Rp {{ number_format($pengembalian->where('status_pengembalian', 'Disetujui')->sum('jumlah_klaim'), 0, ',', '.') }}</span>
+                        <span class="mini-label">Total Disetujui</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Decoration Elements -->
+            <div class="header-decoration">
+                <div class="floating-element element-1"></div>
+                <div class="floating-element element-2"></div>
+                <div class="floating-element element-3"></div>
             </div>
         </div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card border-blue-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Total</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['total'] }}</span>
-            </div>
+        <div class="stat-card menunggu" onclick="applyFilter('Menunggu Review')">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <span class="stat-number">{{ $stats['menunggu'] }}</span>
+            <span class="stat-label">Menunggu Review</span>
         </div>
-        <div class="stat-card border-yellow-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Menunggu Review</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['pending'] }}</span>
-            </div>
+        <div class="stat-card disetujui" onclick="applyFilter('Disetujui')">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <span class="stat-number">{{ $stats['disetujui'] }}</span>
+            <span class="stat-label">Disetujui</span>
         </div>
-        <div class="stat-card border-indigo-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Dalam Review</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['in_review'] }}</span>
-            </div>
+        <div class="stat-card ditolak" onclick="applyFilter('Ditolak')">
+            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+            <span class="stat-number">{{ $stats['ditolak'] }}</span>
+            <span class="stat-label">Ditolak</span>
         </div>
-        <div class="stat-card border-green-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Disetujui</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['approved'] }}</span>
-            </div>
-        </div>
-        <div class="stat-card border-gray-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Selesai</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['completed'] }}</span>
-            </div>
-        </div>
-         <div class="stat-card border-red-500">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 500; color: #ef4444; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Ditolak / Lainnya</span>
-                <span style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">{{ $stats['total'] - $stats['pending'] - $stats['in_review'] - $stats['approved'] - $stats['completed'] }}</span>
-            </div>
+        <div class="stat-card total" onclick="applyFilter('')">
+            <div class="stat-icon"><i class="fas fa-list-alt"></i></div>
+            <span class="stat-number">{{ $stats['total'] }}</span>
+            <span class="stat-label">Total Pengajuan</span>
         </div>
     </div>
 
-    <div class="section-divider"></div>
-
-    <div class="card-modern">
-        <div class="card-header-modern">
-            <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--secondary-color); margin: 0;">Filter Pengajuan</h3>
+    <div class="main-table-card">
+        <div class="table-header">
+            <h5 class="mb-0 text-gray-800">Daftar Pengajuan Pengembalian</h5>
         </div>
-        <div style="padding: 1.5rem;">
-            <form method="GET" action="{{ route('admin.pengembalian.index') }}">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
-                    <div>
-                        <label for="status" style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.25rem;">Status</label>
-                        <select name="status" id="status" class="filter-input">
-                            <option value="">Semua Status</option>
-                            <option value="Menunggu Review" {{ request('status') === 'Menunggu Review' ? 'selected' : '' }}>Menunggu Review</option>
-                            <option value="Dalam Review" {{ request('status') === 'Dalam Review' ? 'selected' : '' }}>Dalam Review</option>
-                            <option value="Disetujui" {{ request('status') === 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
-                            <option value="Ditolak" {{ request('status') === 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                            <option value="Dana Dikembalikan" {{ request('status') === 'Dana Dikembalikan' ? 'selected' : '' }}>Dana Dikembalikan</option>
-                            <option value="Selesai" {{ request('status') === 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="search" style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.25rem;">Cari</label>
-                        <input type="text" name="search" id="search" class="filter-input"
-                               value="{{ request('search') }}"
-                               placeholder="ID pesanan, nama pelanggan, atau keluhan...">
-                    </div>
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button type="submit" class="btn-primary-custom" style="flex: 1;">
-                            <i class="fas fa-filter"></i> Terapkan
-                        </button>
-                        <a href="{{ route('admin.pengembalian.index') }}" class="btn-secondary-custom">
-                            <i class="fas fa-redo-alt"></i> Reset
-                        </a>
-                    </div>
-                </div>
-            </form>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Pesanan</th>
+                        <th>Pelanggan</th>
+                        <th>Jumlah Refund</th>
+                        <th>Alasan Keluhan</th>
+                        <th>Status</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($pengembalian as $item)
+                    <tr>
+                        <td>
+                            <a href="{{ route('admin.pesanan.show', $item->pesanan->id_pesanan) }}" class="order-link">
+                                #{{ $item->pesanan->id_pesanan ?? 'N/A' }}
+                            </a>
+                            <br>
+                            <small class="text-muted">Total: Rp {{ number_format($item->pesanan->total_harga ?? 0, 0, ',', '.') }}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    {{ $item->user->name ?? 'N/A' }}
+                                    <br>
+                                    <small class="text-muted">{{ $item->user->email ?? 'N/A' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="refund-amount">Rp {{ number_format($item->jumlah_klaim, 0, ',', '.') }}</td>
+                        <td>
+                            <div class="complaint-info">
+                                <span>{{ Str::limit($item->jenis_keluhan, 40) }}</span>
+                                @if($item->deskripsi_keluhan)
+                                    <br>
+                                    <small class="text-muted">{{ Str::limit($item->deskripsi_keluhan, 50) }}</small>
+                                @endif
+                                @if($item->foto_bukti)
+                                    <br>
+                                    <small class="photo-badge" style="color: white !important;">Ada Bukti Foto</small>
+                                @endif
+                            </div>
+                        </td>
+                        <td>
+                            @php
+                                $statusClass = strtolower(str_replace(' ', '-', $item->status_pengembalian));
+                            @endphp
+                            <span class="table-status-badge {{ $statusClass }}">
+                                {{ $item->status_pengembalian }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ \Carbon\Carbon::parse($item->created_at)->format('d M Y') }}
+                            <br>
+                            <small class="text-muted">{{ \Carbon\Carbon::parse($item->created_at)->format('H:i') }} WIB</small>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('admin.pengembalian.show', $item->id_pengembalian) }}" class="btn-action-table view">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if($item->status_pengembalian == 'Menunggu Review')
+                                    <button onclick="approveRefund({{ $item->id_pengembalian }})" class="btn-action-table approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="rejectRefund({{ $item->id_pengembalian }})" class="btn-action-table reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-inbox fa-3x"></i>
+                            <h5>Tidak ada pengajuan pengembalian yang ditemukan</h5>
+                            <p>Coba ubah filter Anda atau tunggu pengajuan pengembalian baru dari pelanggan.</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </div>
-        </div>
-    </div>
 
-    <div class="card-modern">
-        <div class="card-header-modern">
-            <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--secondary-color); margin: 0;">Daftar Pengajuan Pengembalian</h3>
-        </div>
-        <div style="padding: 1.5rem;">
-            @if($pengembalian->isEmpty())
-                <div style="text-align: center; padding: 2rem 0; color: #6b7280;">
-                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.5;"></i>
-                    <h5 style="font-size: 1.125rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.5rem;">Tidak Ada Pengajuan Pengembalian</h5>
-                    <p style="color: #6b7280; margin: 0;">Belum ada pengajuan pengembalian yang masuk sesuai filter Anda.</p>
-                </div>
-            @else
-                <div style="overflow-x: auto;">
-                    <table style="min-width: 100%; border-collapse: separate; border-spacing: 0;">
-                        <thead class="table-header-custom">
-                            <tr>
-                                <th style="padding: 1rem 1.5rem; text-align: left;">ID</th>
-                                <th style="padding: 1rem 1.5rem; text-align: left;">Pelanggan</th>
-                                <th style="padding: 1rem 1.5rem; text-align: left;">Pesanan</th>
-                                <th style="padding: 1rem 1.5rem; text-align: left;">Keluhan</th>
-                                <th style="padding: 1rem 1.5rem; text-align: right;">Jumlah Refund</th>
-                                <th style="padding: 1rem 1.5rem; text-align: center;">Status</th>
-                                <th style="padding: 1rem 1.5rem; text-align: left;">Tanggal</th>
-                                <th style="padding: 1rem 1.5rem; text-align: center;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody style="background: white;">
-                            @foreach($pengembalian as $item)
-                                <tr class="table-row-hover" style="border-bottom: 1px solid #e5e7eb;">
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">
-                                        #{{ $item->id }}
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap;">
-                                        <div style="display: flex; align-items: center;">
-                                            <div class="user-avatar">
-                                                {{ substr($item->user->name, 0, 1) }}
-                                            </div>
-                                            <div>
-                                                <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">{{ $item->user->name }}</div>
-                                                <div style="font-size: 0.75rem; color: #6b7280;">{{ $item->user->email }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap;">
-                                        <a href="{{ route('admin.pesanan.show', $item->pesanan->id_pesanan) }}"
-                                           style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: var(--transition);"
-                                           onmouseover="this.style.color='var(--primary-dark)'"
-                                           onmouseout="this.style.color='var(--primary-color)'">
-                                            #{{ $item->pesanan->id_pesanan }}
-                                        </a>
-                                        <div style="font-size: 0.75rem; color: #6b7280;">Rp {{ number_format($item->pesanan->total_harga, 0, ',', '.') }}</div>
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem;">
-                                        <span class="status-badge bg-blue-100 text-blue-800">{{ $item->jenis_keluhan }}</span>
-                                        <span class="status-badge bg-gray-100 text-gray-800">{{ $item->jenis_pengembalian }}</span>
-                                        @if($item->deskripsi_keluhan)
-                                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">{{ Str::limit($item->deskripsi_keluhan, 40) }}</div>
-                                        @endif
-                                        @if($item->foto_bukti)
-                                            <div style="font-size: 0.75rem; color: var(--primary-color); margin-top: 0.25rem;">
-                                                <i class="fas fa-camera" style="margin-right: 0.25rem;"></i>Ada bukti foto
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap; text-align: right; font-size: 0.875rem; font-weight: bold; color: #10b981;">
-                                        Rp {{ number_format($item->jumlah_refund, 0, ',', '.') }}
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap; text-align: center;">
-                                        @php
-                                            $statusClass = strtolower(str_replace(' ', '-', $item->status_pengembalian));
-                                        @endphp
-                                        <span class="status-badge status-{{ $statusClass }}">
-                                            {{ $item->status_pengembalian }}
-                                        </span>
-                                        @if($item->status_pengembalian === 'Menunggu Review')
-                                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">{{ $item->created_at->diffForHumans() }}</div>
-                                        @endif
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap; font-size: 0.875rem; color: #374151;">
-                                        {{ $item->created_at->format('d M Y') }}
-                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ $item->created_at->format('H:i') }} WIB</div>
-                                    </td>
-                                    <td style="padding: 1rem 1.5rem; white-space: nowrap; text-align: center; font-size: 0.875rem; font-weight: 500;">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                                            <a href="{{ route('admin.pengembalian.show', $item->id) }}"
-                                               class="btn-action-outline btn-action-outline-primary" title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if($item->status_pengembalian === 'Menunggu Review')
-                                                <button class="btn-action-outline btn-action-outline-success"
-                                                        onclick="showQuickApproveModal({{ $item->id }})" title="Setujui Cepat">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                                <button class="btn-action-outline btn-action-outline-danger"
-                                                        onclick="showQuickRejectModal({{ $item->id }})" title="Tolak Cepat">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            @elseif($item->status_pengembalian === 'Disetujui')
-                                                <button class="btn-action-outline btn-action-outline-primary"
-                                                        onclick="showRefundModal({{ $item->id }})" title="Konfirmasi Pengembalian Dana">
-                                                    <i class="fas fa-money-bill-wave"></i>
-                                                </button>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                @if($pengembalian->hasPages())
-                <div class="section-divider"></div>
-                <div class="pagination-modern">
-                    {{ $pengembalian->appends(request()->query())->links('pagination::simple-default') }}
-                </div>
-                @endif
-            @endif
-        </div>
-    </div>
-</div>
-
-<!-- Quick Approve Modal - Modern Styled -->
-<div id="quickApproveModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="quickApproveModalLabel" aria-modal="true" role="dialog" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; overflow-y: auto; display: none;">
-    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5);"></div>
-
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem;">
-        <div class="modal-content-modern">
-            <div class="modal-header-modern modal-header-success">
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 0.5rem;" id="quickApproveModalLabel">
-                    <i class="fas fa-check-circle"></i>Setujui Pengajuan Pengembalian
-                </h3>
-                <button type="button" class="modal-close" data-bs-dismiss="modal" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.25rem; border-radius: 0.25rem; transition: var(--transition);" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" onmouseout="this.style.backgroundColor='transparent'">
-                    <i class="fas fa-times"></i>
-                </button>
+        @if(method_exists($pengembalian, 'links') && $pengembalian->hasPages())
+        <div class="pagination-container d-flex justify-content-between align-items-center flex-wrap">
+            <span class="pagination-info">
+                Menampilkan {{ $pengembalian->firstItem() }} - {{ $pengembalian->lastItem() }} dari {{ $pengembalian->total() }} data
+            </span>
+            <div>
+                {{ $pengembalian->appends(request()->query())->links('pagination::bootstrap-5') }}
             </div>
-
-            <form id="quickApproveForm" method="POST">
-                @csrf
-                <div class="modal-body-modern">
-                    <div style="margin-bottom: 1rem;">
-                        <label for="approveNote" class="form-label-modern">
-                            Catatan (Opsional)
-                        </label>
-                        <textarea
-                            name="catatan_admin"
-                            id="approveNote"
-                            rows="3"
-                            class="form-input-modern"
-                            placeholder="Berikan catatan jika diperlukan..."></textarea>
-                        <p class="form-help-text">
-                            Catatan ini akan ditampilkan kepada pelanggan saat melihat detail pengembalian
-                        </p>
-                    </div>
-                </div>
-
-                <div class="modal-footer-modern">
-                    <button type="button" class="btn-secondary-custom modal-close" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn-primary-custom" style="background: var(--gradient-success);">
-                        <i class="fas fa-check"></i> Setujui
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
-</div>
-
-<!-- Quick Reject Modal - Modern Styled -->
-<div id="quickRejectModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="quickRejectModalLabel" aria-modal="true" role="dialog" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; overflow-y: auto; display: none;">
-    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5);"></div>
-
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem;">
-        <div class="modal-content-modern">
-            <div class="modal-header-modern modal-header-danger">
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 0.5rem;" id="quickRejectModalLabel">
-                    <i class="fas fa-times-circle"></i>Tolak Pengajuan Pengembalian
-                </h3>
-                <button type="button" class="modal-close" data-bs-dismiss="modal" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.25rem; border-radius: 0.25rem; transition: var(--transition);" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" onmouseout="this.style.backgroundColor='transparent'">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="quickRejectForm" method="POST">
-                @csrf
-                <div class="modal-body-modern">
-                    <div style="margin-bottom: 1rem;">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <label for="rejectNote" class="form-label-modern" style="margin-bottom: 0;">
-                                Alasan Penolakan
-                            </label>
-                            <span style="margin-left: 0.25rem; color: var(--danger-color); font-size: 0.875rem;">*</span>
-                        </div>
-                        <textarea
-                            name="catatan_admin"
-                            id="rejectNote"
-                            rows="3"
-                            class="form-input-modern"
-                            placeholder="Jelaskan alasan penolakan secara detail..."
-                            required></textarea>
-                        <p class="form-help-text">
-                            Berikan alasan yang jelas dan proses selanjutnya yang dapat dilakukan pelanggan
-                        </p>
-                    </div>
-                </div>
-
-                <div class="modal-footer-modern">
-                    <button type="button" class="btn-secondary-custom modal-close" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn-primary-custom" style="background: var(--gradient-danger);">
-                        <i class="fas fa-times"></i> Tolak
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Refund Modal - Modern Styled -->
-<div id="refundModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="refundModalLabel" aria-modal="true" role="dialog" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; overflow-y: auto; display: none;">
-    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5);"></div>
-
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem;">
-        <div class="modal-content-modern">
-            <div class="modal-header-modern modal-header-primary">
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 0.5rem;" id="refundModalLabel">
-                    <i class="fas fa-money-bill-wave"></i>Konfirmasi Pengembalian Dana
-                </h3>
-                <button type="button" class="modal-close" data-bs-dismiss="modal" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.25rem; border-radius: 0.25rem; transition: var(--transition);" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" onmouseout="this.style.backgroundColor='transparent'">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="refundForm" method="POST">
-                @csrf
-                <div class="modal-body-modern">
-                    <div style="margin-bottom: 1rem;">
-                        <label for="refundNote" class="form-label-modern">
-                            Catatan Pengembalian Dana
-                        </label>
-                        <textarea
-                            name="catatan_admin"
-                            id="refundNote"
-                            rows="3"
-                            class="form-input-modern"
-                            placeholder="Berikan catatan mengenai proses pengembalian dana..."></textarea>
-                        <p class="form-help-text">
-                            Informasi ini akan membantu pelanggan memahami proses pengembalian dana
-                        </p>
-                    </div>
-                </div>
-
-                <div class="modal-footer-modern">
-                    <button type="button" class="btn-secondary-custom modal-close" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn-primary-custom">
-                        <i class="fas fa-money-bill-wave"></i> Konfirmasi Pengembalian
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@push('scripts')
-                    <div class="mb-4">
-                        <label for="refundNote" class="block text-sm font-medium text-gray-700 mb-1">
-                            Catatan (Opsional)
-                        </label>
-                        <textarea
-                            name="catatan_admin"
-                            id="refundNote"
-                            rows="2"
-                            class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                            placeholder="Catatan tambahan tentang transfer..."></textarea>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-lg">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        <i class="fas fa-money-bill-wave mr-2"></i> Konfirmasi Transfer
-                    </button>
-                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm modal-close" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                </div>
-            </form>
-        </div>
+        @endif
     </div>
 </div>
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Modal utility functions
-function showModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('hidden');
+    // Apply filter from stats cards
+    window.applyFilter = function(status) {
+        document.getElementById('status').value = status;
+        document.getElementById('filter-form').submit();
+    };
 
-    // Trigger animation
-    setTimeout(() => {
-        const backdrop = modal.querySelector('.modal-backdrop');
-        const dialog = modal.querySelector('.relative');
-
-        backdrop.classList.add('opacity-100');
-        dialog.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
-        dialog.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
-    }, 10);
-
-    // Add event listeners
-    setupModalListeners(modalId);
-}
-
-function hideModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.add('hidden');
-
-    // Remove event listeners
-    const closeButtons = modal.querySelectorAll('.modal-close');
-    closeButtons.forEach(button => {
-        button.removeEventListener('click', () => hideModal(modalId));
-    });
-}
-
-function setupModalListeners(modalId) {
-    const modal = document.getElementById(modalId);
-
-    // Close buttons
-    const closeButtons = modal.querySelectorAll('.modal-close');
-    closeButtons.forEach(button => {
-        button.addEventListener('click', () => hideModal(modalId));
-    });
-
-    // Backdrop click
-    const backdrop = modal.querySelector('.modal-backdrop');
-    backdrop.addEventListener('click', () => hideModal(modalId));
-
-    // Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            hideModal(modalId);
-        }
-    });
-}
-
-// Show modals with proper setup
-function showQuickApproveModal(id) {
-    const form = document.getElementById('quickApproveForm');
-    form.action = `/admin/pengembalian/${id}/approve`;
-
-    // Get return details for the modal title
-    const returnRow = document.querySelector(`tr[data-id="${id}"]`);
-    const returnIdText = returnRow ? `#${id}` : `#${id}`;
-
-    // Update modal title with return ID
-    const modalTitle = document.getElementById('quickApproveModalLabel');
-    if (modalTitle) {
-        modalTitle.innerHTML = `<i class="fas fa-check-circle mr-2"></i>Setujui Pengajuan ${returnIdText}`;
-    }
-
-    showModal('quickApproveModal');
-}
-
-function showQuickRejectModal(id) {
-    const form = document.getElementById('quickRejectForm');
-    form.action = `/admin/pengembalian/${id}/reject`;
-
-    // Get return details for the modal title
-    const returnRow = document.querySelector(`tr[data-id="${id}"]`);
-    const returnIdText = returnRow ? `#${id}` : `#${id}`;
-
-    // Update modal title with return ID
-    const modalTitle = document.getElementById('quickRejectModalLabel');
-    if (modalTitle) {
-        modalTitle.innerHTML = `<i class="fas fa-times-circle mr-2"></i>Tolak Pengajuan ${returnIdText}`;
-    }
-
-    showModal('quickRejectModal');
-}
-
-function showRefundModal(id) {
-    const form = document.getElementById('refundForm');
-    form.action = `/admin/pengembalian/${id}/mark-refunded`;
-
-    // Get return details for the modal title
-    const returnRow = document.querySelector(`tr[data-id="${id}"]`);
-    const returnIdText = returnRow ? `#${id}` : `#${id}`;
-
-    // Update modal title with return ID
-    const modalTitle = document.getElementById('refundModalLabel');
-    if (modalTitle) {
-        modalTitle.innerHTML = `<i class="fas fa-money-bill-wave mr-2"></i>Konfirmasi Pengembalian Dana ${returnIdText}`;
-    }
-
-    // Set today's date as default
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('refundDate').value = today;
-
-    showModal('refundModal');
-}
-
-// Form validation
-document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('#quickApproveForm, #quickRejectForm, #refundForm');
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-
-                    // Add error message if not exists
-                    const errorId = `${field.id}-error`;
-                    if (!document.getElementById(errorId)) {
-                        const errorMsg = document.createElement('p');
-                        errorMsg.id = errorId;
-                        errorMsg.className = 'mt-1 text-sm text-red-600';
-                        errorMsg.textContent = 'Bidang ini wajib diisi';
-                        field.parentNode.appendChild(errorMsg);
-                    }
-                } else {
-                    field.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-                    const errorMsg = document.getElementById(`${field.id}-error`);
-                    if (errorMsg) errorMsg.remove();
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault();
+    // Approve Refund (SweetAlert2)
+    window.approveRefund = function(id) {
+        Swal.fire({
+            title: 'Setujui Pengembalian',
+            html: `
+                <div class="text-center">
+                    <p class="text-muted mb-3">Apakah Anda yakin ingin menyetujui pengembalian <strong>#${id}</strong>?</p>
+                    <p class="text-success fw-bold"><i class="fas fa-info-circle me-1"></i> Ini akan memberitahu pelanggan dan memulai proses pengembalian dana.</p>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Setujui',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#10b981',
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Sedang menyetujui pengembalian...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                // Submit form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/pengembalian/${id}/approve`;
+                form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">`;
+                document.body.appendChild(form);
+                form.submit();
             }
         });
-    });
-});
+    };
 
-function refreshData() {
-    // Show loading indicator
-    const loadingToast = createToast('Memuat ulang data...', 'loading');
+    // Reject Refund (SweetAlert2)
+    window.rejectRefund = function(id) {
+        Swal.fire({
+            title: 'Tolak Pengembalian',
+            html: `
+                <div class="text-left">
+                    <p class="text-muted mb-3">Mohon berikan alasan penolakan untuk pengembalian <strong>#${id}</strong>:</p>
+                    <textarea id="reason" class="form-control" rows="4" placeholder="Alasan penolakan..." required></textarea>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Tolak',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#ef4444',
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'rounded-md',
+                cancelButton: 'rounded-md'
+            },
+            preConfirm: () => {
+                const reason = document.getElementById('reason').value;
+                if (!reason) {
+                    Swal.showValidationMessage('Alasan penolakan tidak boleh kosong!');
+                    return false;
+                }
+                return reason;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Sedang menolak pengembalian...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                // Submit form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/pengembalian/${id}/reject`;
+                form.innerHTML = `
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="alasan" value="${result.value}">
+                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    };
 
-    // Reload page
-    window.location.reload();
-}
-
-function exportData() {
-    // Create toast notification
-    createToast('Mempersiapkan data untuk ekspor...', 'info');
-
-    // Future implementation - replace with actual export logic
-    setTimeout(() => {
-        createToast('Fitur export data akan segera diimplementasikan!', 'warning');
-    }, 1000);
-}
-
-// Toast notification system
-function createToast(message, type = 'info') {
-    // Remove existing toasts
-    const existingToasts = document.querySelectorAll('.toast-notification');
-    existingToasts.forEach((toast, index) => {
-        // Stagger removal to prevent visual glitches
-        setTimeout(() => {
-            toast.classList.add('opacity-0');
-            setTimeout(() => toast.remove(), 300);
-        }, index * 100);
-    });
-
-    // Create toast container if not exists
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.className = 'fixed bottom-4 right-4 z-50 flex flex-col space-y-2';
-        document.body.appendChild(toastContainer);
-    }
-
-    // Create toast
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification bg-white rounded-lg shadow-lg border-l-4 p-4 transform transition-all duration-300 opacity-0 translate-x-2';
-
-    // Set toast style based on type
-    let icon = '';
-    switch (type) {
-        case 'success':
-            toast.classList.add('border-green-500');
-            icon = '<i class="fas fa-check-circle text-green-500 mr-2"></i>';
-            break;
-        case 'error':
-            toast.classList.add('border-red-500');
-            icon = '<i class="fas fa-times-circle text-red-500 mr-2"></i>';
-            break;
-        case 'warning':
-            toast.classList.add('border-yellow-500');
-            icon = '<i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>';
-            break;
-        case 'loading':
-            toast.classList.add('border-blue-500');
-            icon = '<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i>';
-            break;
-        default:
-            toast.classList.add('border-orange-500');
-            icon = '<i class="fas fa-info-circle text-orange-500 mr-2"></i>';
-    }
-
-    toast.innerHTML = `
-        <div class="flex items-center">
-            ${icon}
-            <span class="text-sm font-medium text-gray-800">${message}</span>
-        </div>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Show the toast
-    setTimeout(() => {
-        toast.classList.remove('opacity-0', 'translate-x-2');
-    }, 10);
-
-    // Auto hide after 4 seconds (except for loading)
-    if (type !== 'loading') {
-        setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-x-2');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 4000);
-    }
-
-    return toast;
-}
-
-// Auto-refresh for pending reviews every 30 seconds
-setInterval(function() {
-    if (window.location.search.includes('status=Menunggu Review') || window.location.search === '') {
-        const pendingCount = {{ $stats['pending'] }};
-        if (pendingCount > 0) {
-            // Check for new returns via fetch API
-            fetch('/admin/pengembalian/check-new')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.hasNew) {
-                        createToast(`${data.count} pengajuan pengembalian baru menunggu review!`, 'info');
-                    }
-                })
-                .catch(() => console.log('Failed to check for new returns'));
-        }
-    }
-}, 30000);
-
-// Add data-id attributes to rows for modal reference
-document.addEventListener('DOMContentLoaded', function() {
-    const rows = document.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        const idCell = row.querySelector('td:first-child');
-        if (idCell) {
-            const idText = idCell.textContent.trim();
-            const id = idText.replace('#', '');
-            row.setAttribute('data-id', id);
+    // Add user avatar placeholder for table
+    document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+        const char = el.textContent.trim().charAt(0);
+        if (char) {
+            el.textContent = char.toUpperCase();
+        } else {
+            el.innerHTML = '<i class="fas fa-user"></i>'; // Default icon
         }
     });
-});
 </script>
 @endpush

@@ -25,7 +25,7 @@
                     <div class="mb-4">
                         <label for="nama_ikan" class="block text-gray-700 font-medium mb-2">Nama Ikan</label>
                         <input type="text" name="nama_ikan" id="nama_ikan" value="{{ old('nama_ikan', $produk->nama_ikan) }}" required
-                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('nama_ikan') ? 'border-red-500' : 'border-gray-300' }}">
+                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('nama_ikan') ? 'border-red-500' : 'border-gray-300' }}">
                         @error('nama_ikan')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -34,13 +34,10 @@
                     <div class="mb-4">
                         <label for="jenis_ikan" class="block text-gray-700 font-medium mb-2">Jenis Ikan</label>
                         <select name="jenis_ikan" id="jenis_ikan" required
-                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('jenis_ikan') ? 'border-red-500' : 'border-gray-300' }}">
+                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('jenis_ikan') ? 'border-red-500' : 'border-gray-300' }}">
                             <option value="">Pilih Jenis Ikan</option>
                             <option value="Koi" {{ old('jenis_ikan', $produk->jenis_ikan) == 'Koi' ? 'selected' : '' }}>Koi</option>
                             <option value="Koki" {{ old('jenis_ikan', $produk->jenis_ikan) == 'Koki' ? 'selected' : '' }}>Koki</option>
-                            <option value="Cupang" {{ old('jenis_ikan', $produk->jenis_ikan) == 'Cupang' ? 'selected' : '' }}>Cupang</option>
-                            <option value="Arwana" {{ old('jenis_ikan', $produk->jenis_ikan) == 'Arwana' ? 'selected' : '' }}>Arwana</option>
-                            <option value="Lainnya" {{ old('jenis_ikan', $produk->jenis_ikan) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                         @error('jenis_ikan')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -54,7 +51,7 @@
                                 <span class="text-gray-500">Rp</span>
                             </div>
                             <input type="number" name="harga" id="harga" value="{{ old('harga', $produk->harga) }}" required min="0"
-                                class="w-full px-3 py-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('harga') ? 'border-red-500' : 'border-gray-300' }}">
+                                class="w-full px-3 py-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('harga') ? 'border-red-500' : 'border-gray-300' }}">
                         </div>
                         @error('harga')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -64,7 +61,7 @@
                     <div class="mb-4">
                         <label for="stok" class="block text-gray-700 font-medium mb-2">Stok</label>
                         <input type="number" name="stok" id="stok" value="{{ old('stok', $produk->stok) }}" required min="0"
-                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('stok') ? 'border-red-500' : 'border-gray-300' }}">
+                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('stok') ? 'border-red-500' : 'border-gray-300' }}">
                         @error('stok')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -75,7 +72,7 @@
                     <div class="mb-4">
                         <label for="deskripsi" class="block text-gray-700 font-medium mb-2">Deskripsi</label>
                         <textarea name="deskripsi" id="deskripsi" rows="3" required
-                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('deskripsi') ? 'border-red-500' : 'border-gray-300' }}">{{ old('deskripsi', $produk->deskripsi) }}</textarea>
+                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('deskripsi') ? 'border-red-500' : 'border-gray-300' }}">{{ old('deskripsi', $produk->deskripsi) }}</textarea>
                         @error('deskripsi')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -95,7 +92,7 @@
                             </div>
                         </div>
                         <input type="file" name="gambar" id="gambar" accept="image/*"
-                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 {{ $errors->has('gambar') ? 'border-red-500' : 'border-gray-300' }}">
+                            class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('gambar') ? 'border-red-500' : 'border-gray-300' }}">
                         <p class="text-sm text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah gambar</p>
                         @error('gambar')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -108,7 +105,7 @@
                 <a href="{{ route('admin.produk.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md">
                     Batal
                 </a>
-                <button type="button" id="updateProductBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+                <button type="button" id="updateProductBtn" class="bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md">
                     SELESAI
                 </button>
             </div>

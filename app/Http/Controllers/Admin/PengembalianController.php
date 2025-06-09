@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pengembalian;
 use App\Models\User;
+use App\Models\Expense;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PengembalianController extends Controller
 {
@@ -39,13 +42,23 @@ class PengembalianController extends Controller
 
         $pengembalian = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        // Get statistics
+        // Get statistics with efficient query
+        $statsRaw = Pengembalian::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status_pengembalian = "Menunggu Review" THEN 1 ELSE 0 END) as menunggu,
+            SUM(CASE WHEN status_pengembalian = "Dalam Review" THEN 1 ELSE 0 END) as dalam_review,
+            SUM(CASE WHEN status_pengembalian = "Disetujui" THEN 1 ELSE 0 END) as disetujui,
+            SUM(CASE WHEN status_pengembalian = "Selesai" THEN 1 ELSE 0 END) as selesai,
+            SUM(CASE WHEN status_pengembalian = "Ditolak" THEN 1 ELSE 0 END) as ditolak
+        ')->first();
+
         $stats = [
-            'total' => Pengembalian::count(),
-            'pending' => Pengembalian::where('status_pengembalian', 'Menunggu Review')->count(),
-            'in_review' => Pengembalian::where('status_pengembalian', 'Dalam Review')->count(),
-            'approved' => Pengembalian::where('status_pengembalian', 'Disetujui')->count(),
-            'completed' => Pengembalian::where('status_pengembalian', 'Selesai')->count(),
+            'total' => $statsRaw->total ?? 0,
+            'menunggu' => $statsRaw->menunggu ?? 0,
+            'dalam_review' => $statsRaw->dalam_review ?? 0,
+            'disetujui' => $statsRaw->disetujui ?? 0,
+            'selesai' => $statsRaw->selesai ?? 0,
+            'ditolak' => $statsRaw->ditolak ?? 0,
         ];
 
         return view('admin.pengembalian.index', compact('pengembalian', 'stats'));
@@ -120,16 +133,31 @@ class PengembalianController extends Controller
             'catatan_admin' => 'nullable|string|max:1000'
         ]);
 
-        $pengembalian = Pengembalian::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        $pengembalian->update([
-            'status_pengembalian' => 'Disetujui',
-            'catatan_admin' => $request->catatan_admin,
-            'reviewed_by' => Auth::id(),
-            'tanggal_review' => now(),
-        ]);
+            $pengembalian = Pengembalian::with(['pesanan', 'user'])->findOrFail($id);
 
-        return redirect()->back()->with('success', 'Pengajuan pengembalian telah disetujui.');
+            // Update pengembalian status
+            $pengembalian->update([
+                'status_pengembalian' => 'Disetujui',
+                'catatan_admin' => $request->catatan_admin,
+                'reviewed_by' => Auth::id(),
+                'tanggal_review' => now(),
+            ]);
+
+            // Create expense record for financial tracking
+            $this->createRefundExpense($pengembalian);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Pengajuan pengembalian telah disetujui dan dicatat dalam sistem keuangan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses persetujuan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -163,16 +191,67 @@ class PengembalianController extends Controller
             'catatan_admin' => 'nullable|string|max:1000'
         ]);
 
-        $pengembalian = Pengembalian::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        $pengembalian->update([
-            'status_pengembalian' => 'Dana Dikembalikan',
-            'nomor_transaksi_pengembalian' => $request->nomor_transaksi_pengembalian,
-            'tanggal_pengembalian_dana' => now(),
-            'catatan_admin' => $request->catatan_admin,
-            'reviewed_by' => Auth::id(),
+            $pengembalian = Pengembalian::with(['pesanan', 'user'])->findOrFail($id);
+
+            $pengembalian->update([
+                'status_pengembalian' => 'Dana Dikembalikan',
+                'nomor_transaksi_pengembalian' => $request->nomor_transaksi_pengembalian,
+                'tanggal_pengembalian_dana' => now(),
+                'catatan_admin' => $request->catatan_admin,
+                'reviewed_by' => Auth::id(),
+            ]);
+
+            // Create expense record if not already created (for cases where refund was approved without expense tracking)
+            $existingExpense = Expense::where('description', 'like', "%Order #{$pengembalian->pesanan->id_pesanan}%")
+                                    ->where('category', 'Pengembalian Dana')
+                                    ->where('amount', $pengembalian->jumlah_klaim)
+                                    ->first();
+
+            if (!$existingExpense) {
+                $this->createRefundExpense($pengembalian);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Dana pengembalian berhasil ditandai sebagai sudah ditransfer dan dicatat dalam sistem keuangan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses transaksi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create expense record for approved refund
+     */
+    private function createRefundExpense(Pengembalian $pengembalian)
+    {
+        $customerName = $pengembalian->user->name ?? 'Pelanggan';
+        $orderId = $pengembalian->pesanan->id_pesanan ?? 'N/A';
+
+        $description = "Pengembalian Dana - Order #{$orderId}";
+        $notes = "Pengembalian dana untuk pelanggan: {$customerName}\n";
+        $notes .= "Jenis Keluhan: {$pengembalian->jenis_keluhan}\n";
+        $notes .= "ID Pengembalian: #{$pengembalian->id_pengembalian}\n";
+
+        if ($pengembalian->catatan_admin) {
+            $notes .= "Catatan Admin: {$pengembalian->catatan_admin}\n";
+        }
+
+        if ($pengembalian->deskripsi_keluhan) {
+            $notes .= "Deskripsi: " . substr($pengembalian->deskripsi_keluhan, 0, 200) . (strlen($pengembalian->deskripsi_keluhan) > 200 ? '...' : '');
+        }
+
+        Expense::create([
+            'category' => 'Pengembalian Dana',
+            'description' => $description,
+            'amount' => $pengembalian->jumlah_klaim,
+            'expense_date' => now()->toDateString(),
+            'notes' => $notes,
         ]);
-
-        return redirect()->back()->with('success', 'Dana pengembalian berhasil ditandai sebagai sudah ditransfer.');
     }
 }

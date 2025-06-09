@@ -6,124 +6,417 @@
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
-    /* CSS Custom Properties */
     :root {
-        --primary-color: #ff8c00;
-        --primary-dark: #e67e00;
-        --primary-light: #ffb74d;
-        --secondary-color: #1a1a1a;
-        --accent-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
-        --light-color: #f8f9fa;
-        --dark-color: #343a40;
-        --gradient-primary: linear-gradient(135deg, #ff8c00 0%, #e67e00 100%);
-        --gradient-secondary: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        --gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        --gradient-warning: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-        --gradient-danger: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        --gradient-info: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-        --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --box-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --border-radius: 0.75rem;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --primary-color: #f97316;
+        --primary-dark: #ea580c;
+        --primary-light: #fed7aa;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --bg-light: #f8fafc;
+        --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    /* Header with Animated Background */
-    .page-header {
-        background: var(--gradient-primary);
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
+    .gradient-bg {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: 100vh;
         position: relative;
-        overflow: hidden;
-        animation: slideInDown 0.6s ease-out;
     }
 
-    .page-header::before {
+    .gradient-bg::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-image:
-            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
-        animation: backgroundShift 8s ease-in-out infinite;
+        background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f97316' fill-opacity='0.03'%3E%3Ccircle cx='40' cy='40' r='2'/%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3Ccircle cx='60' cy='60' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        animation: float 30s ease-in-out infinite;
+        pointer-events: none;
     }
 
-    .page-header .container {
-        position: relative;
-        z-index: 2;
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(180deg); }
     }
 
-    /* Modern Cards */
-    .dashboard-card {
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        padding: 1.5rem;
-        transition: var(--transition);
-        animation: fadeInUp 0.6s ease-out;
+    .hero-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 24px;
         position: relative;
         overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
     }
 
-    .dashboard-card::before {
+    .hero-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='48' cy='48' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        animation: heroFloat 25s ease-in-out infinite;
+    }
+
+    @keyframes heroFloat {
+        0%, 100% { transform: translateX(0px) translateY(0px); }
+        33% { transform: translateX(-20px) translateY(-10px); }
+        66% { transform: translateX(20px) translateY(10px); }
+    }
+
+    .modern-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+        margin-bottom: 2rem;
+    }
+
+    .modern-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         height: 4px;
-        background: var(--gradient-primary);
-        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
-    .dashboard-card:hover {
+    .modern-card:hover {
         transform: translateY(-4px);
-        box-shadow: var(--box-shadow-lg);
+        box-shadow: var(--shadow-large);
+        border-color: var(--primary-light);
     }
 
-    .detail-section {
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        transition: var(--transition);
-        animation: fadeInUp 0.6s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .detail-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--gradient-primary);
-        border-radius: var(--border-radius) var(--border-radius) 0 0;
-    }
-
-    .detail-section:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--box-shadow-lg);
+    .modern-card:hover::before {
+        opacity: 1;
     }
 
     .detail-header {
-        font-size: 1.125rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .detail-header i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
         font-weight: 600;
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e5e7eb;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-medium);
+    }
+
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .status-badge:hover::before {
+        left: 100%;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #fef3c7, #fbbf24);
+        color: #92400e;
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #d1fae5, #10b981);
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background: linear-gradient(135deg, #fee2e2, #ef4444);
+        color: #991b1b;
+    }
+
+    .status-processed {
+        background: linear-gradient(135deg, #dbeafe, #3b82f6);
+        color: #1e40af;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #e0e7ff, #8b5cf6);
+        color: #5b21b6;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .info-row:hover {
+        background: white;
+        border-color: var(--primary-light);
+        transform: translateX(4px);
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .info-value {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .timeline-container {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline-line {
+        position: absolute;
+        left: 1rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+        border-radius: 2px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.25rem;
+        top: 1.5rem;
+        width: 1rem;
+        height: 1rem;
+        background: var(--primary-color);
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px var(--primary-light);
+        z-index: 2;
+    }
+
+    .timeline-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        border-color: var(--primary-light);
+    }
+
+    .timeline-item.completed::before {
+        background: var(--success-color);
+        box-shadow: 0 0 0 3px #d1fae5;
+    }
+
+    .timeline-item.pending::before {
+        background: var(--warning-color);
+        box-shadow: 0 0 0 3px #fef3c7;
+    }
+
+    .timeline-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.125rem;
+    }
+
+    .timeline-date {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .timeline-description {
+        margin-top: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+    .evidence-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .evidence-photo {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .evidence-photo:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-large);
+        border-color: var(--primary-color);
+    }
+
+    .btn-modern {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        font-size: 0.875rem;
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-large);
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
+        color: var(--text-primary);
+    }
+
+    .amount-display {
+        background: linear-gradient(135deg, #fff7ed, #fed7aa);
+        border: 2px solid var(--primary-light);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .amount-display::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    .amount-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .amount-label {
+        color: var(--text-secondary);
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-up {
+        animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .detail-header::after {
@@ -447,416 +740,338 @@
 @endpush
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="page-header flex flex-wrap justify-between items-center mb-8">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-wrap justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-white mb-2">Detail Refund</h1>
-                    <p class="text-orange-100">ID: #{{ $refund->id }} - Pesanan: {{ $refund->pesanan->nomor_pesanan }}</p>
-                </div>
-                <div class="space-x-2">
-                    <a href="{{ route('refunds.index') }}" style="background: white; color: var(--primary-color); padding: 0.5rem 1rem; border-radius: var(--border-radius); text-decoration: none; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500;" onmouseover="this.style.background='#fff3e0'" onmouseout="this.style.background='white'">
-                        <i class="fas fa-arrow-left"></i>Kembali
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Status Overview -->
-    <div class="status-grid">
-        <!-- Current Status -->
-        <div class="dashboard-card">
-            <h3 class="detail-header">Status Saat Ini</h3>
-            <div class="text-center">
-                <span class="status-badge status-{{ $refund->status }}">
-                    @switch($refund->status)
-                        @case('pending') Menunggu Review @break
-                        @case('approved') Disetujui @break
-                        @case('rejected') Ditolak @break
-                        @case('processing') Sedang Diproses @break
-                        @case('completed') Selesai @break
-                        @default {{ ucfirst($refund->status) }}
-                    @endswitch
-                </span>
-                <div style="margin-top: 0.75rem; font-size: 0.875rem; color: #6b7280;">
-                    @if($refund->status === 'pending')
-                        Permintaan refund Anda sedang direview oleh tim kami
-                    @elseif($refund->status === 'approved')
-                        Refund disetujui dan akan diproses segera
-                    @elseif($refund->status === 'rejected')
-                        Maaf, permintaan refund ditolak
-                    @elseif($refund->status === 'processing')
-                        Dana refund sedang diproses
-                    @elseif($refund->status === 'completed')
-                        Refund telah selesai diproses
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Amount Info -->
-        <div class="dashboard-card">
-            <h3 class="detail-header">Jumlah Refund</h3>
-            <div class="text-center">
-                <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 0.5rem;">
-                    Rp {{ number_format($refund->amount, 0, ',', '.') }}
-                </div>
-                <div style="font-size: 0.875rem; color: #6b7280;">
-                    dari total pesanan<br>
-                    Rp {{ number_format($refund->pesanan->total_harga, 0, ',', '.') }}
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline -->
-        <div class="dashboard-card">
-            <h3 class="detail-header">Timeline</h3>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.875rem;">
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #6b7280;">Diajukan:</span>
-                    <span style="font-weight: 500;">{{ $refund->created_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @if($refund->processed_at)
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #6b7280;">Diproses:</span>
-                    <span style="font-weight: 500;">{{ $refund->processed_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @endif
-                @if($refund->completed_at)
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #6b7280;">Selesai:</span>
-                    <span style="font-weight: 500;">{{ $refund->completed_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-            <div class="text-center">
-                <div class="text-3xl font-bold text-orange-600 mb-2">
-                    Rp {{ number_format($refund->amount, 0, ',', '.') }}
-                </div>
-                <div class="text-sm text-gray-600">
-                    dari total pesanan<br>
-                    Rp {{ number_format($refund->pesanan->total_harga, 0, ',', '.') }}
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline -->
-        <div class="dashboard-card">
-            <h3 class="detail-header">Timeline</h3>
-            <div class="space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Diajukan:</span>
-                    <span class="font-medium">{{ $refund->created_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @if($refund->processed_at)
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Diproses:</span>
-                    <span class="font-medium">{{ $refund->processed_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @endif
-                @if($refund->completed_at)
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Selesai:</span>
-                    <span class="font-medium">{{ $refund->completed_at->format('d/m/Y H:i') }}</span>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- Refund Details -->
-    <div class="detail-grid">
-        <!-- Reason & Description -->
-        <div class="detail-section">
-            <h3 class="detail-header">Detail Permintaan</h3>
-
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.5rem;">Alasan Refund</label>
-                    <div class="info-box">
-                        @switch($refund->reason)
-                            @case('defective') Produk Rusak/Cacat @break
-                            @case('wrong_item') Barang yang Diterima Salah @break
-                            @case('not_as_described') Tidak Sesuai Deskripsi @break
-                            @case('dead_fish') Ikan Mati saat Diterima @break
-                            @case('other') Lainnya @break
-                            @default {{ ucfirst($refund->reason) }}
-                        @endswitch
+<div class="gradient-bg">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Hero Header -->
+        <div class="hero-header p-8 mb-8 fade-in">
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div>
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4 backdrop-blur-sm">
+                            <i class="fas fa-receipt text-2xl text-white"></i>
+                        </div>
+                        <h1 class="text-4xl font-bold text-white mb-2">Detail Refund</h1>
+                        <p class="text-orange-100 text-lg">ID: #{{ $refund->id_pengembalian }} • Pesanan: #{{ $refund->pesanan->nomor_pesanan }}</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <a href="{{ route('pengembalian.index') }}" class="btn-modern btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali
+                        </a>
                     </div>
                 </div>
-
-                @if($refund->description)
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.5rem;">Deskripsi Masalah</label>
-                    <div class="info-box">
-                        {{ $refund->description }}
-                    </div>
-                </div>
-                @endif
-
-                @if($refund->refund_method)
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.5rem;">Metode Refund</label>
-                    <div class="info-box">
-                        @switch($refund->refund_method)
-                            @case('bank_transfer') Transfer Bank @break
-                            @case('wallet') E-Wallet @break
-                            @case('store_credit') Kredit Toko @break
-                            @default {{ ucfirst($refund->refund_method) }}
-                        @endswitch
-                    </div>
-                </div>
-                @endif
-
-                @if($refund->admin_notes)
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 0.5rem;">Catatan dari Admin</label>
-                    <div class="admin-note">
-                        {{ $refund->admin_notes }}
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
 
-        <!-- Evidence Photos -->
-        <div class="detail-section">
-            <h3 class="detail-header">Bukti Foto</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Status & Amount -->
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-info-circle"></i>
+                        Status & Jumlah Refund
+                    </div>
 
-            @if($refund->evidence_photos && count($refund->evidence_photos) > 0)
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                    @foreach($refund->evidence_photos as $photo)
-                    <div style="position: relative;">
-                        <img src="{{ asset('storage/' . $photo) }}"
-                             alt="Bukti foto refund"
-                             class="evidence-photo"
-                             onclick="openPhotoModal('{{ asset('storage/' . $photo) }}')">
-                        <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0); transition: var(--transition); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; cursor: pointer;"
-                             onmouseover="this.style.background='rgba(0, 0, 0, 0.2)'; this.querySelector('i').style.opacity='1'"
-                             onmouseout="this.style.background='rgba(0, 0, 0, 0)'; this.querySelector('i').style.opacity='0'">
-                            <i class="fas fa-search-plus" style="color: white; opacity: 0; transition: var(--transition);"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Status -->
+                        <div class="text-center">
+                            @php
+                                $statusClasses = [
+                                    'Menunggu Review' => 'status-pending',
+                                    'Dalam Review' => 'status-processed',
+                                    'Disetujui' => 'status-approved',
+                                    'Ditolak' => 'status-rejected',
+                                    'Dana Dikembalikan' => 'status-approved',
+                                    'Selesai' => 'status-completed'
+                                ];
+                                $statusClass = $statusClasses[$refund->status_pengembalian] ?? 'status-pending';
+                            @endphp
+
+                            <div class="status-badge {{ $statusClass }} mb-4">
+                                @switch($refund->status_pengembalian)
+                                    @case('Menunggu Review')
+                                        <i class="fas fa-clock mr-2"></i>Menunggu Review
+                                        @break
+                                    @case('Dalam Review')
+                                        <i class="fas fa-search mr-2"></i>Dalam Review
+                                        @break
+                                    @case('Disetujui')
+                                        <i class="fas fa-check mr-2"></i>Disetujui
+                                        @break
+                                    @case('Ditolak')
+                                        <i class="fas fa-times mr-2"></i>Ditolak
+                                        @break
+                                    @case('Dana Dikembalikan')
+                                        <i class="fas fa-money-bill mr-2"></i>Dana Dikembalikan
+                                        @break
+                                    @case('Selesai')
+                                        <i class="fas fa-star mr-2"></i>Selesai
+                                        @break
+                                    @default
+                                        <i class="fas fa-question mr-2"></i>{{ $refund->status_pengembalian }}
+                                @endswitch
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                @if($refund->status_pengembalian === 'Menunggu Review')
+                                    Permintaan refund sedang direview
+                                @elseif($refund->status_pengembalian === 'Dalam Review')
+                                    Tim kami sedang memproses refund Anda
+                                @elseif($refund->status_pengembalian === 'Disetujui')
+                                    Refund telah disetujui dan akan diproses
+                                @elseif($refund->status_pengembalian === 'Ditolak')
+                                    Refund tidak memenuhi syarat dan ketentuan
+                                @elseif($refund->status_pengembalian === 'Dana Dikembalikan')
+                                    Dana telah dikembalikan ke rekening Anda
+                                @else
+                                    Status refund: {{ $refund->status_pengembalian }}
+                                @endif
+                            </p>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="amount-display">
+                            <div class="amount-value">
+                                Rp {{ number_format($refund->jumlah_klaim, 0, ',', '.') }}
+                            </div>
+                            <div class="amount-label">
+                                Jumlah Refund
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">
+                                dari total pesanan Rp {{ number_format($refund->pesanan->total_harga, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
-                    @endforeach
                 </div>
-            @else
-                <div style="text-align: center; padding: 2rem 0; color: #6b7280;">
-                    <i class="fas fa-camera" style="font-size: 2.5rem; margin-bottom: 1rem; color: #d1d5db;"></i>
-                    <p>Tidak ada bukti foto yang diunggah.</p>
+
+                <!-- Refund Details -->
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        Detail Permintaan
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="info-row">
+                            <span class="info-label">Jenis Keluhan</span>
+                            <span class="info-value">
+                                @switch($refund->jenis_keluhan)
+                                    @case('Barang Rusak') Produk Rusak/Cacat @break
+                                    @case('Barang Tidak Sesuai') Barang yang Diterima Salah @break
+                                    @case('Barang Kurang') Tidak Sesuai Deskripsi @break
+                                    @case('Kualitas Buruk') Ikan Mati saat Diterima @break
+                                    @case('Lainnya') Lainnya @break
+                                    @default {{ $refund->jenis_keluhan }}
+                                @endswitch
+                            </span>
+                        </div>
+
+                        @if($refund->deskripsi_masalah)
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi Masalah</label>
+                            <p class="text-gray-900 leading-relaxed">{{ $refund->deskripsi_masalah }}</p>
+                        </div>
+                        @endif
+
+                        @if($refund->metode_refund)
+                        <div class="info-row">
+                            <span class="info-label">Metode Refund</span>
+                            <span class="info-value">
+                                @if($refund->metode_refund === 'bank_transfer')
+                                    <i class="fas fa-university mr-1"></i>Transfer Bank
+                                @else
+                                    <i class="fas fa-mobile-alt mr-1"></i>E-Wallet
+                                @endif
+                            </span>
+                        </div>
+
+                        @if($refund->metode_refund === 'bank_transfer')
+                            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-3">Detail Rekening Bank</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-blue-700 font-medium">Bank:</span>
+                                        <span class="text-blue-900">{{ $refund->nama_bank ?? '-' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-blue-700 font-medium">No. Rekening:</span>
+                                        <span class="text-blue-900">{{ $refund->nomor_rekening ?? '-' }}</span>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <span class="text-blue-700 font-medium">Nama Pemilik:</span>
+                                        <span class="text-blue-900">{{ $refund->nama_pemilik_rekening ?? '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($refund->metode_refund === 'e_wallet')
+                            <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+                                <h4 class="font-semibold text-green-900 mb-3">Detail E-Wallet</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-green-700 font-medium">E-Wallet:</span>
+                                        <span class="text-green-900">{{ $refund->nama_ewallet ?? '-' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-green-700 font-medium">Nomor:</span>
+                                        <span class="text-green-900">{{ $refund->nomor_ewallet ?? '-' }}</span>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <span class="text-green-700 font-medium">Nama Pemilik:</span>
+                                        <span class="text-green-900">{{ $refund->nama_pemilik_ewallet ?? '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
-            @endif
-        </div>
-    </div>
-                             class="evidence-photo"
-                             onclick="openPhotoModal('{{ asset('storage/' . $photo) }}')">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-search-plus text-white opacity-0 hover:opacity-100"></i>
+
+                <!-- Evidence Photos -->
+                @if($refund->foto_bukti)
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-camera"></i>
+                        Foto Bukti
+                    </div>
+
+                    <div class="evidence-grid">
+                        @php
+                            $fotoBukti = is_string($refund->foto_bukti) ? json_decode($refund->foto_bukti) : $refund->foto_bukti;
+                        @endphp
+                        @foreach($fotoBukti as $index => $foto)
+                            <img src="{{ asset('uploads/refund_photos/' . $foto) }}"
+                                 alt="Bukti {{ $index + 1 }}"
+                                 class="evidence-photo"
+                                 onclick="openPhotoModal('{{ asset('uploads/refund_photos/' . $foto) }}', 'Bukti {{ $index + 1 }}')">
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- Admin Notes -->
+                @if($refund->catatan_admin)
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-sticky-note"></i>
+                        Catatan Admin
+                    </div>
+
+                    <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                        <p class="text-yellow-900 leading-relaxed">{{ $refund->catatan_admin }}</p>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Timeline -->
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-history"></i>
+                        Timeline Proses
+                    </div>
+
+                    <div class="timeline-container">
+                        <div class="timeline-line"></div>
+
+                        <!-- Submitted -->
+                        <div class="timeline-item completed">
+                            <div class="timeline-title">Pengajuan Diterima</div>
+                            <div class="timeline-date">{{ $refund->created_at->format('d M Y, H:i') }}</div>
+                            <div class="timeline-description">
+                                Permintaan refund telah berhasil diajukan dan menunggu review dari tim kami.
+                            </div>
+                        </div>
+
+                        <!-- Review Process -->
+                        @if($refund->tanggal_review)
+                        <div class="timeline-item {{ in_array($refund->status_pengembalian, ['Disetujui', 'Ditolak', 'Dana Dikembalikan', 'Selesai']) ? 'completed' : 'pending' }}">
+                            <div class="timeline-title">
+                                @if($refund->status_pengembalian === 'Ditolak')
+                                    Refund Ditolak
+                                @else
+                                    Review Selesai
+                                @endif
+                            </div>
+                            <div class="timeline-date">{{ $refund->tanggal_review->format('d M Y, H:i') }}</div>
+                            <div class="timeline-description">
+                                @if($refund->status_pengembalian === 'Ditolak')
+                                    Permintaan refund tidak memenuhi syarat dan telah ditolak.
+                                @else
+                                    Tim telah menyelesaikan review dan menyetujui permintaan refund Anda.
+                                @endif
+                            </div>
+                        </div>
+                        @else
+                        <div class="timeline-item pending">
+                            <div class="timeline-title">Sedang Direview</div>
+                            <div class="timeline-date">Menunggu proses</div>
+                            <div class="timeline-description">
+                                Tim kami sedang meninjau permintaan refund dan bukti yang Anda berikan.
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Refund Processed -->
+                        @if($refund->tanggal_pengembalian_dana)
+                        <div class="timeline-item completed">
+                            <div class="timeline-title">Dana Dikembalikan</div>
+                            <div class="timeline-date">{{ $refund->tanggal_pengembalian_dana->format('d M Y, H:i') }}</div>
+                            <div class="timeline-description">
+                                Dana refund telah berhasil dikembalikan ke rekening/e-wallet Anda.
+                            </div>
+                        </div>
+                        @elseif($refund->status_pengembalian === 'Disetujui')
+                        <div class="timeline-item pending">
+                            <div class="timeline-title">Memproses Pengembalian</div>
+                            <div class="timeline-date">Dalam proses</div>
+                            <div class="timeline-description">
+                                Dana sedang diproses untuk dikembalikan ke rekening/e-wallet Anda.
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Order Information -->
+                <div class="modern-card slide-up">
+                    <div class="detail-header">
+                        <i class="fas fa-shopping-cart"></i>
+                        Informasi Pesanan
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="info-row">
+                            <span class="info-label">Nomor Pesanan</span>
+                            <span class="info-value">#{{ $refund->pesanan->nomor_pesanan }}</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Tanggal Pesanan</span>
+                            <span class="info-value">{{ $refund->pesanan->created_at->format('d M Y') }}</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Total Pesanan</span>
+                            <span class="info-value">Rp {{ number_format($refund->pesanan->total_harga, 0, ',', '.') }}</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Status Pesanan</span>
+                            <span class="info-value">{{ $refund->pesanan->status }}</span>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{{ route('pesanan.show', $refund->pesanan->id_pesanan) }}" class="btn-modern w-full justify-center">
+                                <i class="fas fa-eye mr-2"></i>
+                                Lihat Detail Pesanan
+                            </a>
                         </div>
                     </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-center py-8 text-gray-500">
-                    <i class="fas fa-camera text-4xl mb-4"></i>
-                    <p>Tidak ada bukti foto yang diunggah.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Order Information -->
-    <div class="detail-section">
-        <h3 class="detail-header">Informasi Pesanan</h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-            <div>
-                <span style="font-size: 0.875rem; color: #6b7280;">Nomor Pesanan:</span>
-                <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">{{ $refund->pesanan->nomor_pesanan }}</div>
-            </div>
-            <div>
-                <span style="font-size: 0.875rem; color: #6b7280;">Tanggal Pesanan:</span>
-                <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">{{ $refund->pesanan->created_at->format('d/m/Y') }}</div>
-            </div>
-            <div>
-                <span style="font-size: 0.875rem; color: #6b7280;">Status Pesanan:</span>
-                <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">{{ $refund->pesanan->status_pesanan }}</div>
-            </div>
-            <div>
-                <span style="font-size: 0.875rem; color: #6b7280;">Total Harga:</span>
-                <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">Rp {{ number_format($refund->pesanan->total_harga, 0, ',', '.') }}</div>
-            </div>
-        </div>
-
-        @if($refund->pesanan->produk)
-        <div style="border-top: 2px solid #e5e7eb; padding-top: 1.5rem;">
-            <h4 style="font-size: 1rem; font-weight: 500; color: var(--secondary-color); margin-bottom: 1rem;">Produk</h4>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                @if($refund->pesanan->produk->gambar)
-                <img src="{{ asset('storage/' . $refund->pesanan->produk->gambar) }}"
-                     alt="{{ $refund->pesanan->produk->nama }}"
-                     class="product-image">
-                @endif
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 500; color: var(--secondary-color);">{{ $refund->pesanan->produk->nama }}</div>
-                    <div style="font-size: 0.875rem; color: #6b7280;">{{ $refund->pesanan->produk->deskripsi }}</div>
-                    <div style="font-size: 0.875rem; color: #6b7280;">Kuantitas: {{ $refund->pesanan->kuantitas }} ekor</div>
                 </div>
             </div>
         </div>
-        @endif
-    </div>
-
-    <div class="section-divider"></div>
-
-    <!-- Status Information -->
-    @if($refund->status === 'pending')
-    <div class="status-info-card status-info-pending">
-        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex-shrink: 0;">
-                <i class="fas fa-clock" style="color: #f59e0b; font-size: 1.25rem;"></i>
-            </div>
-            <div>
-                <h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem;">Menunggu Review</h3>
-                <p style="margin: 0;">
-                    Permintaan refund Anda sedang direview oleh tim kami.
-                    Proses review biasanya memakan waktu 1-2 hari kerja.
-                    Kami akan menghubungi Anda segera setelah review selesai.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'approved')
-    <div class="status-info-card status-info-approved">
-        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex-shrink: 0;">
-                <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.25rem;"></i>
-            </div>
-            <div>
-                <h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem;">Refund Disetujui</h3>
-                <p style="margin: 0;">
-                    Selamat! Permintaan refund Anda telah disetujui.
-                    Dana akan segera diproses dan dikembalikan sesuai dengan metode yang dipilih.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'rejected')
-    <div class="status-info-card status-info-rejected">
-        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex-shrink: 0;">
-                <i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.25rem;"></i>
-            </div>
-            <div>
-                <h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem;">Refund Ditolak</h3>
-                <p style="margin: 0;">
-                    Maaf, permintaan refund Anda ditolak.
-                    Silakan lihat catatan admin di atas untuk informasi lebih lanjut.
-                    Jika Anda memiliki pertanyaan, silakan hubungi customer service kami.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'processing')
-    <div class="status-info-card status-info-processing">
-        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex-shrink: 0;">
-                <i class="fas fa-cogs" style="color: #3b82f6; font-size: 1.25rem;"></i>
-            </div>
-            <div>
-                <h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem;">Sedang Diproses</h3>
-                <p style="margin: 0;">
-                    Dana refund Anda sedang diproses.
-                    Proses ini biasanya memakan waktu 3-5 hari kerja tergantung metode refund yang dipilih.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'completed')
-    <div class="status-info-card status-info-completed">
-        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex-shrink: 0;">
-                <i class="fas fa-check-double" style="color: #6b7280; font-size: 1.25rem;"></i>
-            </div>
-            <div>
-                <h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem;">Refund Selesai</h3>
-                <p style="margin: 0;">
-                    Refund telah selesai diproses. Dana sudah dikembalikan sesuai dengan metode yang dipilih.
-                    Terima kasih telah berbelanja di WIB Fish Farm.
-                </p>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Action Buttons -->
-    <div style="text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <a href="{{ route('pesanan.show', $refund->pesanan) }}" class="btn-primary">
-            <i class="fas fa-box"></i>
-            Lihat Detail Pesanan
-        </a>
-
-        <a href="{{ route('refunds.index') }}" class="btn-secondary">
-            <i class="fas fa-list"></i>
-            Lihat Semua Refund
-        </a>
-    </div>
-                    Maaf, permintaan refund Anda ditolak.
-                    Silakan lihat catatan admin di atas untuk informasi lebih lanjut.
-                    Jika Anda memiliki pertanyaan, silakan hubungi customer service kami.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'processing')
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-        <div class="flex items-start space-x-3">
-            <div class="flex-shrink-0">
-                <i class="fas fa-cogs text-blue-600 text-xl"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-medium text-blue-800 mb-2">Sedang Diproses</h3>
-                <p class="text-blue-700">
-                    Dana refund Anda sedang diproses.
-                    Proses ini biasanya memakan waktu 3-5 hari kerja tergantung metode refund yang dipilih.
-                </p>
-            </div>
-        </div>
-    </div>
-    @elseif($refund->status === 'completed')
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
-        <div class="flex items-start space-x-3">
-            <div class="flex-shrink-0">
-                <i class="fas fa-check-double text-gray-600 text-xl"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-medium text-gray-800 mb-2">Refund Selesai</h3>
-                <p class="text-gray-700">
-                    Refund telah selesai diproses. Dana sudah dikembalikan sesuai dengan metode yang dipilih.
-                    Terima kasih telah berbelanja di WIB Fish Farm.
-                </p>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Action Buttons -->
-    <div class="text-center space-x-4">
-        <a href="{{ route('pesanan.show', $refund->pesanan) }}"
-           class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors inline-flex items-center">
-            <i class="fas fa-box mr-2"></i>
-            Lihat Detail Pesanan
-        </a>
-
-        <a href="{{ route('refunds.index') }}"
-           class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors inline-flex items-center">
-            <i class="fas fa-list mr-2"></i>
-            Lihat Semua Refund
-        </a>
     </div>
 </div>
 
@@ -886,22 +1101,46 @@
         </div>
     </div>
 </div>
-@endsection
+
+<!-- Photo Modal -->
+<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-full">
+        <button onclick="closePhotoModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <img id="modalPhoto" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" src="" alt="Bukti">
+        <div id="modalCaption" class="text-center text-white mt-4 font-semibold"></div>
+    </div>
+</div>
 
 @push('scripts')
 <!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 <script>
-function openPhotoModal(photoUrl) {
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animations
+    const cards = document.querySelectorAll('.slide-up');
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+
+function openPhotoModal(photoUrl, caption = '') {
     document.getElementById('modalPhoto').src = photoUrl;
+    document.getElementById('modalCaption').textContent = caption;
     const modal = document.getElementById('photoModal');
-    modal.style.display = 'block';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
 }
 
 function closePhotoModal() {
     const modal = document.getElementById('photoModal');
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.body.style.overflow = '';
 }
 
@@ -918,5 +1157,20 @@ document.addEventListener('keydown', function(e) {
         closePhotoModal();
     }
 });
+
+// Add smooth scroll for timeline
+document.addEventListener('scroll', function() {
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const scrollPos = window.scrollY + window.innerHeight * 0.8;
+
+    timelineItems.forEach(item => {
+        if (item.offsetTop < scrollPos) {
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }
+    });
+});
 </script>
 @endpush
+
+@endsection

@@ -113,8 +113,8 @@
                         } elseif ($p->status_pesanan == 'Dibatalkan') {
                             $statusText = 'DIBATALKAN';
                             $statusColor = 'text-red-500';
-                        } elseif ($p->status_pesanan == 'Karantina') {
-                            $statusText = 'KARANTINA';
+                        } elseif ($p->status_pesanan == 'Pengembalian') {
+                            $statusText = 'PENGEMBALIAN';
                             $statusColor = 'text-yellow-500';
                         } elseif ($p->status_pesanan == 'Pengembalian') {
                             $statusText = 'PENGEMBALIAN';
@@ -151,9 +151,6 @@
                                     {{ $detail->produk->nama_ikan ?? 'Produk tidak tersedia' }}
                                 </h4>
                                 <div class="flex items-center text-sm text-gray-500">
-                                    @if($detail->ukuran_id && isset($detail->ukuran))
-                                        <span class="mr-2">Variasi: {{ $detail->ukuran->ukuran }}</span>
-                                    @endif
                                     <span>x{{ $detail->kuantitas }}</span>
                                 </div>
                             </div>
@@ -259,7 +256,6 @@
                              data-product-id="{{ $detailPesanan->id_Produk }}"
                              data-product-name="{{ $detailPesanan->produk->nama_ikan ?? 'Produk tidak tersedia' }}"
                              data-product-image="@if($detailPesanan->produk && $detailPesanan->produk->gambar)@if(Str::startsWith($detailPesanan->produk->gambar, 'uploads/')){{ asset($detailPesanan->produk->gambar) }}@elseif(Str::startsWith($detailPesanan->produk->gambar, 'storage/')){{ asset($detailPesanan->produk->gambar) }}@else{{ asset('storage/' . $detailPesanan->produk->gambar) }}@endif@endif"
-                             data-product-size="@if($detailPesanan->ukuran_id && isset($detailPesanan->ukuran)){{ $detailPesanan->ukuran->ukuran }}@endif"
                              data-product-qty="{{ $detailPesanan->kuantitas }}"
                              data-index="{{ $index }}">
                         </div>
@@ -324,7 +320,6 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="font-medium text-gray-900 text-sm">${productName}</h3>
-                            ${productSize ? `<p class="text-xs text-gray-500 mt-1">Ukuran: ${productSize}</p>` : ''}
                             <p class="text-xs text-gray-500 mt-1">Qty: ${productQty}</p>
                         </div>
                     </div>

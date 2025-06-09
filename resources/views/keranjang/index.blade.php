@@ -67,11 +67,7 @@
                 <!-- Price column (hidden on mobile) -->
                 <div class="w-32 hidden md:flex items-center justify-center p-4">
                     <span class="text-base text-gray-900">
-                        @if($item->ukuran && $item->ukuran->harga)
-                            Rp {{ number_format($item->ukuran->harga, 0, ',', '.') }}
-                        @else
-                            Rp {{ number_format($item->produk->harga, 0, ',', '.') }}
-                        @endif
+                        Rp {{ number_format($item->produk->harga, 0, ',', '.') }}
                     </span>
                 </div>
 

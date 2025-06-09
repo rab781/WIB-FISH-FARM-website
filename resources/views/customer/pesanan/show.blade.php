@@ -1,5 +1,3 @@
-@extends('layouts.app')
-
 @extends('layouts.customer')
 
 @php
@@ -119,16 +117,6 @@ use Carbon\Carbon;
                                              style="width: {{ ($currentIndex / (count($statuses) - 1)) * 100 }}%"></div>
                                     </div>
                                 </div>
-                                <!-- Container untuk garis penghubung - adjusted z-index and positioning -->
-                                <div class="absolute top-6 left-0 w-full" style="z-index: -1;">
-                                    <div class="relative h-2">
-                                        <!-- Background line -->
-                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
-                                        <!-- Progress line -->
-                                        <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500 ease-in-out"
-                                             style="width: {{ ($currentIndex / (count($statuses) - 1)) * 100 }}%"></div>
-                                    </div>
-                                </div>
 
                                 @foreach($statuses as $index => $status)
                                     <div class="flex flex-col items-center relative z-10 {{ $index > 0 ? 'flex-1' : '' }}">
@@ -166,7 +154,7 @@ use Carbon\Carbon;
                                                             {{ $pesanan->created_at->format('d M Y H:i') }}
                                                             @break
                                                         @case(1)
-                                                            Karantina ikan (± 1 minggu)
+                                                            Pemrosesan pesanan (2-3 hari)
                                                             @break
                                                         @case(2)
                                                             {{ $pesanan->tanggal_pengiriman ?? 'Sedang dikirim' }}
@@ -264,7 +252,7 @@ use Carbon\Carbon;
                     </div>
                 </div>
 
-                <!-- Keterangan Proses Karantina untuk Status Diproses -->
+                <!-- Processing Information for Diproses Status -->
                 @if(in_array($pesanan->status_pesanan, ['Diproses', 'Pembayaran Dikonfirmasi']))
                 <div class="bg-white shadow-sm mb-4">
                     <div class="p-4 border-b border-gray-200">
@@ -272,7 +260,7 @@ use Carbon\Carbon;
                             <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Proses Karantina Ikan
+                            Informasi Pemrosesan Pesanan
                         </h3>
                     </div>
                     <div class="p-4">
@@ -284,21 +272,21 @@ use Carbon\Carbon;
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <h4 class="text-sm font-semibold text-blue-800 mb-2">Informasi Penting tentang Proses Pengiriman</h4>
+                                    <h4 class="text-sm font-semibold text-blue-800 mb-2">Informasi Pemrosesan Pesanan</h4>
                                     <div class="text-sm text-blue-700 space-y-2">
-                                        <p><strong>🐠 Proses Karantina:</strong> Ikan hias Anda akan melalui proses karantina selama <strong>± 1 minggu</strong> untuk memastikan kesehatan dan kualitas terbaik sebelum dikirim.</p>
+                                        <p><strong>🐠 Persiapan Ikan:</strong> Ikan hias Anda sedang dipersiapkan dengan hati-hati untuk memastikan kualitas terbaik sebelum dikirim.</p>
 
-                                        <p><strong>📋 Tujuan Karantina:</strong></p>
+                                        <p><strong>📋 Tahap Pemrosesan:</strong></p>
                                         <ul class="list-disc list-inside ml-4 space-y-1">
-                                            <li>Memastikan ikan dalam kondisi sehat dan prima</li>
-                                            <li>Mencegah penyebaran penyakit</li>
-                                            <li>Memastikan ikan siap untuk perjalanan pengiriman</li>
-                                            <li>Memberikan waktu adaptasi sebelum pindah lingkungan</li>
+                                            <li>Pemeriksaan kesehatan ikan</li>
+                                            <li>Persiapan kemasan khusus</li>
+                                            <li>Pengecekan kualitas air</li>
+                                            <li>Persiapan pengiriman</li>
                                         </ul>
 
-                                        <p><strong>⏰ Estimasi Total:</strong> Pengiriman akan dilakukan setelah proses karantina selesai. Total waktu dari pemesanan hingga pengiriman adalah sekitar <strong>7-10 hari kerja</strong>.</p>
+                                        <p><strong>⏰ Estimasi:</strong> Pesanan akan diproses dalam <strong>2-3 hari kerja</strong> sebelum dikirim.</p>
 
-                                        <p><strong>📞 Informasi:</strong> Kami akan menginformasikan Anda ketika ikan siap untuk dikirim. Terima kasih atas kesabaran Anda dalam menjaga kualitas ikan hias terbaik!</p>
+                                        <p><strong>📞 Informasi:</strong> Kami akan menginformasikan Anda ketika pesanan siap dikirim. Terima kasih atas kesabaran Anda!</p>
                                     </div>
                                 </div>
                             </div>
@@ -829,16 +817,15 @@ use Carbon\Carbon;
         @endif
     </div>
 </div>
-@endsection
 
-@section('scripts')
+@push('scripts')
 <script>
         // Global variables for review modal
         let currentOrderId = null;
         let reviewsData = {};
 
-        // Show SweetAlert modal for review
-        function showReviewModal(orderId) {
+        // Show SweetAlert modal for review - Make it globally accessible
+        window.showReviewModal = function(orderId) {
             currentOrderId = orderId;
             const reviewDataContainer = document.getElementById(`review-data-${orderId}`);
             const products = reviewDataContainer.querySelectorAll('.product-review-data');
@@ -973,8 +960,8 @@ use Carbon\Carbon;
             });
         }
 
-        // Set rating in modal
-        function setModalRating(productIndex, rating) {
+        // Set rating in modal - Make it globally accessible
+        window.setModalRating = function(productIndex, rating) {
             reviewsData[productIndex].rating = rating;
 
             // Update star colors
@@ -1006,8 +993,8 @@ use Carbon\Carbon;
             }
         }
 
-        // Update comment in modal
-        function updateModalComment(productIndex) {
+        // Update comment in modal - Make it globally accessible
+        window.updateModalComment = function(productIndex) {
             const textarea = document.getElementById(`comment-${productIndex}`);
             const charCount = document.querySelector(`.char-count-${productIndex}`);
             const errorEl = document.querySelector(`.comment-error-${productIndex}`);
@@ -1024,8 +1011,8 @@ use Carbon\Carbon;
             }
         }
 
-        // Handle photo upload
-        function handlePhotoUpload(productIndex) {
+        // Handle photo upload - Make it globally accessible
+        window.handlePhotoUpload = function(productIndex) {
             const input = document.getElementById(`photos-${productIndex}`);
             const previewContainer = document.querySelector(`.photo-preview-${productIndex}`);
 
@@ -1064,8 +1051,8 @@ use Carbon\Carbon;
             });
         }
 
-        // Remove photo
-        function removePhoto(productIndex, photoIndex) {
+        // Remove photo - Make it globally accessible
+        window.removePhoto = function(productIndex, photoIndex) {
             reviewsData[productIndex].photos.splice(photoIndex, 1);
 
             // Re-render photo previews
@@ -1173,7 +1160,8 @@ use Carbon\Carbon;
                 });
             });
         }
-        function confirmOrderReceived() {
+        // Confirm order received function - Make it globally accessible
+        window.confirmOrderReceived = function() {
             Swal.fire({
                 title: 'Konfirmasi Pesanan Diterima',
                 text: 'Apakah Anda sudah menerima pesanan ini dengan baik?',
@@ -1204,8 +1192,8 @@ use Carbon\Carbon;
             });
         }
 
-        // Confirm create refund function
-        function confirmCreateRefund() {
+        // Confirm create refund function - Make it globally accessible
+        window.confirmCreateRefund = function() {
             @php
                 $timeLeft = $pesanan->tanggal_diterima ? $pesanan->tanggal_diterima->addHours(24)->diffInHours(now()) : 0;
             @endphp
@@ -1238,8 +1226,8 @@ use Carbon\Carbon;
             });
         }
 
-        // Cancel order confirmation function
-        function confirmCancelOrder(orderId) {
+        // Cancel order confirmation function - Make it globally accessible
+        window.confirmCancelOrder = function(orderId) {
             Swal.fire({
                 title: 'Batalkan Pesanan',
                 html: `
@@ -1310,8 +1298,8 @@ use Carbon\Carbon;
             });
         }
 
-        // Copy to clipboard function for tracking number
-        function copyToClipboard(text) {
+        // Copy to clipboard function for tracking number - Make it globally accessible
+        window.copyToClipboard = function(text) {
             navigator.clipboard.writeText(text).then(() => {
                 Swal.fire({
                     toast: true,
@@ -1490,50 +1478,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
-
-@push('styles')
-<style>
-    @keyframes pulse-slow {
-        0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-    }
-
-    @keyframes progress-line {
-        0% {
-            background: linear-gradient(to right, #22c55e 0%, rgb(229, 231, 235) 0%);
-        }
-        100% {
-            background: linear-gradient(to right, #22c55e 100%, rgb(229, 231, 235) 0%);
-        }
-    }
-
-    .animate-pulse-slow {
-        animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    .animate-progress-line {
-        animation: progress-line 1.5s ease-in-out forwards;
-    }
-
-    /* Hover effects for status items */
-    .status-item {
-        transition: transform 0.3s ease;
-    }
-
-    .status-item:hover {
-        transform: translateY(-2px);
-    }
-
-    /* Custom shadow for completed status */
-    .status-completed {
-        box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
-    }
-</style>
 @endpush

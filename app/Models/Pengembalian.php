@@ -19,9 +19,13 @@ class Pengembalian extends Model
         'deskripsi_masalah',
         'foto_bukti',
         'jumlah_klaim',
+        'metode_refund',
         'nama_bank',
         'nomor_rekening',
         'nama_pemilik_rekening',
+        'nama_ewallet',
+        'nomor_ewallet',
+        'nama_pemilik_ewallet',
         'status_pengembalian',
         'catatan_admin',
         'reviewed_by',
@@ -79,7 +83,7 @@ class Pengembalian extends Model
     {
         return match($this->status_pengembalian) {
             'Menunggu Review' => 'bg-yellow-100 text-yellow-800',
-            'Dalam Review' => 'bg-blue-100 text-blue-800', 
+            'Dalam Review' => 'bg-blue-100 text-blue-800',
             'Disetujui' => 'bg-green-100 text-green-800',
             'Ditolak' => 'bg-red-100 text-red-800',
             'Dana Dikembalikan' => 'bg-purple-100 text-purple-800',
