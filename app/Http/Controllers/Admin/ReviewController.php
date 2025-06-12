@@ -71,7 +71,9 @@ class ReviewController extends Controller
             'negative' => Ulasan::where('rating', '<', 3)->count(),
         ];
 
-        return view('admin.reviews.index', compact('reviews', 'stats'));
+        $header = 'Manajemen Ulasan';
+
+        return view('admin.reviews.index', compact('reviews', 'stats', 'header'));
     }
 
     /**
@@ -83,7 +85,8 @@ class ReviewController extends Controller
     public function show(Ulasan $review)
     {
         $review->load(['user', 'produk', 'adminReplier', 'interactions.user']);
-        return view('admin.reviews.show', compact('review'));
+        $header = 'Detail Ulasan #' . $review->id_ulasan;
+        return view('admin.reviews.show', compact('review', 'header'));
     }
 
     /**

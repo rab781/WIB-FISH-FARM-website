@@ -140,6 +140,8 @@ class DashboardController extends Controller
         $averageOrderValue = Pesanan::whereIn('status_pesanan', ['Selesai', 'Dikirim'])
             ->avg('total_harga');
 
+        $header = 'Dashboard';
+
         return view('admin.dashboard', compact(
             'totalRevenue',
             'revenueGrowth',
@@ -158,7 +160,8 @@ class DashboardController extends Controller
             'netIncome',
             'currentMonthNetIncome',
             'lastMonthNetIncome',
-            'netIncomeGrowth'
+            'netIncomeGrowth',
+            'header'
         ));
     }
 
@@ -220,12 +223,15 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        $header = 'Laporan Penjualan';
+
         return view('admin.reports.sales', compact(
             'salesData',
             'summary',
             'dailySales',
             'topProductsByQuantity',
-            'topProductsByRevenue'
+            'topProductsByRevenue',
+            'header'
         ));
     }
 
@@ -291,13 +297,16 @@ class DashboardController extends Controller
             ->orderBy('month', 'asc')
             ->get();
 
+        $header = 'Catatan Keuangan';
+
         return view('admin.reports.financial', compact(
             'financialSummary',
             'paymentMethodAnalysis',
             'monthlyRevenue',
             'monthlyExpenses',
             'expenseCategories',
-            'transactions'
+            'transactions',
+            'header'
         ));
     }
 }

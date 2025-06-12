@@ -21,7 +21,8 @@ class ProdukController extends Controller
     {
         // Mengambil semua produk termasuk yang di-soft delete
         $produk = Produk::withTrashed()->latest()->paginate(10);
-        return view('admin.produk.index', compact('produk'));
+        $header = 'Manajemen Produk';
+        return view('admin.produk.index', compact('produk', 'header'));
     }
 
     /**
@@ -29,7 +30,8 @@ class ProdukController extends Controller
      */
     public function create()
     {
-        return view('admin.produk.create');
+        $header = 'Tambah Produk Baru';
+        return view('admin.produk.create', compact('header'));
     }
 
     /**

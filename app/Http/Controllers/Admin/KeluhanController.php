@@ -19,7 +19,9 @@ class KeluhanController extends Controller
                         ->orderBy('created_at', 'desc')
                         ->paginate(15);
 
-        return view('admin.keluhan.index', compact('keluhans'));
+        $header = 'Manajemen Keluhan';
+
+        return view('admin.keluhan.index', compact('keluhans', 'header'));
     }
 
     /**
@@ -28,7 +30,8 @@ class KeluhanController extends Controller
     public function show($id)
     {
         $keluhan = Keluhan::with('user')->findOrFail($id);
-        return view('admin.keluhan.show', compact('keluhan'));
+        $header = 'Detail Keluhan #' . $keluhan->id;
+        return view('admin.keluhan.show', compact('keluhan', 'header'));
     }
 
     /**

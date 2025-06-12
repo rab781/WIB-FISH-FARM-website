@@ -84,19 +84,26 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                    <select name="rating" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">Semua Rating</option>
-                        <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5 Bintang</option>
-                        <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4 Bintang</option>
-                        <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3 Bintang</option>
-                        <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Bintang</option>
-                        <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Bintang</option>
-                    </select>
+                    <div class="relative">
+                        <select name="rating" class="border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white w-full">
+                            <option value="">Semua Rating</option>
+                            <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5 Bintang</option>
+                            <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4 Bintang</option>
+                            <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3 Bintang</option>
+                            <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Bintang</option>
+                            <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Bintang</option>
+                        </select>
+                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status Balasan</label>
-                    <select name="replied" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500">
+                    <select name="replied" class="border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
                         <option value="">Semua</option>
                         <option value="yes" {{ request('replied') == 'yes' ? 'selected' : '' }}>Sudah Dibalas</option>
                         <option value="no" {{ request('replied') == 'no' ? 'selected' : '' }}>Belum Dibalas</option>

@@ -192,8 +192,10 @@ class PesananController extends Controller
         $dibatalkan = Pesanan::where('status_pesanan', 'Dibatalkan')->count();
         $pengembalian = Pesanan::where('status_pesanan', 'Pengembalian')->count();
 
+        $header = 'Manajemen Pesanan';
+
         return view('admin.pesanan.index', compact('pesanan', 'totalPesanan', 'menungguPembayaran',
-            'pembayaranDikonfirmasi', 'sedangDiproses', 'dikirim', 'selesai', 'dibatalkan', 'pengembalian'));
+            'pembayaranDikonfirmasi', 'sedangDiproses', 'dikirim', 'selesai', 'dibatalkan', 'pengembalian', 'header'));
     }
 
     /**
@@ -216,7 +218,9 @@ class PesananController extends Controller
                 ->get();
         }
 
-        return view('admin.pesanan.show', compact('pesanan', 'reviews'));
+        $header = 'Detail Pesanan #' . $pesanan->id_pesanan;
+
+        return view('admin.pesanan.show', compact('pesanan', 'reviews', 'header'));
     }
 
     /**

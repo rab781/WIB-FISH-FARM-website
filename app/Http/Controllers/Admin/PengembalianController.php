@@ -61,7 +61,9 @@ class PengembalianController extends Controller
             'ditolak' => $statsRaw->ditolak ?? 0,
         ];
 
-        return view('admin.pengembalian.index', compact('pengembalian', 'stats'));
+        $header = 'Manajemen Pengembalian';
+
+        return view('admin.pengembalian.index', compact('pengembalian', 'stats', 'header'));
     }
 
     /**

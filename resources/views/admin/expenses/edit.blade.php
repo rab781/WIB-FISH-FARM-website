@@ -306,6 +306,7 @@
         color: var(--gray-500);
         pointer-events: none;
         transition: transform 0.3s ease;
+        z-index: 1;
     }
 
     .select-wrapper.open::after {
@@ -314,9 +315,15 @@
 
     select.form-control {
         appearance: none;
-        background-image: none;
+        background-image: none !important;
+        background-repeat: no-repeat;
         cursor: pointer;
         padding-right: 3rem;
+    }
+
+    /* Remove browser default dropdown arrow */
+    select.form-control::-ms-expand {
+        display: none;
     }
 
     /* Textarea Auto-resize */
@@ -732,14 +739,25 @@ document.addEventListener('DOMContentLoaded', function() {
         autoResize(notesTextarea);
     }
 
-    // Dropdown animation
-    categorySelect.addEventListener('focus', function() {
-        this.parentElement.classList.add('open');
-    });
+    // Select dropdown handling
+    const selectWrapper = categorySelect?.parentElement;
 
-    categorySelect.addEventListener('blur', function() {
-        this.parentElement.classList.remove('open');
-    });
+    if (categorySelect && selectWrapper) {
+        // Add open/close classes for animation
+        categorySelect.addEventListener('focus', function() {
+            selectWrapper.classList.add('open');
+        });
+
+        categorySelect.addEventListener('blur', function() {
+            selectWrapper.classList.remove('open');
+        });
+
+        // Remove any browser default styling
+        categorySelect.style.backgroundImage = 'none';
+        categorySelect.style.appearance = 'none';
+        categorySelect.style.webkitAppearance = 'none';
+        categorySelect.style.mozAppearance = 'none';
+    }
 
     // Form validation
     function validateField(field) {

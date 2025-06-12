@@ -20,8 +20,9 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $title = 'Profil Admin';
+        $header = 'Profil Admin';
 
-        return view('admin.profile.show', compact('user', 'title'));
+        return view('admin.profile.show', compact('user', 'title', 'header'));
     }
 
     /**
@@ -45,6 +46,9 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
+        /** @var \App\Models\User $user */
+
+        // Get the currently authenticated user
         $user = Auth::user();
 
         $request->validate([

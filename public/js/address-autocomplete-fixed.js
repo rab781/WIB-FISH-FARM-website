@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to select an address
     function selectAddress(id, text) {
+        logDebug(`Selecting address: ${id} - ${text}`);
         addressIdInput.value = id;
         addressInput.value = text;
 
@@ -59,6 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         hideDropdown();
+
+        // Trigger change event for form validation
+        addressInput.dispatchEvent(new Event('change', { bubbles: true }));
+        addressIdInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     // Function to perform the actual search
@@ -227,8 +232,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 addressItem.dataset.index = index;
 
                 // Add click event to select this item
-                addressItem.addEventListener('click', function() {
+                addressItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     selectAddress(item.id, formattedAddress);
+                });
+
+                // Add mouse enter event for hover effect
+                addressItem.addEventListener('mouseenter', function() {
+                    // Remove active class from all items
+                    dropdownContainer.querySelectorAll('.address-item').forEach(el => {
+                        el.classList.remove('address-item-active');
+                    });
+                    // Add active class to hovered item
+                    this.classList.add('address-item-active');
                 });
 
                 dropdownContainer.appendChild(addressItem);
@@ -356,8 +373,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
-        if (isDropdownOpen && !dropdownContainer.contains(e.target) && e.target !== addressInput) {
-            hideDropdown();
+        if (isDropdownOpen) {
+            // Check if click is outside the entire address search container
+            const addressSearchContainer = addressInput.closest('.address-search-container') || addressInput.parentElement;
+            const isClickOutside = !addressSearchContainer.contains(e.target) &&
+                                   !dropdownContainer.contains(e.target) &&
+                                   e.target !== addressInput;
+
+            if (isClickOutside) {
+                // Add small delay to allow click events on dropdown items to process first
+                setTimeout(() => {
+                    if (isDropdownOpen) {
+                        hideDropdown();
+                    }
+                }, 100);
+            }
         }
     });
 

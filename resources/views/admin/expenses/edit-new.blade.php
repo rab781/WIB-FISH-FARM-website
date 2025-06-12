@@ -306,6 +306,10 @@
         color: var(--gray-500);
         pointer-events: none;
         transition: transform 0.3s ease;
+        z-index: 1;
+    }
+        pointer-events: none;
+        transition: transform 0.3s ease;
     }
 
     .select-wrapper.open::after {
