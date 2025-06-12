@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let searchTimeout;
     console.log('Enhanced address search initialized for tambah_alamat page');
-    
+
     // Debug function to help diagnose issues
     function logDebug(message, data = null) {
         const now = new Date();
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(data);
         }
     }
-    
+
     // Log initialization
     logDebug('Address search component ready');
 
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (searchTerm.length > 0) {
                     // Clear options except for the placeholder
                     selectElement.innerHTML = '<option value="">Pilih alamat dari hasil pencarian</option>';
-                    
+
                     // Add helpful message
                     const helpOption = new Option('Masukkan minimal 3 karakter untuk mencari', '');
                     helpOption.disabled = true;
@@ -59,10 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const loadingOption = new Option('Loading...', '');
             selectElement.add(loadingOption);            // Add a timestamp to prevent caching
             const timestamp = new Date().getTime();
-            
+
             // Log the search attempt
             logDebug(`Searching for "${searchTerm}" via API`);
-            
+
             // First try using the standard API endpoint with cache-busting parameter
             tryFetchAddress(`/api/alamat/search?term=${encodeURIComponent(searchTerm)}&_=${timestamp}`)
                 .then(data => {
@@ -121,19 +121,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const timeoutId = setTimeout(() => {
                 reject(new Error('Request timed out after 10 seconds'));
             }, 10000);
-            
+
             // Add CSRF token and Ajax headers for Laravel
             const headers = {
                 'X-Requested-With': 'XMLHttpRequest'
             };
-            
+
             // Add CSRF token if available
             const token = document.querySelector('meta[name="csrf-token"]');
             if (token) {
                 headers['X-CSRF-TOKEN'] = token.getAttribute('content');
             }
              logDebug(`Fetching from URL: ${url}`);
-            
+
             fetch(url, { headers })
                 .then(response => {
                     clearTimeout(timeoutId);
@@ -175,10 +175,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             } else {
-                // No results found
-                const noResultOption = new Option('Tidak ada hasil ditemukan', '');
+                // No results found - show user-friendly message
+                const noResultOption = new Option('Kota tidak tersedia, harap periksa kembali input Anda', '');
                 noResultOption.disabled = true;
                 selectElement.add(noResultOption);
+
+                // Add suggestion option
+                const suggestionOption = new Option('Coba kata kunci lain seperti: Jakarta, Bandung, Surabaya', '');
+                suggestionOption.disabled = true;
+                selectElement.add(suggestionOption);
             }
         }
 });

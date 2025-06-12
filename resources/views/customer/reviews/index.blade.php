@@ -12,7 +12,8 @@
     .status-hidden { @apply bg-gray-100 text-gray-800; }
 
     .review-card {
-        @apply bg-white rounded-lg shadow hover:shadow-md transition-all border border-gray-200 p-6;
+        @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all border-2 border-gray-200 p-6 mb-4;
+        border-left: 4px solid #f97316; /* Orange left border for distinction */
     }
 
     /* Modal styling */
@@ -177,7 +178,7 @@
 
     <!-- Reviews List -->
     @if($reviews->count() > 0)
-    <div class="space-y-6">
+    <div class="space-y-8">
         @foreach($reviews as $review)
         <div class="review-card">
             <div class="flex flex-wrap justify-between items-start mb-4">

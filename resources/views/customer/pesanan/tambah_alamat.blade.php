@@ -382,6 +382,12 @@
     .address-search-container {
         position: relative;
     }
+
+    /* Allow dropdown to extend outside section-card */
+    .section-card:has(.address-search-container),
+    .section-card.address-dropdown-open {
+        overflow: visible !important;
+    }
 </style>
 @endpush
 

@@ -344,3 +344,13 @@ Route::get('/test/enhanced-search', [App\Http\Controllers\TestController::class,
 Route::get('/test/rate-limiter', function () {
     return view('test.rate_limiter_test');
 })->name('test.rate-limiter');
+
+// Test route for address error fallback messages
+Route::get('/test/address-error-fallback', function () {
+    return view('test-address-error-fallback');
+})->name('test.address-error-fallback');
+
+// Test route for dropdown fixes verification
+Route::get('/test-dropdown-fixes', function () {
+    return view('test-dropdown-fixes');
+})->name('test.dropdown-fixes');

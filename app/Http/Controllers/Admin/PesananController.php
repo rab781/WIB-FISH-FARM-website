@@ -299,6 +299,19 @@ class PesananController extends Controller
                 'tanggal_pengiriman' => now()
             ]);
 
+            // Create notification for customer
+            \App\Models\Notification::create([
+                'user_id' => $pesanan->user_id,
+                'title' => 'Pesanan Dikirim',
+                'message' => 'Pesanan #' . $pesanan->nomor_pesanan . ' telah dikirim dengan nomor resi: ' . $request->resi,
+                'type' => 'order_shipped',
+                'data' => json_encode([
+                    'order_id' => $pesanan->id_pesanan,
+                    'tracking_number' => $request->resi
+                ]),
+                'is_read' => false
+            ]);
+
             // Return JSON response for AJAX requests
             if (request()->ajax()) {
                 return response()->json([

@@ -39,12 +39,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function showDropdown() {
         dropdownContainer.style.display = 'block';
         isDropdownOpen = true;
+
+        // Add class to parent section card to override overflow hidden
+        const sectionCard = addressInput.closest('.section-card');
+        if (sectionCard) {
+            sectionCard.classList.add('address-dropdown-open');
+        }
+
+        // Also check for bg-gradient containers (for edit_alamat page)
+        const gradientContainer = addressInput.closest('.bg-gradient-to-r');
+        if (gradientContainer) {
+            gradientContainer.classList.add('address-dropdown-open');
+        }
     }
 
     // Function to hide the dropdown
     function hideDropdown() {
         dropdownContainer.style.display = 'none';
         isDropdownOpen = false;
+
+        // Remove class from parent section card
+        const sectionCard = addressInput.closest('.section-card');
+        if (sectionCard) {
+            sectionCard.classList.remove('address-dropdown-open');
+        }
+
+        // Also remove from bg-gradient containers
+        const gradientContainer = addressInput.closest('.bg-gradient-to-r');
+        if (gradientContainer) {
+            gradientContainer.classList.remove('address-dropdown-open');
+        }
     }
 
     // Function to select an address
@@ -253,11 +277,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
             showDropdown();
         } else {
-            // No results
+            // No results - show user-friendly message based on input type
+            const searchTerm = addressInput.value.trim().toLowerCase();
+
+            // Check if input looks like random characters
+            const isRandomChars = /^[a-z]{6,}$/.test(searchTerm) && !/^(jakarta|bandung|surabaya|yogya|medan|makassar|palembang|semarang|tangerang|depok|bekasi|bogor)/i.test(searchTerm);
+
             const noResultItem = document.createElement('div');
-            noResultItem.className = 'address-item address-item-message';
-            noResultItem.textContent = 'Tidak ada hasil ditemukan';
+            noResultItem.className = 'address-item address-item-error';
+
+            if (isRandomChars) {
+                noResultItem.textContent = 'Kota tidak tersedia, harap periksa kembali input Anda';
+            } else {
+                noResultItem.textContent = 'Alamat tidak ditemukan, periksa ejaan atau coba kata kunci lain';
+            }
+
             dropdownContainer.appendChild(noResultItem);
+
+            // Add suggestion message
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'address-item address-item-message';
+            suggestionItem.textContent = 'Coba kata kunci seperti: Jakarta, Bandung, Surabaya, Yogyakarta';
+            dropdownContainer.appendChild(suggestionItem);
+
             showDropdown();
         }
     }

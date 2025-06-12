@@ -229,6 +229,13 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/address-autocomplete.css') }}">
+<style>
+    /* Allow dropdown to extend outside container */
+    .bg-gradient-to-r:has(.address-search-container),
+    .bg-gradient-to-r.address-dropdown-open {
+        overflow: visible !important;
+    }
+</style>
 @endpush
 
 @push('scripts')

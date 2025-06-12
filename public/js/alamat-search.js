@@ -77,10 +77,15 @@ function initializeAlamatSearch(searchInputId, selectElementId) {
                             }
                         });
                     } else {
-                        // No results found
-                        const noResultOption = new Option('Tidak ada hasil ditemukan', '');
+                        // No results found - show user-friendly message
+                        const noResultOption = new Option('Kota tidak tersedia, harap periksa kembali input Anda', '');
                         noResultOption.disabled = true;
                         selectElement.add(noResultOption);
+
+                        // Add suggestion option
+                        const suggestionOption = new Option('Coba kata kunci lain seperti: Jakarta, Bandung, Surabaya', '');
+                        suggestionOption.disabled = true;
+                        selectElement.add(suggestionOption);
                     }
                 })                .catch(error => {
                     console.error('Error fetching alamat:', error);

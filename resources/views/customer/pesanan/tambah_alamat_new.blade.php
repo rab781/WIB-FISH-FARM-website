@@ -311,6 +311,12 @@
         overflow: hidden;
     }
 
+    /* Allow dropdown to extend outside section-card */
+    .section-card:has(.address-search-container),
+    .section-card.address-dropdown-open {
+        overflow: visible !important;
+    }
+
     .section-card::before {
         content: '';
         position: absolute;

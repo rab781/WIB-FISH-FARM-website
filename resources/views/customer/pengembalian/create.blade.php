@@ -197,6 +197,64 @@
         box-shadow: var(--shadow-large);
     }
 
+    .refund-method-option {
+        position: relative;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .refund-method-option::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .refund-method-option:hover {
+        border-color: var(--primary-color);
+        background: linear-gradient(145deg, #fff7ed, #ffffff);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .refund-method-option:hover::before {
+        opacity: 1;
+    }
+
+    .refund-method-option .radio-indicator {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .refund-method-option .radio-indicator div {
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
     .radio-option {
         position: relative;
         cursor: pointer;
@@ -718,19 +776,25 @@
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">Metode Refund Pilihan <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="metode_refund" value="bank_transfer" required class="mr-3 accent-orange-500" onchange="toggleRefundMethod()">
+                    <label class="refund-method-option relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="metode_refund" value="bank_transfer" required class="sr-only">
                         <div class="text-center w-full">
                             <i class="fas fa-university text-3xl text-blue-500 mb-2"></i>
                             <div class="font-medium text-gray-900">Transfer Bank</div>
                         </div>
+                        <div class="radio-indicator absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full opacity-0 transition-opacity"></div>
+                        </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
-                        <input type="radio" name="metode_refund" value="e_wallet" required class="mr-3 accent-orange-500" onchange="toggleRefundMethod()">
+                    <label class="refund-method-option relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all hover:border-orange-500 hover:shadow-sm">
+                        <input type="radio" name="metode_refund" value="e_wallet" required class="sr-only">
                         <div class="text-center w-full">
                             <i class="fas fa-mobile-alt text-3xl text-green-500 mb-2"></i>
                             <div class="font-medium text-gray-900">E-Wallet</div>
+                        </div>
+                        <div class="radio-indicator absolute top-2 right-2 w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full opacity-0 transition-opacity"></div>
                         </div>
                     </label>
                 </div>
@@ -878,33 +942,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     let selectedFiles = [];
 
-    // Click to upload
-    uploadArea.addEventListener('click', function() {
-        photoInput.click();
-    });
+    // Initialize refund method handlers
+    initializeRefundMethodHandlers();
 
-    // Drag and drop events
-    uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
+    // Photo upload functionality
+    if (uploadArea && photoInput) {
+        // Click to upload
+        uploadArea.addEventListener('click', function(e) {
+            e.preventDefault();
+            photoInput.click();
+        });
 
-    uploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-    });
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.add('dragover');
+        });
 
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-    });
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+        });
 
-    // File input change
-    photoInput.addEventListener('change', function() {
-        handleFiles(this.files);
-    });
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        // File input change
+        photoInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+    }
 
     function handleFiles(files) {
         for (let file of files) {
@@ -977,63 +1051,111 @@ document.addEventListener('DOMContentLoaded', function() {
         photoPreview.innerHTML = '';
         if (selectedFiles.length === 0) {
             photoPreview.style.display = 'none';
-        } else {
-            selectedFiles.forEach((file, index) => {
-                displayPreview(file, index);
-            });
-            photoPreview.style.display = 'grid';
+            return;
         }
+        selectedFiles.forEach((file, index) => {
+            displayPreview(file, index);
+        });
     }
 
-    // Initialize modal
-    function showModal(title, message, type = 'info') {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-50 overflow-y-auto';
-        modal.innerHTML = `
-            <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                <div class="relative bg-white rounded-lg max-w-md w-full">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-medium text-gray-900">${title}</h3>
-                            <button type="button" class="modal-close text-gray-400 hover:text-gray-500">
-                                <span class="sr-only">Close</span>
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-600">${message}</p>
-                        </div>
-                        <div class="mt-6 flex justify-end space-x-3">
-                            <button type="button" class="modal-close px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+    // Initialize refund method selection handlers
+    function initializeRefundMethodHandlers() {
+        const refundMethodOptions = document.querySelectorAll('.refund-method-option');
+        const bankForm = document.getElementById('bankForm');
+        const ewalletForm = document.getElementById('ewalletForm');
 
-        document.body.appendChild(modal);
+        refundMethodOptions.forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            const indicator = option.querySelector('.radio-indicator div');
 
-        // Close modal handlers
-        modal.querySelectorAll('.modal-close').forEach(button => {
-            button.addEventListener('click', () => {
-                modal.remove();
+            option.addEventListener('click', function() {
+                // Update all radio states
+                refundMethodOptions.forEach(opt => {
+                    const r = opt.querySelector('input[type="radio"]');
+                    const ind = opt.querySelector('.radio-indicator div');
+                    const border = opt.querySelector('.radio-indicator');
+
+                    if (r === radio) {
+                        r.checked = true;
+                        ind.style.opacity = '1';
+                        border.style.borderColor = '#f97316';
+                        opt.style.borderColor = '#f97316';
+                        opt.style.backgroundColor = '#fff7ed';
+                    } else {
+                        r.checked = false;
+                        ind.style.opacity = '0';
+                        border.style.borderColor = '#d1d5db';
+                        opt.style.borderColor = '#d1d5db';
+                        opt.style.backgroundColor = '';
+                    }
+                });
+
+                // Show/hide relevant forms
+                toggleRefundForms(radio.value);
             });
         });
-
-        // Close on background click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
     }
 
+    function toggleRefundForms(selectedMethod) {
+        const bankForm = document.getElementById('bankForm');
+        const ewalletForm = document.getElementById('ewalletForm');
+
+        if (!bankForm || !ewalletForm) {
+            console.warn('Bank or e-wallet form not found');
+            return;
+        }
+
+        // Reset both forms
+        bankForm.style.display = 'none';
+        ewalletForm.style.display = 'none';
+
+        if (selectedMethod === 'bank_transfer') {
+            bankForm.style.display = 'block';
+            bankForm.style.opacity = '0';
+            bankForm.style.transform = 'translateY(-10px)';
+
+            // Set required attributes for bank fields
+            const bankFields = ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'];
+            const ewalletFields = ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'];
+
+            bankFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            ewalletFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = false;
+            });
+
+            // Smooth show animation
+            setTimeout(() => {
+                bankForm.style.opacity = '1';
+                bankForm.style.transform = 'translateY(0)';
+            }, 100);
+
+        } else if (selectedMethod === 'e_wallet') {
+            ewalletForm.style.display = 'block';
+            ewalletForm.style.opacity = '0';
+            ewalletForm.style.transform = 'translateY(-10px)';
+
+            // Set required attributes for e-wallet fields
+            const bankFields = ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'];
+            const ewalletFields = ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'];
+
+            ewalletFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            bankFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = false;
+            });
+
+    // Form validation and submission
     const refundForm = document.getElementById('refundForm');
     const submitBtn = document.getElementById('submitRefund');
-    const loadingOverlay = document.getElementById('loadingOverlay');
 
     refundForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1165,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show comprehensive confirmation dialog
+        // Show confirmation dialog
         let paymentDetails = '';
         if (refundMethod.value === 'bank_transfer') {
             const bankName = document.getElementById('nama_bank').value;
@@ -1249,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div>
                                 <p class="text-sm font-medium text-yellow-800">Perhatian</p>
                                 <p class="text-xs text-yellow-700 mt-1">
-                                    Pastikan semua informasi sudah benar. Pengajuan yang sudah dikirim tidak dapat diubah dan akan diproses dalam 1-3 hari kerja.
+                                    Pastikan semua informasi sudah benar. Pengajuan yang sudah dikirim tidak dapat diubah.
                                 </p>
                             </div>
                         </div>
@@ -1281,12 +1403,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const formData = new FormData(this);
-
-            // Add CSRF token to form data
             const token = document.querySelector('meta[name="csrf-token"]').content;
 
-            // Make the fetch request without Content-Type header for multipart/form-data
-            // Important: Don't include Content-Type when sending FormData with files
             const response = await fetch(this.action, {
                 method: 'POST',
                 body: formData,
@@ -1294,36 +1412,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': token,
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
-                    // Omit Content-Type to let the browser set it with the boundary for multipart/form-data
                 },
                 credentials: 'same-origin'
             });
 
-            // Parse the response
             let result;
             try {
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     result = await response.json();
                 } else {
-                    // Handle non-JSON responses
                     const text = await response.text();
-
-                    if (text.includes("SQLSTATE[42S02]") || text.includes("Table") || text.includes("doesn't exist")) {
-                        console.error("Database table error:", text);
-                        throw new Error('Terjadi masalah dengan struktur database. Silakan hubungi administrator.');
-                    }
-
                     try {
                         result = JSON.parse(text);
                     } catch (e) {
                         console.error("Response is not JSON:", text);
-
-                        if (text.includes("<!DOCTYPE html>") || text.includes("<html")) {
-                            // It's an HTML error page, likely a 500 error
-                            throw new Error('Terjadi error pada server. Silakan coba lagi nanti.');
-                        }
-
                         result = { message: 'Server returned an invalid response format' };
                     }
                 }
@@ -1341,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-check-circle text-green-600 text-4xl"></i>
                             </div>
                             <p class="mb-4">Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.</p>
-                            <p class="text-sm text-gray-600">Nomor Refund: <span class="font-medium">${result && result.refund_id ? result.refund_id : 'N/A'}</span></p>
+                            <p class="text-sm text-gray-600">Pengajuan akan diproses dalam 1-3 hari kerja.</p>
                         </div>
                     `,
                     icon: 'success',
@@ -1350,8 +1453,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = '{{ route("pesanan.show", $pesanan) }}';
             } else {
                 console.error("Response error:", result);
-
-                // Check for validation errors
                 if (result && result.errors) {
                     const errorMessages = Object.values(result.errors).flat().join('<br>');
                     throw new Error(errorMessages);
@@ -1360,40 +1461,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error("Form submission error:", error);
-
-            // Check if it's a database table error
             let errorMsg = error.message || 'Terjadi kesalahan saat mengirim pengajuan refund';
-            let errorTitle = 'Error';
-            let errorHtml = '';
-
-            if (errorMsg.includes("Table") && errorMsg.includes("doesn't exist")) {
-                errorTitle = 'Database Error';
-                errorHtml = `
-                    <div class="text-left">
-                        <p class="mb-2">Terjadi kesalahan pada database. Silakan hubungi administrator dengan detail berikut:</p>
-                        <div class="bg-gray-100 p-2 rounded text-xs font-mono overflow-auto">
-                            ${errorMsg.substring(0, 150)}...
-                        </div>
-                    </div>
-                `;
-            } else if (errorMsg.includes("<br>")) {
-                // This is a validation error with multiple messages
-                errorTitle = 'Validasi Gagal';
-                errorHtml = `
-                    <div class="text-left">
-                        <p class="mb-2">Silakan perbaiki kesalahan berikut:</p>
-                        <ul class="list-disc pl-4 text-sm">
-                            ${errorMsg.split("<br>").map(msg => `<li>${msg}</li>`).join("")}
-                        </ul>
-                    </div>
-                `;
-            } else {
-                errorHtml = errorMsg;
-            }
 
             Swal.fire({
-                title: errorTitle,
-                html: errorHtml,
+                title: 'Error',
+                text: errorMsg,
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
@@ -1405,78 +1477,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Dynamic form method toggle function
-    window.toggleRefundMethod = function() {
-        const bankForm = document.getElementById('bankForm');
-        const ewalletForm = document.getElementById('ewalletForm');
-        const selectedMethod = document.querySelector('input[name="metode_refund"]:checked');
-
-        if (!selectedMethod) {
-            bankForm.style.display = 'none';
-            ewalletForm.style.display = 'none';
-            return;
-        }
-
-        // Add smooth transition effect
-        bankForm.style.transition = 'all 0.3s ease';
-        ewalletForm.style.transition = 'all 0.3s ease';
-
-        if (selectedMethod.value === 'bank_transfer') {
-            bankForm.style.display = 'block';
-            ewalletForm.style.display = 'none';
-
-            // Set required attributes for bank fields
-            document.getElementById('nama_bank').required = true;
-            document.getElementById('nomor_rekening').required = true;
-            document.getElementById('nama_pemilik_rekening').required = true;
-
-            // Remove required attributes from e-wallet fields
-            const namaEwallet = document.getElementById('nama_ewallet');
-            const nomorEwallet = document.getElementById('nomor_ewallet');
-            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
-            if (namaEwallet) namaEwallet.required = false;
-            if (nomorEwallet) nomorEwallet.required = false;
-            if (namaPemilikEwallet) namaPemilikEwallet.required = false;
-
-            // Smooth show animation
-            setTimeout(() => {
-                bankForm.style.opacity = '1';
-                bankForm.style.transform = 'translateY(0)';
-            }, 100);
-
-        } else if (selectedMethod.value === 'e_wallet') {
-            bankForm.style.display = 'none';
-            ewalletForm.style.display = 'block';
-
-            // Set required attributes for e-wallet fields
-            const namaEwallet = document.getElementById('nama_ewallet');
-            const nomorEwallet = document.getElementById('nomor_ewallet');
-            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
-            if (namaEwallet) namaEwallet.required = true;
-            if (nomorEwallet) nomorEwallet.required = true;
-            if (namaPemilikEwallet) namaPemilikEwallet.required = true;
-
-            // Remove required attributes from bank fields
-            document.getElementById('nama_bank').required = false;
-            document.getElementById('nomor_rekening').required = false;
-            document.getElementById('nama_pemilik_rekening').required = false;
-
-            // Smooth show animation
-            setTimeout(() => {
-                ewalletForm.style.opacity = '1';
-                ewalletForm.style.transform = 'translateY(0)';
-            }, 100);
-        }
-    };
-
-    // Update amount display
+    // Update amount display with validation
     document.getElementById('amount').addEventListener('input', function() {
         const amount = parseInt(this.value) || 0;
         const maxAmount = {{ $pesanan->total_harga }};
 
         if (amount > maxAmount) {
             this.value = maxAmount;
-            // Add a subtle highlight animation when correcting the value
             this.classList.add('form-field-invalid');
             setTimeout(() => {
                 this.classList.remove('form-field-invalid');

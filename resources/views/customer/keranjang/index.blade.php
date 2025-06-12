@@ -29,7 +29,7 @@
                 <div class="w-32 p-4 text-sm font-medium text-gray-700 text-center">Harga Satuan</div>
                 <div class="w-32 p-4 text-sm font-medium text-gray-700 text-center">Kuantitas</div>
                 <div class="w-32 p-4 text-sm font-medium text-gray-700 text-center">Total Harga</div>
-                <div class="w-24 p-4 text-sm font-medium text-gray-700 text-center">Aksi</div>
+                {{-- <div class="w-24 p-4 text-sm font-medium text-gray-700 text-center">Aksi</div> --}}
             </div>
 
             <!-- Cart items -->
@@ -89,7 +89,7 @@
                     </span>
                 </div>
 
-                <!-- Actions -->
+                {{-- <!-- Actions -->
                 <div class="w-24 p-4 flex items-center justify-center">
                     <form class="delete-form" action="{{ route('keranjang.destroy.post', $item->id_keranjang) }}" method="POST">
                         @csrf
@@ -99,7 +99,7 @@
                             </svg>
                         </button>
                     </form>
-                </div>
+                </div> --}}
             </div>
             @endforeach
         </form>
