@@ -230,11 +230,11 @@
             <!-- Review Photos -->
             @if($review->photos && count($review->photos) > 0)
             <div class="mb-4">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Foto Ulasan:</h4>
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Foto Ulasan ({{ count($review->photos) }}):</h4>
                 <div class="review-photos">
-                    @foreach($review->photos as $photo)
+                    @foreach($review->photos as $index => $photo)
                     <img src="{{ asset('storage/' . $photo) }}"
-                         alt="Foto ulasan"
+                         alt="Foto ulasan {{ $index + 1 }}"
                          class="review-photo"
                          onclick="openPhotoModal('{{ asset('storage/' . $photo) }}')">
                     @endforeach

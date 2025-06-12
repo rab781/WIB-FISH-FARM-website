@@ -1052,30 +1052,18 @@
                                         <p class="text-gray-700 leading-relaxed">{{ $review->komentar }}</p>
                                     </div>
 
-                                    @if($review->foto_review)
-                                        @php
-                                            $photos = is_array($review->foto_review) ? $review->foto_review : [$review->foto_review];
-                                        @endphp
+                                    @if($review->hasPhotos())
                                         <div class="mb-3">
+                                            <h5 class="text-sm font-medium text-gray-700 mb-2">Foto Review ({{ count($review->photos) }}):</h5>
                                             <div class="flex flex-wrap gap-2">
-                                                @foreach($photos as $photo)
-                                                    <div class="relative">
-                                                        @php
-                                                            $photoUrl = '';
-                                                            if (Str::startsWith($photo, ['http://', 'https://'])) {
-                                                                $photoUrl = $photo;
-                                                            } elseif (Str::startsWith($photo, 'uploads/')) {
-                                                                $photoUrl = asset($photo);
-                                                            } elseif (Str::startsWith($photo, 'storage/')) {
-                                                                $photoUrl = asset($photo);
-                                                            } else {
-                                                                $photoUrl = asset('storage/' . $photo);
-                                                            }
-                                                        @endphp
-                                                        <img src="{{ $photoUrl }}"
-                                                             alt="Foto Review"
-                                                             class="w-16 h-16 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-75 transition-opacity"
-                                                             onclick="openPhotoModal('{{ $photoUrl }}')">
+                                                @foreach($review->photos as $index => $photo)
+                                                    <div class="relative group cursor-pointer" onclick="openPhotoGallery({{ $review->id }}, {{ $index }})">
+                                                        <img src="{{ asset('storage/' . $photo) }}"
+                                                             alt="Foto Review {{ $index + 1 }}"
+                                                             class="w-16 h-16 object-cover rounded-lg border border-gray-200 group-hover:opacity-75 transition-opacity">
+                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center justify-center">
+                                                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                        </div>
                                                     </div>
                                                 @endforeach
                                             </div>

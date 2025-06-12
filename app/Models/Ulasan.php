@@ -185,17 +185,51 @@ class Ulasan extends Model
     // Photo methods
     public function hasPhotos(): bool
     {
-        return !empty($this->foto_review) && is_array($this->foto_review);
+        return !empty($this->foto_review) &&
+               (is_array($this->foto_review) || is_string($this->foto_review));
+    }
+
+    public function getPhotosAttribute(): array
+    {
+        if (empty($this->foto_review)) {
+            return [];
+        }
+
+        // Handle different data formats
+        $photos = $this->foto_review;
+
+        // If it's a string, try to decode it as JSON
+        if (is_string($photos)) {
+            $decoded = json_decode($photos, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $photos = $decoded;
+            } else {
+                // If not JSON, treat as single photo
+                $photos = [$photos];
+            }
+        }
+
+        // Ensure it's an array
+        if (!is_array($photos)) {
+            return [];
+        }
+
+        // Filter out empty/null values and ensure files exist
+        return array_filter($photos, function($photo) {
+            if (empty($photo) || $photo === null || trim($photo) === '' || $photo === 'null') {
+                return false;
+            }
+
+            // Check if file exists
+            $filePath = storage_path('app/public/' . $photo);
+            return file_exists($filePath);
+        });
     }
 
     public function getPhotoUrlsAttribute(): array
     {
-        if (!$this->hasPhotos()) {
-            return [];
-        }
-
         return array_map(function($photo) {
             return asset('storage/' . $photo);
-        }, $this->foto_review);
+        }, $this->photos);
     }
 }

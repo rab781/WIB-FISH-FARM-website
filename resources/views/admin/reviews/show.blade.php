@@ -130,12 +130,21 @@
             </div>
 
             <!-- Review Photos -->
-            @if($review->hasPhotos())
+            @if($review->photos && count($review->photos) > 0)
                 <div class="mb-6">
-                    <h4 class="text-md font-semibold text-gray-900 mb-3">Foto Ulasan:</h4>
+                    <h4 class="text-md font-semibold text-gray-900 mb-3">Foto Ulasan ({{ count($review->photos) }}):</h4>
                     <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 review-photos">
-                        @foreach($review->photo_urls as $photo)
-                            <img src="{{ $photo }}" alt="Review photo" onclick="openImageModal('{{ $photo }}')">
+                        @foreach($review->photo_urls as $index => $photo)
+                            <div class="relative group cursor-pointer" onclick="openImageModal('{{ $photo }}')">
+                                <img src="{{ $photo }}"
+                                     alt="Review photo {{ $index + 1 }}"
+                                     class="w-full h-20 object-cover rounded-lg border border-gray-200 group-hover:opacity-75 transition-opacity duration-200">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all duration-200 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>

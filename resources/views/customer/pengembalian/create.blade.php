@@ -258,37 +258,66 @@
     .radio-option {
         position: relative;
         cursor: pointer;
-        border: 2px solid var(--border-color);
+        border: 2px solid #e2e8f0;
         border-radius: 12px;
         transition: all 0.3s ease;
-        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        background: #ffffff;
         overflow: hidden;
     }
 
-    .radio-option::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.1), transparent);
-        transition: left 0.5s ease;
-    }
-
     .radio-option:hover {
-        border-color: var(--primary-color);
+        border-color: #f97316;
         transform: translateY(-2px);
-        box-shadow: var(--shadow-medium);
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.15);
     }
 
-    .radio-option:hover::before {
-        left: 100%;
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
     }
 
-    .radio-option input[type="radio"]:checked + div {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        color: white;
+    .refund-method-option {
+        position: relative;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .refund-method-option:hover {
+        border-color: #f97316;
+        background: #fff7ed;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.15);
+    }
+
+    .refund-method-option .radio-indicator {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .refund-method-option .radio-indicator div {
+        width: 10px;
+        height: 10px;
+        background: #f97316;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .btn-primary {
@@ -697,7 +726,7 @@
                         </div>
                     </label>
                 </div>
-                @error('jenis_refund')
+                @error('jenis_keluhan')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -936,20 +965,150 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Refund form script initialized');
+
     const uploadArea = document.getElementById('uploadArea');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const refundForm = document.getElementById('refundForm');
+    const submitBtn = document.getElementById('submitRefund');
     let selectedFiles = [];
 
-    // Initialize refund method handlers
+    // Initialize all handlers
+    initializeRefundReasonHandlers();
     initializeRefundMethodHandlers();
+    initializePhotoUpload();
+    initializeFormSubmission();
+    initializeAmountValidation();
 
-    // Photo upload functionality
-    if (uploadArea && photoInput) {
+    // Initialize refund reason selection handlers
+    function initializeRefundReasonHandlers() {
+        const reasonOptions = document.querySelectorAll('.radio-option');
+        console.log('Found reason options:', reasonOptions.length);
+
+        reasonOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                console.log('Reason option clicked');
+
+                // Reset all options
+                reasonOptions.forEach(opt => {
+                    opt.style.borderColor = '#e2e8f0';
+                    opt.style.backgroundColor = '';
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = false;
+                });
+
+                // Select current option
+                this.style.borderColor = '#f97316';
+                this.style.backgroundColor = '#fff7ed';
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    console.log('Selected reason:', radio.value);
+                }
+            });
+        });
+    }
+
+    // Initialize refund method selection handlers
+    function initializeRefundMethodHandlers() {
+        const refundMethodOptions = document.querySelectorAll('.refund-method-option');
+        console.log('Found refund method options:', refundMethodOptions.length);
+
+        refundMethodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                console.log('Refund method clicked');
+
+                const radio = this.querySelector('input[type="radio"]');
+                if (!radio) return;
+
+                // Reset all options
+                refundMethodOptions.forEach(opt => {
+                    const r = opt.querySelector('input[type="radio"]');
+                    const indicator = opt.querySelector('.radio-indicator div');
+
+                    if (r) r.checked = false;
+                    if (indicator) indicator.style.opacity = '0';
+                    opt.style.borderColor = '#d1d5db';
+                    opt.style.backgroundColor = '';
+                });
+
+                // Select current option
+                radio.checked = true;
+                const indicator = this.querySelector('.radio-indicator div');
+                if (indicator) indicator.style.opacity = '1';
+                this.style.borderColor = '#f97316';
+                this.style.backgroundColor = '#fff7ed';
+
+                console.log('Selected refund method:', radio.value);
+                toggleRefundForms(radio.value);
+            });
+        });
+    }
+
+    function toggleRefundForms(selectedMethod) {
+        const bankForm = document.getElementById('bankForm');
+        const ewalletForm = document.getElementById('ewalletForm');
+
+        console.log('Toggling forms for method:', selectedMethod);
+
+        if (!bankForm || !ewalletForm) {
+            console.error('Bank or e-wallet form not found');
+            return;
+        }
+
+        // Reset both forms
+        bankForm.style.display = 'none';
+        ewalletForm.style.display = 'none';
+
+        // Clear required attributes
+        ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
+            const element = document.getElementById(field);
+            if (element) element.required = false;
+        });
+
+        ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
+            const element = document.getElementById(field);
+            if (element) element.required = false;
+        });
+
+        if (selectedMethod === 'bank_transfer') {
+            bankForm.style.display = 'block';
+
+            // Set required attributes for bank fields
+            ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            console.log('Bank form shown');
+        } else if (selectedMethod === 'e_wallet') {
+            ewalletForm.style.display = 'block';
+
+            // Set required attributes for e-wallet fields
+            ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            console.log('E-wallet form shown');
+        }
+    }
+
+    // Initialize photo upload functionality
+    function initializePhotoUpload() {
+        if (!uploadArea || !photoInput) {
+            console.log('Photo upload elements not found');
+            return;
+        }
+
+        console.log('Photo upload initialized');
+
         // Click to upload
         uploadArea.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             photoInput.click();
         });
 
@@ -976,11 +1135,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // File input change
         photoInput.addEventListener('change', function() {
+            console.log('Files selected:', this.files.length);
             handleFiles(this.files);
         });
     }
 
     function handleFiles(files) {
+        console.log('Handling files:', files.length);
+
         for (let file of files) {
             if (selectedFiles.length >= 5) {
                 Swal.fire({
@@ -1002,10 +1164,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 continue;
             }
 
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 Swal.fire({
                     title: 'Ukuran File Terlalu Besar',
-                    text: 'Ukuran file maksimal 5MB',
+                    text: 'Ukuran file maksimal 2MB',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
@@ -1014,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             selectedFiles.push(file);
             displayPreview(file, selectedFiles.length - 1);
+            console.log('File added. Total files:', selectedFiles.length);
         }
         updateFileInput();
     }
@@ -1035,7 +1198,9 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsDataURL(file);
     }
 
+    // Global function for removing photos
     window.removePhoto = function(index) {
+        console.log('Removing photo at index:', index);
         selectedFiles.splice(index, 1);
         updateFileInput();
         refreshPreviews();
@@ -1045,6 +1210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const dt = new DataTransfer();
         selectedFiles.forEach(file => dt.items.add(file));
         photoInput.files = dt.files;
+        console.log('Updated file input with', selectedFiles.length, 'files');
     }
 
     function refreshPreviews() {
@@ -1058,109 +1224,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize refund method selection handlers
-    function initializeRefundMethodHandlers() {
-        const refundMethodOptions = document.querySelectorAll('.refund-method-option');
-        const bankForm = document.getElementById('bankForm');
-        const ewalletForm = document.getElementById('ewalletForm');
-
-        refundMethodOptions.forEach(option => {
-            const radio = option.querySelector('input[type="radio"]');
-            const indicator = option.querySelector('.radio-indicator div');
-
-            option.addEventListener('click', function() {
-                // Update all radio states
-                refundMethodOptions.forEach(opt => {
-                    const r = opt.querySelector('input[type="radio"]');
-                    const ind = opt.querySelector('.radio-indicator div');
-                    const border = opt.querySelector('.radio-indicator');
-
-                    if (r === radio) {
-                        r.checked = true;
-                        ind.style.opacity = '1';
-                        border.style.borderColor = '#f97316';
-                        opt.style.borderColor = '#f97316';
-                        opt.style.backgroundColor = '#fff7ed';
-                    } else {
-                        r.checked = false;
-                        ind.style.opacity = '0';
-                        border.style.borderColor = '#d1d5db';
-                        opt.style.borderColor = '#d1d5db';
-                        opt.style.backgroundColor = '';
-                    }
-                });
-
-                // Show/hide relevant forms
-                toggleRefundForms(radio.value);
-            });
-        });
-    }
-
-    function toggleRefundForms(selectedMethod) {
-        const bankForm = document.getElementById('bankForm');
-        const ewalletForm = document.getElementById('ewalletForm');
-
-        if (!bankForm || !ewalletForm) {
-            console.warn('Bank or e-wallet form not found');
+    // Form submission handler
+    function initializeFormSubmission() {
+        if (!refundForm || !submitBtn) {
+            console.error('Form or submit button not found');
             return;
         }
 
-        // Reset both forms
-        bankForm.style.display = 'none';
-        ewalletForm.style.display = 'none';
+        refundForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submission attempted');
 
-        if (selectedMethod === 'bank_transfer') {
-            bankForm.style.display = 'block';
-            bankForm.style.opacity = '0';
-            bankForm.style.transform = 'translateY(-10px)';
+            // Show loading
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
 
-            // Set required attributes for bank fields
-            const bankFields = ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'];
-            const ewalletFields = ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'];
+            // Validate form
+            if (!validateForm()) {
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+                return;
+            }
 
-            bankFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = true;
-            });
+            // Show confirmation dialog
+            const confirmed = await showConfirmationDialog();
+            if (!confirmed) {
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+                return;
+            }
 
-            ewalletFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = false;
-            });
+            // Submit form
+            await submitFormData();
+        });
+    }
 
-            // Smooth show animation
-            setTimeout(() => {
-                bankForm.style.opacity = '1';
-                bankForm.style.transform = 'translateY(0)';
-            }, 100);
-
-        } else if (selectedMethod === 'e_wallet') {
-            ewalletForm.style.display = 'block';
-            ewalletForm.style.opacity = '0';
-            ewalletForm.style.transform = 'translateY(-10px)';
-
-            // Set required attributes for e-wallet fields
-            const bankFields = ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'];
-            const ewalletFields = ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'];
-
-            ewalletFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = true;
-            });
-
-            bankFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = false;
-            });
-
-    // Form validation and submission
-    const refundForm = document.getElementById('refundForm');
-    const submitBtn = document.getElementById('submitRefund');
-
-    refundForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Validate form
+    function validateForm() {
+        // Check reason selection
         const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
         if (!reason) {
             Swal.fire({
@@ -1169,31 +1272,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
-            return;
+            return false;
         }
 
-        const description = document.getElementById('description').value;
-        if (description.length < 20) {
+        // Check description
+        const description = document.getElementById('description');
+        if (!description || description.value.trim().length < 20) {
             Swal.fire({
                 title: 'Error',
                 text: 'Deskripsi masalah harus minimal 20 karakter',
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
-            return;
+            return false;
         }
 
-        const amount = document.getElementById('amount').value;
-        if (!amount || amount <= 0) {
+        // Check amount
+        const amount = document.getElementById('amount');
+        if (!amount || !amount.value || parseFloat(amount.value) <= 0) {
             Swal.fire({
                 title: 'Error',
                 text: 'Jumlah refund harus lebih dari 0',
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
-            return;
+            return false;
         }
 
+        // Check refund method
         const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
         if (!refundMethod) {
             Swal.fire({
@@ -1202,80 +1308,81 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
-            return;
+            return false;
         }
 
-        // Validate refund method specific information
+        // Validate method-specific fields
         if (refundMethod.value === 'bank_transfer') {
-            const namaBank = document.getElementById('nama_bank').value;
-            const nomorRekening = document.getElementById('nomor_rekening').value;
-            const namaPemilik = document.getElementById('nama_pemilik_rekening').value;
+            const namaBank = document.getElementById('nama_bank');
+            const nomorRekening = document.getElementById('nomor_rekening');
+            const namaPemilik = document.getElementById('nama_pemilik_rekening');
 
-            if (!namaBank || namaBank.length < 3) {
+            if (!namaBank || namaBank.value.trim().length < 3) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Nama bank harus diisi dengan benar',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
 
-            if (!nomorRekening || nomorRekening.length < 5) {
+            if (!nomorRekening || nomorRekening.value.trim().length < 5) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Nomor rekening harus diisi dengan benar',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
 
-            if (!namaPemilik || namaPemilik.length < 3) {
+            if (!namaPemilik || namaPemilik.value.trim().length < 3) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Nama pemilik rekening harus diisi dengan benar',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
         } else if (refundMethod.value === 'e_wallet') {
-            const namaEwallet = document.getElementById('nama_ewallet').value;
-            const nomorEwallet = document.getElementById('nomor_ewallet').value;
-            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet').value;
+            const namaEwallet = document.getElementById('nama_ewallet');
+            const nomorEwallet = document.getElementById('nomor_ewallet');
+            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
 
-            if (!namaEwallet) {
+            if (!namaEwallet || !namaEwallet.value) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Silakan pilih jenis e-wallet',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
 
-            if (!nomorEwallet || nomorEwallet.length < 5) {
+            if (!nomorEwallet || nomorEwallet.value.trim().length < 5) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Nomor e-wallet harus diisi dengan benar',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
 
-            if (!namaPemilikEwallet || namaPemilikEwallet.length < 3) {
+            if (!namaPemilikEwallet || namaPemilikEwallet.value.trim().length < 3) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Nama pemilik e-wallet harus diisi dengan benar',
                     icon: 'error',
                     confirmButtonColor: '#f97316'
                 });
-                return;
+                return false;
             }
         }
 
+        // Check terms agreement
         const agreeTerms = document.querySelector('input[name="agree_terms"]:checked');
         if (!agreeTerms) {
             Swal.fire({
@@ -1284,10 +1391,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 confirmButtonColor: '#f97316'
             });
-            return;
+            return false;
         }
 
-        // Show confirmation dialog
+        console.log('Form validation passed');
+        return true;
+    }
+
+    async function showConfirmationDialog() {
+        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
+        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
+        const description = document.getElementById('description');
+        const amount = document.getElementById('amount');
+
         let paymentDetails = '';
         if (refundMethod.value === 'bank_transfer') {
             const bankName = document.getElementById('nama_bank').value;
@@ -1323,11 +1439,6 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
-        const photoCount = selectedFiles.length;
-        const reasonText = document.querySelector('input[name="jenis_keluhan"]:checked').value;
-        const descriptionText = document.getElementById('description').value;
-        const amountValue = document.getElementById('amount').value;
-
         const result = await Swal.fire({
             title: 'Konfirmasi Pengajuan Refund',
             html: `
@@ -1343,15 +1454,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="flex justify-between py-1 border-b border-orange-100">
                                 <span class="text-gray-600">Alasan:</span>
-                                <span class="font-medium">${reasonText}</span>
+                                <span class="font-medium">${reason.value}</span>
                             </div>
                             <div class="flex justify-between py-1 border-b border-orange-100">
                                 <span class="text-gray-600">Jumlah Refund:</span>
-                                <span class="font-medium text-orange-600">Rp ${parseInt(amountValue).toLocaleString('id-ID')}</span>
+                                <span class="font-medium text-orange-600">Rp ${parseInt(amount.value).toLocaleString('id-ID')}</span>
                             </div>
                             <div class="flex justify-between py-1">
                                 <span class="text-gray-600">Foto Bukti:</span>
-                                <span class="font-medium">${photoCount} foto</span>
+                                <span class="font-medium">${selectedFiles.length} foto</span>
                             </div>
                         </div>
                     </div>
@@ -1362,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
                             <i class="fas fa-comment-alt mr-2"></i>Deskripsi Masalah
                         </h4>
-                        <p class="text-sm text-gray-700 italic bg-white p-2 rounded border">"${descriptionText}"</p>
+                        <p class="text-sm text-gray-700 italic bg-white p-2 rounded border">"${description.value}"</p>
                     </div>
 
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3">
@@ -1392,20 +1503,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        if (!result.isConfirmed) {
-            return;
-        }
+        return result.isConfirmed;
+    }
 
+    async function submitFormData() {
         // Show loading state
-        loadingOverlay.style.display = 'flex';
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
 
         try {
-            const formData = new FormData(this);
+            const formData = new FormData(refundForm);
             const token = document.querySelector('meta[name="csrf-token"]').content;
 
-            const response = await fetch(this.action, {
+            const response = await fetch(refundForm.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1473,23 +1584,28 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
         } finally {
-            loadingOverlay.style.display = 'none';
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
         }
-    });
+    }
 
-    // Update amount display with validation
-    document.getElementById('amount').addEventListener('input', function() {
-        const amount = parseInt(this.value) || 0;
-        const maxAmount = {{ $pesanan->total_harga }};
+    // Initialize amount validation
+    function initializeAmountValidation() {
+        const amountField = document.getElementById('amount');
+        if (amountField) {
+            amountField.addEventListener('input', function() {
+                const amount = parseInt(this.value) || 0;
+                const maxAmount = {{ $pesanan->total_harga }};
 
-        if (amount > maxAmount) {
-            this.value = maxAmount;
-            this.classList.add('form-field-invalid');
-            setTimeout(() => {
-                this.classList.remove('form-field-invalid');
-            }, 800);
+                if (amount > maxAmount) {
+                    this.value = maxAmount;
+                    this.classList.add('form-field-invalid');
+                    setTimeout(() => {
+                        this.classList.remove('form-field-invalid');
+                    }, 800);
+                }
+            });
         }
-    });
+    }
 });
 </script>
 @endpush

@@ -194,67 +194,24 @@
                     </div>
 
                     <!-- Review Photos -->
-                    @php
-                        $hasValidPhotos = false;
-                        $validPhotos = [];
-
-                        if ($review->foto_review) {
-                            // Parse foto_review data
-                            $photos = is_string($review->foto_review) ? json_decode($review->foto_review, true) : $review->foto_review;
-
-                            // Handle single photo case
-                            if (!is_array($photos)) {
-                                $photos = [$review->foto_review];
-                            }
-
-                            // Filter out empty, null, or invalid photos with more comprehensive checks
-                            $validPhotos = array_filter($photos, function($photo) {
-                                if (empty($photo) || $photo === null || $photo === '' || $photo === 'null') {
-                                    return false;
-                                }
-
-                                $trimmedPhoto = trim($photo);
-                                if ($trimmedPhoto === '' || $trimmedPhoto === 'null') {
-                                    return false;
-                                }
-
-                                // Check for common placeholder values
-                                $invalidValues = ['[]', '{}', 'null', 'undefined', 'false', '0'];
-                                if (in_array(strtolower($trimmedPhoto), $invalidValues)) {
-                                    return false;
-                                }
-
-                                // Check if file exists (basic validation)
-                                $filePath = storage_path('app/public/' . $trimmedPhoto);
-                                if (!file_exists($filePath)) {
-                                    return false;
-                                }
-
-                                return true;
-                            });
-
-                            $hasValidPhotos = !empty($validPhotos) && count($validPhotos) > 0;
-                        }
-                    @endphp
-
-                    @if($hasValidPhotos)
-                    <div class="mb-3">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Foto Ulasan ({{ count($validPhotos) }}):</h4>
-                        <div class="flex space-x-2">
-                            @foreach(array_slice($validPhotos, 0, 4) as $index => $photo)
-                            <img src="{{ asset('storage/' . $photo) }}"
-                                 alt="Review photo"
-                                 class="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                                 onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, {{ $index }})">
-                            @endforeach
-                            @if(count($validPhotos) > 4)
-                            <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm cursor-pointer hover:bg-gray-300"
-                                 onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, 0)">
-                                +{{ count($validPhotos) - 4 }}
+                    @if($review->hasPhotos())
+                        <div class="mb-3">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Foto Ulasan ({{ count($review->photos) }}):</h4>
+                            <div class="flex space-x-2">
+                                @foreach(array_slice($review->photos, 0, 4) as $index => $photo)
+                                <img src="{{ asset('storage/' . $photo) }}"
+                                     alt="Review photo {{ $index + 1 }}"
+                                     class="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                                     onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, {{ $index }})">
+                                @endforeach
+                                @if(count($review->photos) > 4)
+                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm cursor-pointer hover:bg-gray-300"
+                                     onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, 0)">
+                                    +{{ count($review->photos) - 4 }}
+                                </div>
+                                @endif
                             </div>
-                            @endif
                         </div>
-                    </div>
                     @endif
 
                     <!-- Admin Reply -->

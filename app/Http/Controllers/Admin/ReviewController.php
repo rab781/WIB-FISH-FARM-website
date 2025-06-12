@@ -212,7 +212,7 @@ class ReviewController extends Controller
                     'not_helpful' => $review->interactions()->where('interaction_type', 'not_helpful')->count(),
                     'total' => $review->interactions()->count()
                 ],
-                'photos' => $this->formatPhotos($review->foto_review)
+                'photos' => $review->photo_urls // Use enhanced photo handling
             ];
 
             return response()->json([
@@ -237,7 +237,8 @@ class ReviewController extends Controller
     public function photos(Ulasan $review)
     {
         try {
-            $photos = $this->formatPhotos($review->foto_review);
+            // Use the enhanced photo handling from the model
+            $photos = $review->photo_urls; // This uses the enhanced getPhotoUrlsAttribute()
 
             return response()->json([
                 'success' => true,
@@ -253,42 +254,5 @@ class ReviewController extends Controller
                 'message' => 'Gagal mengambil foto review: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Helper method to format photos for API response
-     */
-    private function formatPhotos($fotoReview)
-    {
-        $photos = [];
-
-        if ($fotoReview) {
-            // Parse foto_review data properly
-            $photoData = is_string($fotoReview) ? json_decode($fotoReview, true) : $fotoReview;
-
-            // Handle single photo case
-            if (!is_array($photoData)) {
-                $photoData = [$fotoReview];
-            }
-
-            foreach ($photoData as $photo) {
-                // Skip empty or invalid photos
-                if (empty($photo) || $photo === null || trim($photo) === '' || $photo === 'null') {
-                    continue;
-                }
-
-                // Check if file exists
-                $filePath = storage_path('app/public/' . $photo);
-                if (!file_exists($filePath)) {
-                    continue;
-                }
-
-                // Format photo URL properly
-                $photoUrl = asset('storage/' . $photo);
-                $photos[] = $photoUrl;
-            }
-        }
-
-        return $photos;
     }
 }
