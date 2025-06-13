@@ -16,11 +16,151 @@
     .status-verified { @apply bg-blue-100 text-blue-800; }
 
     .review-card {
-        @apply bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer;
+        @apply bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden;
+        backdrop-filter: blur(10px);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid transparent;
+        padding: 1.5rem;
     }
 
     .review-card:hover {
-        @apply transform scale-[1.01];
+        @apply transform scale-[1.02] border-orange-200;
+        border-left-color: #f97316;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(249, 115, 22, 0.1);
+    }
+
+    .review-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #f97316, #ea580c, #dc2626);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .review-card:hover::before {
+        opacity: 1;
+    }
+
+    .review-separator {
+        @apply border-b border-gray-100 pb-6 mb-6 last:border-b-0 last:pb-0 last:mb-0;
+    }
+
+    .customer-avatar {
+        @apply w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .rating-display {
+        @apply flex items-center space-x-1;
+    }
+
+    .rating-display .star {
+        @apply text-lg transition-all duration-200;
+    }
+
+    .rating-display .star.filled {
+        @apply text-yellow-400;
+        filter: drop-shadow(0 1px 2px rgba(251, 191, 36, 0.3));
+    }
+
+    .rating-display .star.empty {
+        @apply text-gray-300;
+    }
+
+    .product-info-card {
+        @apply bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-150;
+        backdrop-filter: blur(5px);
+    }
+
+    .product-image {
+        @apply w-14 h-14 object-cover rounded-xl shadow-md;
+        border: 2px solid white;
+    }
+
+    .review-content {
+        @apply text-gray-800 leading-relaxed text-base;
+        line-height: 1.7;
+    }
+
+    .photo-thumbnail {
+        @apply w-20 h-20 object-cover rounded-xl cursor-pointer border-2 border-white shadow-lg;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .photo-thumbnail:hover {
+        @apply transform scale-110 border-orange-300;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .photo-grid {
+        @apply flex flex-wrap gap-3;
+    }
+
+    .photo-count-badge {
+        @apply w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center text-gray-600 text-sm font-semibold cursor-pointer;
+        transition: all 0.3s ease;
+    }
+
+    .photo-count-badge:hover {
+        @apply bg-gradient-to-br from-orange-200 to-orange-300 text-orange-700 transform scale-105;
+    }
+
+    .admin-reply-card {
+        @apply bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 rounded-xl p-4;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+
+    .interactions-display {
+        @apply flex items-center space-x-6 text-sm font-medium;
+    }
+
+    .interaction-item {
+        @apply flex items-center space-x-2 px-3 py-2 rounded-lg;
+        transition: all 0.2s ease;
+    }
+
+    .interaction-item.helpful {
+        @apply bg-green-50 text-green-700 hover:bg-green-100;
+    }
+
+    .interaction-item.not-helpful {
+        @apply bg-red-50 text-red-700 hover:bg-red-100;
+    }
+
+    .action-buttons {
+        @apply flex flex-col space-y-3;
+    }
+
+    .action-btn {
+        @apply flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    }
+
+    .action-btn.reply {
+        @apply bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800;
+    }
+
+    .action-btn.edit {
+        @apply bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800;
+    }
+
+    .action-btn:hover {
+        @apply transform translateY(-1px) shadow-md;
+    }
+
+    .empty-state {
+        @apply text-center py-12 px-6;
+    }
+
+    .empty-state-icon {
+        @apply text-6xl text-gray-300 mb-4;
     }
 
     /* Modal styling */
@@ -36,6 +176,43 @@
     .modal-content {
         @apply bg-white rounded-lg shadow-xl overflow-hidden;
         z-index: 50;
+    }
+
+    /* Enhanced animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .review-card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .review-card:nth-child(1) { animation-delay: 0.1s; }
+    .review-card:nth-child(2) { animation-delay: 0.2s; }
+    .review-card:nth-child(3) { animation-delay: 0.3s; }
+    .review-card:nth-child(4) { animation-delay: 0.4s; }
+    .review-card:nth-child(5) { animation-delay: 0.5s; }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .review-card {
+            @apply p-4 mx-2;
+        }
+        
+        .customer-avatar {
+            @apply w-10 h-10 text-base;
+        }
+        
+        .photo-thumbnail, .photo-count-badge {
+            @apply w-16 h-16;
+        }
     }
 </style>
 @endpush
@@ -123,31 +300,34 @@
     </div>
 
     <!-- Reviews List -->
-    <div class="space-y-4">
+    <div class="space-y-6">
         @forelse($reviews as $review)
         <div class="review-card" onclick="openReviewDetailModal({{ $review->id_ulasan }})">
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <!-- Header -->
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            <div class="flex items-center space-x-3">
+                                <div class="customer-avatar">
                                     {{ substr($review->user->name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <div class="font-medium text-gray-900">{{ $review->user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $review->created_at->format('d/m/Y H:i') }}</div>
+                                    <div class="font-semibold text-gray-900 text-lg">{{ $review->user->name }}</div>
+                                    <div class="text-sm text-gray-500 flex items-center">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        {{ $review->created_at->format('d/m/Y H:i') }}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="flex items-center space-x-2">
-                                <div class="flex text-yellow-400">
+                            <div class="flex items-center space-x-3">
+                                <div class="rating-display">
                                     @for($i = 1; $i <= 5; $i++)
-                                        <i class="fas fa-star {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
+                                        <i class="fas fa-star star {{ $i <= $review->rating ? 'filled' : 'empty' }}"></i>
                                     @endfor
                                 </div>
-                                <span class="text-sm text-gray-600">({{ $review->rating }}/5)</span>
+                                <span class="text-sm font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">({{ $review->rating }}/5)</span>
                             </div>
                         </div>
 
@@ -164,48 +344,60 @@
                     </div>
 
                     <!-- Product Info -->
-                    <div class="mb-3 p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            @if($review->detailPesanan && $review->detailPesanan->produk && $review->detailPesanan->produk->gambar)
-                                @if(Str::startsWith($review->detailPesanan->produk->gambar, 'uploads/'))
-                                    <img src="{{ asset($review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="w-12 h-12 object-cover rounded-lg">
-                                @elseif(Str::startsWith($review->detailPesanan->produk->gambar, 'storage/'))
-                                    <img src="{{ asset($review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="w-12 h-12 object-cover rounded-lg">
+                    <div class="mb-4">
+                        <div class="product-info-card">
+                            <div class="flex items-center space-x-4">
+                                @if($review->detailPesanan && $review->detailPesanan->produk && $review->detailPesanan->produk->gambar)
+                                    @if(Str::startsWith($review->detailPesanan->produk->gambar, 'uploads/'))
+                                        <img src="{{ asset($review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="product-image">
+                                    @elseif(Str::startsWith($review->detailPesanan->produk->gambar, 'storage/'))
+                                        <img src="{{ asset($review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="product-image">
+                                    @else
+                                        <img src="{{ asset('storage/' . $review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="product-image">
+                                    @endif
                                 @else
-                                    <img src="{{ asset('storage/' . $review->detailPesanan->produk->gambar) }}" alt="{{ $review->detailPesanan->produk->nama_ikan }}" class="w-12 h-12 object-cover rounded-lg">
+                                    <div class="w-14 h-14 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
                                 @endif
-                            @else
-                                <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-900 text-lg">{{ $review->detailPesanan && $review->detailPesanan->produk ? $review->detailPesanan->produk->nama_ikan : 'Produk tidak tersedia' }}</div>
+                                    <div class="text-sm text-gray-500 flex items-center mt-1">
+                                        <i class="fas fa-receipt mr-1"></i>
+                                        Pesanan: #{{ $review->pesanan ? $review->pesanan->id_pesanan : 'N/A' }}
+                                    </div>
                                 </div>
-                            @endif
-                            <div>
-                                <div class="font-medium text-gray-900">{{ $review->detailPesanan && $review->detailPesanan->produk ? $review->detailPesanan->produk->nama_ikan : 'Produk tidak tersedia' }}</div>
-                                <div class="text-sm text-gray-500">Pesanan: #{{ $review->pesanan ? $review->pesanan->id_pesanan : 'N/A' }}</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Review Content -->
-                    <div class="mb-3">
-                        <p class="text-gray-800">{{ $review->komentar }}</p>
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-comment-alt mr-2 text-orange-500"></i>
+                            Ulasan Pelanggan
+                        </h4>
+                        <p class="review-content">{{ $review->komentar }}</p>
                     </div>
 
                     <!-- Review Photos -->
                     @if($review->hasPhotos())
-                        <div class="mb-3">
-                            <h4 class="text-sm font-medium text-gray-700 mb-2">Foto Ulasan ({{ count($review->photos) }}):</h4>
-                            <div class="flex space-x-2">
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-images mr-2 text-purple-500"></i>
+                                Foto Ulasan ({{ count($review->photos) }})
+                            </h4>
+                            <div class="photo-grid">
                                 @foreach(array_slice($review->photos, 0, 4) as $index => $photo)
                                 <img src="{{ asset('storage/' . $photo) }}"
                                      alt="Review photo {{ $index + 1 }}"
-                                     class="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                                     class="photo-thumbnail"
                                      onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, {{ $index }})">
                                 @endforeach
                                 @if(count($review->photos) > 4)
-                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 text-sm cursor-pointer hover:bg-gray-300"
+                                <div class="photo-count-badge"
                                      onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, 0)">
                                     +{{ count($review->photos) - 4 }}
                                 </div>
@@ -216,45 +408,56 @@
 
                     <!-- Admin Reply -->
                     @if($review->balasan_admin)
-                    <div class="mt-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <i class="fas fa-reply text-blue-600"></i>
-                            <span class="font-medium text-blue-900">Balasan Admin</span>
-                            <span class="text-sm text-blue-600">{{ $review->balasan_admin_at ? $review->balasan_admin_at->format('d/m/Y H:i') : '' }}</span>
+                    <div class="mb-4">
+                        <div class="admin-reply-card">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <i class="fas fa-reply text-blue-600"></i>
+                                <span class="font-semibold text-blue-900">Balasan Admin</span>
+                                <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{{ $review->balasan_admin_at ? $review->balasan_admin_at->format('d/m/Y H:i') : '' }}</span>
+                            </div>
+                            <p class="text-blue-800 leading-relaxed">{{ $review->balasan_admin }}</p>
                         </div>
-                        <p class="text-blue-800">{{ $review->balasan_admin }}</p>
                     </div>
                     @endif
 
                     <!-- Interactions -->
                     @if($review->interactions->count() > 0)
-                    <div class="mt-3 flex items-center space-x-4 text-sm text-gray-600">
-                        <span><i class="fas fa-thumbs-up mr-1"></i>{{ $review->interactions->where('interaction_type', 'helpful')->count() }} Helpful</span>
-                        <span><i class="fas fa-thumbs-down mr-1"></i>{{ $review->interactions->where('interaction_type', 'not_helpful')->count() }} Not Helpful</span>
+                    <div class="interactions-display">
+                        <div class="interaction-item helpful">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>{{ $review->interactions->where('interaction_type', 'helpful')->count() }} Helpful</span>
+                        </div>
+                        <div class="interaction-item not-helpful">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span>{{ $review->interactions->where('interaction_type', 'not_helpful')->count() }} Not Helpful</span>
+                        </div>
                     </div>
                     @endif
                 </div>
 
                 <!-- Actions -->
-                <div class="ml-4 flex flex-col space-y-2" onclick="event.stopPropagation()">
+                <div class="action-buttons" onclick="event.stopPropagation()">
                     @if(!$review->balasan_admin)
                     <button onclick="openReplyModalSwal({{ $review->id_ulasan }})"
-                            class="text-blue-600 hover:text-blue-900 text-sm flex items-center">
-                        <i class="fas fa-reply mr-1"></i>Balas
+                            class="action-btn reply">
+                        <i class="fas fa-reply"></i>
+                        <span>Balas</span>
                     </button>
                     @else
                     <button onclick="editReplyModalSwal({{ $review->id_ulasan }}, '{{ addslashes($review->balasan_admin) }}')"
-                            class="text-green-600 hover:text-green-900 text-sm flex items-center">
-                        <i class="fas fa-edit mr-1"></i>Edit Balasan
+                            class="action-btn edit">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Balasan</span>
                     </button>
                     @endif
                 </div>
             </div>
         </div>
         @empty
-        <div class="text-center py-8 text-gray-500">
-            <i class="fas fa-star text-4xl mb-4"></i>
-            <p>Tidak ada ulasan ditemukan.</p>
+        <div class="empty-state">
+            <i class="fas fa-star empty-state-icon"></i>
+            <h3 class="text-xl font-medium text-gray-600 mb-2">Tidak ada ulasan ditemukan</h3>
+            <p class="text-gray-500">Belum ada ulasan dari pelanggan yang sesuai dengan filter yang dipilih.</p>
         </div>
         @endforelse
     </div>

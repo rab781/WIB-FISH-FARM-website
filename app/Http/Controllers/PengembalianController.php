@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pengembalian;
-use App\Models\Pesanan;
 use App\Models\Expense;
+use App\Models\Pesanan;
+use Illuminate\Support\Str;
 use App\Models\Notification;
+use App\Models\Pengembalian;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PengembalianController extends Controller
 {
@@ -82,95 +84,135 @@ class PengembalianController extends Controller
      */
     public function store(Request $request, $pesanan = null)
     {
-        // Dynamic validation based on refund method
-        $rules = [
-            'id_pesanan' => 'sometimes|required|exists:pesanan,id_pesanan',
-            'jenis_keluhan' => 'required|in:Barang Rusak,Barang Tidak Sesuai,Barang Kurang,Kualitas Buruk,Lainnya',
-            'deskripsi_masalah' => 'required|string|min:10|max:1000',
-            'jumlah_klaim' => 'required|numeric|min:1000',
-            'metode_refund' => 'required|in:bank_transfer,e_wallet',
-            'foto_bukti.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-        ];
+        try {
+            // Dynamic validation based on refund method
+            $rules = [
+                'id_pesanan' => 'sometimes|required|exists:pesanan,id_pesanan',
+                'jenis_keluhan' => 'required|in:Barang Rusak,Barang Tidak Sesuai,Barang Kurang,Kualitas Buruk,Lainnya',
+                'deskripsi_masalah' => 'required|string|min:10|max:1000',
+                'jumlah_klaim' => 'required|numeric|min:1000',
+                'metode_refund' => 'required|in:bank_transfer,e_wallet',
+                'foto_bukti.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            ];
 
-        // Add conditional validation based on refund method
-        if ($request->metode_refund === 'bank_transfer') {
-            $rules['nama_bank'] = 'required|string|max:100';
-            $rules['nomor_rekening'] = 'required|string|max:50';
-            $rules['nama_pemilik_rekening'] = 'required|string|max:100';
-        } elseif ($request->metode_refund === 'e_wallet') {
-            $rules['nama_ewallet'] = 'required|string|in:GoPay,OVO,DANA,ShopeePay,LinkAja';
-            $rules['nomor_ewallet'] = 'required|string|max:50';
-            $rules['nama_pemilik_ewallet'] = 'required|string|max:100';
-        }
+            // Add conditional validation based on refund method
+            if ($request->metode_refund === 'bank_transfer') {
+                $rules['nama_bank'] = 'required|string|max:100';
+                $rules['nomor_rekening'] = 'required|string|max:50';
+                $rules['nama_pemilik_rekening'] = 'required|string|max:100';
+            } elseif ($request->metode_refund === 'e_wallet') {
+                $rules['nama_ewallet'] = 'required|string|in:GoPay,OVO,DANA,ShopeePay,LinkAja';
+                $rules['nomor_ewallet'] = 'required|string|max:50';
+                $rules['nama_pemilik_ewallet'] = 'required|string|max:100';
+            }
 
-        $request->validate($rules);
+            $request->validate($rules);
 
-        // Handle pesanan parameter from route or form data
-        if ($pesanan) {
-            // From route parameter
-            if (is_string($pesanan)) {
-                $pesananModel = Pesanan::where('id_pesanan', $pesanan)
+            // Handle pesanan parameter from route or form data
+            if ($pesanan) {
+                // From route parameter
+                if (is_string($pesanan)) {
+                    $pesananModel = Pesanan::where('id_pesanan', $pesanan)
+                        ->where('user_id', Auth::id())
+                        ->firstOrFail();
+                } else {
+                    $pesananModel = $pesanan;
+                    if ($pesananModel->user_id !== Auth::id()) {
+                        abort(403);
+                    }
+                }
+            } else {
+                // From form data (backward compatibility)
+                $pesananModel = Pesanan::where('id_pesanan', $request->id_pesanan)
                     ->where('user_id', Auth::id())
                     ->firstOrFail();
-            } else {
-                $pesananModel = $pesanan;
-                if ($pesananModel->user_id !== Auth::id()) {
-                    abort(403);
+            }
+
+            // Check if return already exists
+            if (Pengembalian::where('id_pesanan', $pesananModel->id_pesanan)->exists()) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pengembalian untuk pesanan ini sudah pernah diajukan.'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Pengembalian untuk pesanan ini sudah pernah diajukan.');
+            }
+
+            // Handle photo uploads
+            $fotoPaths = [];
+            if ($request->hasFile('foto_bukti')) {
+                foreach ($request->file('foto_bukti') as $foto) {
+                    $filename = 'pengembalian_' . time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+                    $path = $foto->storeAs('pengembalian', $filename, 'public');
+                    $fotoPaths[] = $path;
                 }
             }
-        } else {
-            // From form data (backward compatibility)
-            $pesananModel = Pesanan::where('id_pesanan', $request->id_pesanan)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-        }
 
-        // Check if return already exists
-        if (Pengembalian::where('id_pesanan', $pesananModel->id_pesanan)->exists()) {
-            return redirect()->back()->with('error', 'Pengembalian untuk pesanan ini sudah pernah diajukan.');
-        }
+            // Prepare data array for creation
+            $pengembalianData = [
+                'id_pesanan' => $pesananModel->id_pesanan,
+                'user_id' => Auth::id(),
+                'jenis_keluhan' => $request->jenis_keluhan,
+                'deskripsi_masalah' => $request->deskripsi_masalah,
+                'foto_bukti' => $fotoPaths,
+                'jumlah_klaim' => $request->jumlah_klaim,
+                'metode_refund' => $request->metode_refund,
+                'status_pengembalian' => 'Menunggu Review'
+            ];
 
-        // Handle photo uploads
-        $fotoPaths = [];
-        if ($request->hasFile('foto_bukti')) {
-            foreach ($request->file('foto_bukti') as $foto) {
-                $filename = 'pengembalian_' . time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $path = $foto->storeAs('pengembalian', $filename, 'public');
-                $fotoPaths[] = $path;
+            // Add bank or e-wallet specific fields
+            if ($request->metode_refund === 'bank_transfer') {
+                $pengembalianData['nama_bank'] = $request->nama_bank;
+                $pengembalianData['nomor_rekening'] = $request->nomor_rekening;
+                $pengembalianData['nama_pemilik_rekening'] = $request->nama_pemilik_rekening;
+            } elseif ($request->metode_refund === 'e_wallet') {
+                $pengembalianData['nama_ewallet'] = $request->nama_ewallet;
+                $pengembalianData['nomor_ewallet'] = $request->nomor_ewallet;
+                $pengembalianData['nama_pemilik_ewallet'] = $request->nama_pemilik_ewallet;
             }
+
+            // Create return request
+            $pengembalian = Pengembalian::create($pengembalianData);
+
+            // Send notification to admin
+            $this->notifyAdminNewRefund($pengembalian);
+
+            // Handle AJAX requests
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pengajuan pengembalian berhasil dikirim. Tim kami akan meninjau dalam 1-3 hari kerja.',
+                    'redirect_url' => route('pengembalian.show', $pengembalian->id_pengembalian)
+                ]);
+            }
+
+            return redirect()->route('pengembalian.show', $pengembalian->id_pengembalian)
+                ->with('success', 'Pengajuan pengembalian berhasil dikirim. Tim kami akan meninjau dalam 1-3 hari kerja.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data yang dikirim tidak valid.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Pengembalian store error: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat memproses pengajuan pengembalian. Silakan coba lagi.'
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memproses pengajuan pengembalian. Silakan coba lagi.')
+                ->withInput();
         }
-
-        // Prepare data array for creation
-        $pengembalianData = [
-            'id_pesanan' => $pesananModel->id_pesanan,
-            'user_id' => Auth::id(),
-            'jenis_keluhan' => $request->jenis_keluhan,
-            'deskripsi_masalah' => $request->deskripsi_masalah,
-            'foto_bukti' => $fotoPaths,
-            'jumlah_klaim' => $request->jumlah_klaim,
-            'metode_refund' => $request->metode_refund,
-            'status_pengembalian' => 'Menunggu Review'
-        ];
-
-        // Add bank or e-wallet specific fields
-        if ($request->metode_refund === 'bank_transfer') {
-            $pengembalianData['nama_bank'] = $request->nama_bank;
-            $pengembalianData['nomor_rekening'] = $request->nomor_rekening;
-            $pengembalianData['nama_pemilik_rekening'] = $request->nama_pemilik_rekening;
-        } elseif ($request->metode_refund === 'e_wallet') {
-            $pengembalianData['nama_ewallet'] = $request->nama_ewallet;
-            $pengembalianData['nomor_ewallet'] = $request->nomor_ewallet;
-            $pengembalianData['nama_pemilik_ewallet'] = $request->nama_pemilik_ewallet;
-        }
-
-        // Create return request
-        $pengembalian = Pengembalian::create($pengembalianData);
-
-        // Send notification to admin
-        $this->notifyAdminNewRefund($pengembalian);
-
-        return redirect()->route('pengembalian.show', $pengembalian->id_pengembalian)
-            ->with('success', 'Pengajuan pengembalian berhasil dikirim. Tim kami akan meninjau dalam 1-3 hari kerja.');
     }
 
     /**

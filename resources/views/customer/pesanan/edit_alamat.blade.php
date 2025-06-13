@@ -71,7 +71,7 @@
                             <div class="relative address-search-container">
                                 <input type="text"
                                     id="alamat_search"
-                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('alamat_id') border-red-300 @enderror"
+                                    class="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('alamat_id') border-red-300 @else border-gray-200 @enderror"
                                     placeholder="Contoh: Jakarta Selatan, Bandung, Surabaya..."
                                     value="{{ $pesanan->alamat_id ? $pesanan->alamat->full_address : '' }}"
                                 >
@@ -130,7 +130,7 @@
                                 name="alamat_jalan"
                                 id="alamat_jalan"
                                 rows="4"
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none @error('alamat_jalan') border-red-400 @enderror"
+                                class="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none @error('alamat_jalan') border-red-400 @else border-gray-200 @enderror"
                                 placeholder="Contoh: Jl. Sudirman No. 123, RT 01/RW 05, Komplek Permata Hijau, dekat Alfamart"
                             >{{ old('alamat_jalan', $pesanan->alamat_jalan) }}</textarea>
                             <p class="mt-2 text-xs text-green-600 flex items-center">
@@ -175,7 +175,7 @@
                                     id="no_hp"
                                     name="no_hp"
                                     value="{{ old('no_hp', $pesanan->no_hp) }}"
-                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('no_hp') border-red-400 @enderror"
+                                    class="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('no_hp') border-red-400 @else border-gray-200 @enderror"
                                     placeholder="Contoh: 08123456789"
                                     required
                                 >

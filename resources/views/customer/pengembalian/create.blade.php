@@ -1561,7 +1561,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     confirmButtonColor: '#f97316'
                 });
-                window.location.href = '{{ route("pesanan.show", $pesanan) }}';
+                // Use redirect_url from response if available, otherwise fallback to pesanan show
+                if (result && result.redirect_url) {
+                    window.location.href = result.redirect_url;
+                } else {
+                    window.location.href = '{{ route("pesanan.show", $pesanan) }}';
+                }
             } else {
                 console.error("Response error:", result);
                 if (result && result.errors) {

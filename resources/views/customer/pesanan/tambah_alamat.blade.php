@@ -88,7 +88,7 @@
                                 <div class="address-search-container">
                                     <input type="text"
                                            id="alamat_search"
-                                           class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('alamat_id') border-red-300 @enderror"
+                                           class="form-input w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('alamat_id') border-red-300 @else border-gray-200 @enderror"
                                            placeholder="Contoh: Jakarta Selatan, Bandung, Surabaya..."
                                            autocomplete="off">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -150,7 +150,7 @@
                                 <textarea name="alamat_jalan"
                                           id="alamat_jalan"
                                           rows="4"
-                                          class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none @error('alamat_jalan') border-red-400 @enderror"
+                                          class="form-input w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none @error('alamat_jalan') border-red-400 @else border-gray-200 @enderror"
                                           placeholder="Contoh: Jl. Sudirman No. 123, RT 01/RW 05, Komplek Permata Hijau, dekat Alfamart">{{ old('alamat_jalan', $user->alamat_jalan ?? '') }}</textarea>
                                 <p class="mt-2 text-xs text-green-600 flex items-center">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +193,7 @@
                                            id="no_hp"
                                            name="no_hp"
                                            value="{{ old('no_hp', $user->no_hp ?? '') }}"
-                                           class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('no_hp') border-red-400 @enderror"
+                                           class="form-input w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 @error('no_hp') border-red-400 @else border-gray-200 @enderror"
                                            placeholder="Contoh: 08123456789"
                                            required>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
