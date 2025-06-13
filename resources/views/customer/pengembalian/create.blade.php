@@ -112,6 +112,7 @@
         border-color: var(--primary-light);
     }
 
+    /* Upload Area Styles */
     .upload-area {
         border: 2px dashed var(--border-color);
         border-radius: 16px;
@@ -122,41 +123,35 @@
         background: linear-gradient(145deg, #ffffff, #f8fafc);
         position: relative;
         overflow: hidden;
-    }
-
-    .upload-area::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        user-select: none;
     }
 
     .upload-area:hover {
-        border-color: var(--primary-color);
-        background: linear-gradient(145deg, #fff7ed, #ffffff);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-medium);
+        border-color: var(--primary-color) !important;
+        background-color: #fff7ed !important;
+        cursor: pointer !important;
     }
 
-    .upload-area:hover::before {
-        opacity: 1;
+    .upload-area:active {
+        transform: scale(0.98);
+        background-color: #fed7aa !important;
     }
 
     .upload-area.dragover {
-        border-color: var(--primary-color);
-        background: linear-gradient(145deg, #fff7ed, #ffffff);
-        box-shadow: var(--shadow-large);
+        border-color: var(--primary-color) !important;
+        background-color: #fff7ed !important;
+        box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
     }
 
     .preview-image {
         position: relative;
         display: inline-block;
         margin: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .preview-image:hover {
+        transform: scale(1.05);
     }
 
     .preview-image img {
@@ -194,7 +189,7 @@
 
     .preview-image .remove-btn:hover {
         transform: scale(1.1);
-        box-shadow: var(--shadow-large);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .refund-method-option {
@@ -415,10 +410,6 @@
         filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.3));
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
     @keyframes slideUp {
         from {
             opacity: 0;
@@ -533,14 +524,7 @@
 <!-- CSRF Meta Tag -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Memproses pengajuan refund...</h3>
-        <p class="text-gray-600">Mohon tunggu sebentar</p>
-    </div>
-</div>
+<!-- Loading overlay removed - using SweetAlert for user feedback instead -->
 
 <div class="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
     <!-- Modern Header with Gradient -->
@@ -771,11 +755,9 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-camera text-orange-500 mr-2"></i>
                     Bukti Foto (Opsional)
-                </label>
-
-                <!-- Upload Area -->
+                </label>                <!-- Upload Area -->
                 <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50"
-                     id="uploadArea" onclick="document.getElementById('photoInput').click()">
+                     id="uploadArea">
                     <input type="file" id="photoInput" name="foto_bukti[]" multiple accept="image/jpeg,image/png,image/jpg" class="hidden">
                     <div class="upload-content" id="uploadContent">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
@@ -787,7 +769,15 @@
                 </div>
 
                 <!-- Photo Previews -->
-                <div id="photoPreview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4" style="display: none;"></div>
+                <div id="photoPreview" class="mt-4" style="display: none;">
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-images text-orange-500 mr-2"></i>
+                            Foto yang Dipilih (<span id="photoCount">0</span>)
+                        </h4>
+                        <div id="photoGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                    </div>
+                </div>
 
                 <div class="mt-2 text-sm text-gray-500 flex items-center">
                     <i class="fas fa-info-circle mr-1 text-orange-500"></i>
@@ -927,12 +917,36 @@
                 </div>
             </div>
 
+            <!-- Syarat dan Ketentuan -->
+            <div class="mb-6">
+                <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-orange-800 mb-4 flex items-center">
+                        <i class="fas fa-file-contract text-orange-600 mr-3"></i>
+                        Syarat dan Ketentuan
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1 flex-shrink-0">1</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Pengajuan pengembalian dapat diajukan dengan menyertakan bukti berupa foto/video.
+                            </p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1 flex-shrink-0">2</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Owner akan menghubungi pelanggan untuk melakukan kesepakatan proses pengembalian.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Terms Agreement -->
             <div class="mb-6">
                 <label class="flex items-start">
                     <input type="checkbox" name="agree_terms" required class="mt-1 mr-3 accent-orange-500">
                     <span class="text-sm text-gray-700">
-                        Saya menyetujui <a href="#" class="text-orange-600 hover:text-orange-800">syarat dan ketentuan refund</a>
+                        Saya menyetujui <a href="#" onclick="showTermsModal(event); return false;" class="text-orange-600 hover:text-orange-800 underline">syarat dan ketentuan refund</a>
                         dan memahami bahwa informasi yang saya berikan adalah benar dan dapat dipertanggungjawabkan.
                     </span>
                 </label>
@@ -940,6 +954,8 @@
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+
+
 
             <!-- Submit Buttons -->
             <div class="flex flex-wrap gap-4 justify-end mt-8 pt-4 border-t border-gray-200">
@@ -960,6 +976,182 @@
     </div>
 </div>
 
+<!-- Terms and Conditions Modal -->
+<div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-file-contract mr-3"></i>
+                    Syarat dan Ketentuan Pengembalian
+                </h2>
+                <button onclick="closeTermsModal()" class="text-white hover:text-gray-200 text-2xl font-bold">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div class="space-y-6">
+                <!-- Ketentuan Umum -->
+                <section>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                        <i class="fas fa-list-ul text-orange-500 mr-2"></i>
+                        Ketentuan Umum
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1">1</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Pengajuan pengembalian dapat diajukan dengan menyertakan bukti berupa foto/video yang menunjukkan kondisi produk atau masalah yang dialami.
+                            </p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1">2</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Owner akan menghubungi pelanggan untuk melakukan kesepakatan proses pengembalian setelah pengajuan direview dan disetujui.
+                            </p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1">3</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Pengajuan pengembalian akan diproses dalam waktu 1-3 hari kerja setelah diterima.
+                            </p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-1">4</div>
+                            <p class="text-gray-700 leading-relaxed">
+                                Informasi yang diberikan dalam pengajuan harus benar dan dapat dipertanggungjawabkan.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Proses Komunikasi -->
+                <section>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                        <i class="fas fa-phone text-orange-500 mr-2"></i>
+                        Proses Komunikasi
+                    </h3>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="text-blue-800 font-semibold mb-2">Langkah-langkah Komunikasi:</p>
+                                <ol class="list-decimal list-inside space-y-2 text-blue-700">
+                                    <li>Tim review akan memeriksa pengajuan pengembalian Anda</li>
+                                    <li>Jika disetujui, owner akan menghubungi melalui nomor telepon yang terdaftar</li>
+                                    <li>Kesepakatan proses pengembalian akan didiskusikan bersama</li>
+                                    <li>Proses pengembalian dana akan dilakukan sesuai kesepakatan</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="text-yellow-800 font-semibold mb-1">Penting!</p>
+                                <p class="text-yellow-700">
+                                    Pastikan nomor telepon dan informasi kontak Anda dapat dihubungi untuk mempercepat proses koordinasi pengembalian.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bukti Pendukung -->
+                <section>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                        <i class="fas fa-camera text-orange-500 mr-2"></i>
+                        Bukti Pendukung
+                    </h3>
+                    <div class="space-y-3">
+                        <p class="text-gray-700 leading-relaxed">
+                            Untuk mempercepat proses review, disarankan untuk melampirkan:
+                        </p>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Foto kondisi produk yang bermasalah</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Video yang menunjukkan masalah (jika diperlukan)</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Foto kemasan atau label produk</span>
+                            </li>
+                        </ul>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                <strong>Tips:</strong> Foto yang jelas dan detail akan membantu tim review memahami masalah dengan lebih baik dan mempercepat proses persetujuan.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Hak dan Kewajiban -->
+                <section>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                        <i class="fas fa-balance-scale text-orange-500 mr-2"></i>
+                        Hak dan Kewajiban
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-green-700 mb-3 flex items-center">
+                                <i class="fas fa-user-check mr-2"></i>
+                                Hak Pelanggan
+                            </h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-green-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Mendapat penjelasan yang jelas tentang status pengajuan</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-green-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Mendapat komunikasi yang transparan dari tim</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-green-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Mendapat pengembalian dana sesuai kesepakatan</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-700 mb-3 flex items-center">
+                                <i class="fas fa-user-edit mr-2"></i>
+                                Kewajiban Pelanggan
+                            </h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-blue-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Memberikan informasi yang akurat dan jujur</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-blue-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Menyediakan bukti yang relevan dan valid</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-dot-circle text-blue-500 mr-2 mt-1 text-xs"></i>
+                                    <span class="text-sm text-gray-700">Dapat dihubungi untuk komunikasi lebih lanjut</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
+            <button onclick="closeTermsModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold transition-all">
+                <i class="fas fa-check mr-2"></i>
+                Mengerti
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -970,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadArea = document.getElementById('uploadArea');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
-    const loadingOverlay = document.getElementById('loadingOverlay');
+    const photoGrid = document.getElementById('photoGrid');
     const refundForm = document.getElementById('refundForm');
     const submitBtn = document.getElementById('submitRefund');
     let selectedFiles = [];
@@ -981,6 +1173,39 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePhotoUpload();
     initializeFormSubmission();
     initializeAmountValidation();
+
+    // Additional fallback initialization with delay
+    setTimeout(function() {
+        console.log('Fallback upload initialization...');
+        const fallbackUploadArea = document.getElementById('uploadArea');
+        const fallbackPhotoInput = document.getElementById('photoInput');
+
+        if (fallbackUploadArea && fallbackPhotoInput) {
+            console.log('Setting up fallback click handler');
+
+            // Remove any existing listeners and add fresh one
+            const newUploadArea = fallbackUploadArea.cloneNode(true);
+            fallbackUploadArea.parentNode.replaceChild(newUploadArea, fallbackUploadArea);
+
+            newUploadArea.addEventListener('click', function(e) {
+                console.log('FALLBACK: Upload area clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                fallbackPhotoInput.click();
+            });
+
+            // Also add to the content div
+            const contentDiv = newUploadArea.querySelector('#uploadContent');
+            if (contentDiv) {
+                contentDiv.addEventListener('click', function(e) {
+                    console.log('FALLBACK: Content div clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fallbackPhotoInput.click();
+                });
+            }
+        }
+    }, 1000);
 
     // Initialize refund reason selection handlers
     function initializeRefundReasonHandlers() {
@@ -1094,50 +1319,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('E-wallet form shown');
         }
-    }
-
-    // Initialize photo upload functionality
+    }    // Initialize photo upload functionality
     function initializePhotoUpload() {
+        console.log('Initializing photo upload...');
+
         if (!uploadArea || !photoInput) {
-            console.log('Photo upload elements not found');
+            console.error('Photo upload elements not found');
             return;
         }
 
-        console.log('Photo upload initialized');
+        console.log('Photo upload elements found - setting up handlers');
 
-        // Click to upload
-        uploadArea.addEventListener('click', function(e) {
+        // Simple, direct click handler - this should work
+        function handleUploadClick(e) {
+            console.log('Upload area clicked!');
             e.preventDefault();
             e.stopPropagation();
-            photoInput.click();
+
+            try {
+                photoInput.click();
+                console.log('File input triggered successfully');
+            } catch (error) {
+                console.error('Error triggering file input:', error);
+            }
+        }
+
+        // Remove any existing event listeners by cloning the element
+        const newUploadArea = uploadArea.cloneNode(true);
+        uploadArea.parentNode.replaceChild(newUploadArea, uploadArea);
+
+        // Update reference to the new element
+        const freshUploadArea = document.getElementById('uploadArea');
+        const freshPhotoInput = document.getElementById('photoInput');
+
+        // Add event listeners to the fresh element
+        freshUploadArea.addEventListener('click', handleUploadClick);
+
+        // Also add to all child elements to ensure click is captured
+        const allElements = freshUploadArea.querySelectorAll('*');
+        allElements.forEach(element => {
+            element.addEventListener('click', handleUploadClick);
         });
 
-        // Drag and drop events
-        uploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.add('dragover');
+        // Make sure the photo input change handler is also attached to fresh element
+        freshPhotoInput.addEventListener('change', function() {
+            console.log('Files selected:', this.files.length);
+            handleFiles(this.files);
         });
 
-        uploadArea.addEventListener('dragleave', function(e) {
+        // Drag and drop events for fresh element
+        freshUploadArea.addEventListener('dragover', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            uploadArea.classList.remove('dragover');
+            this.classList.add('dragover');
+            console.log('Drag over detected');
         });
 
-        uploadArea.addEventListener('drop', function(e) {
+        freshUploadArea.addEventListener('dragleave', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            uploadArea.classList.remove('dragover');
+            this.classList.remove('dragover');
+            console.log('Drag leave detected');
+        });
+
+        freshUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
+            console.log('Files dropped:', e.dataTransfer.files.length);
             const files = e.dataTransfer.files;
             handleFiles(files);
         });
 
-        // File input change
-        photoInput.addEventListener('change', function() {
-            console.log('Files selected:', this.files.length);
-            handleFiles(this.files);
-        });
+        console.log('Upload functionality initialized with fresh elements');
     }
 
     function handleFiles(files) {
@@ -1185,15 +1439,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const previewDiv = document.createElement('div');
-            previewDiv.className = 'preview-image relative inline-block m-2';
+            previewDiv.className = 'preview-image relative group';
             previewDiv.innerHTML = `
-                <img src="${e.target.result}" alt="Preview" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-300">
-                <div class="remove-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-red-600 text-xs" onclick="removePhoto(${index})">
+                <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 hover:border-orange-400 transition-all duration-300">
+                    <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-20 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                        <button type="button"
+                                onclick="removePhoto(${index})"
+                                class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold transition-all duration-300 transform scale-90 group-hover:scale-100">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-red-600 text-xs shadow-lg" onclick="removePhoto(${index})">
                     <i class="fas fa-times"></i>
                 </div>
             `;
-            photoPreview.appendChild(previewDiv);
-            photoPreview.style.display = 'grid';
+
+            const photoGrid = document.getElementById('photoGrid');
+            photoGrid.appendChild(previewDiv);
+
+            const photoPreview = document.getElementById('photoPreview');
+            const photoCount = document.getElementById('photoCount');
+
+            photoPreview.style.display = 'block';
+            photoCount.textContent = selectedFiles.length;
         };
         reader.readAsDataURL(file);
     }
@@ -1214,14 +1484,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function refreshPreviews() {
-        photoPreview.innerHTML = '';
+        const photoGrid = document.getElementById('photoGrid');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoCount = document.getElementById('photoCount');
+
+        photoGrid.innerHTML = '';
+
         if (selectedFiles.length === 0) {
             photoPreview.style.display = 'none';
             return;
         }
+
         selectedFiles.forEach((file, index) => {
             displayPreview(file, index);
         });
+
+        photoCount.textContent = selectedFiles.length;
     }
 
     // Form submission handler
@@ -1235,25 +1513,14 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             console.log('Form submission attempted');
 
-            // Show loading
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'flex';
-            }
-
             // Validate form
             if (!validateForm()) {
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'none';
-                }
                 return;
             }
 
             // Show confirmation dialog
             const confirmed = await showConfirmationDialog();
             if (!confirmed) {
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'none';
-                }
                 return;
             }
 
@@ -1439,6 +1706,37 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
+        // Generate photo preview HTML for SweetAlert
+        let photoPreviewHtml = '';
+        if (selectedFiles.length > 0) {
+            const photoThumbnails = await Promise.all(
+                selectedFiles.map((file, index) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            resolve(`
+                                <div class="inline-block m-1">
+                                    <img src="${e.target.result}" alt="Foto ${index + 1}" class="w-16 h-16 object-cover rounded-lg border border-gray-300 shadow-sm">
+                                </div>
+                            `);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                })
+            );
+
+            photoPreviewHtml = `
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-orange-800 mb-2 flex items-center">
+                        <i class="fas fa-camera mr-2"></i>Foto Bukti (${selectedFiles.length})
+                    </h4>
+                    <div class="flex flex-wrap justify-start">
+                        ${photoThumbnails.join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         const result = await Swal.fire({
             title: 'Konfirmasi Pengajuan Refund',
             html: `
@@ -1460,12 +1758,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span class="text-gray-600">Jumlah Refund:</span>
                                 <span class="font-medium text-orange-600">Rp ${parseInt(amount.value).toLocaleString('id-ID')}</span>
                             </div>
-                            <div class="flex justify-between py-1">
-                                <span class="text-gray-600">Foto Bukti:</span>
-                                <span class="font-medium">${selectedFiles.length} foto</span>
-                            </div>
                         </div>
                     </div>
+
+                    ${photoPreviewHtml}
 
                     ${paymentDetails}
 
@@ -1507,8 +1803,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function submitFormData() {
-        // Show loading state
-        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+        // Show loading state on button only
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
 
@@ -1588,8 +1883,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
-        } finally {
-            if (loadingOverlay) loadingOverlay.style.display = 'none';
         }
     }
 
@@ -1611,6 +1904,38 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    // Terms Modal Functions
+    function showTermsModal(event) {
+        event.preventDefault();
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('termsModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeTermsModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('termsModal');
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeTermsModal();
+        }
+    });
+
+    // Make functions globally available
+    window.showTermsModal = showTermsModal;
+    window.closeTermsModal = closeTermsModal;
 });
 </script>
 @endpush

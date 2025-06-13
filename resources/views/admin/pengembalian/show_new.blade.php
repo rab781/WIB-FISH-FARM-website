@@ -5,8 +5,8 @@
 @push('styles')
 <style>
     :root {
-        --primary:rgb(244, 117, 39);
-        --primary-dark:rgb(177, 110, 17);
+        --primary: #4f46e5;
+        --primary-dark: #3730a3;
         --primary-light: #e0e7ff;
         --success: #10b981;
         --warning: #f59e0b;
