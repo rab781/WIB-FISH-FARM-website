@@ -534,7 +534,7 @@
             <div class="relative z-10">
                 <div class="text-center">
                     <div class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-6 backdrop-blur-sm hero-icon">
-                        <i class="fas fa-undo text-3xl text-white"></i>
+                        <i class="fas fa-undo text-3xl text-orange-400"></i>
                     </div>
                     <h1 class="text-4xl font-bold text-white mb-4 hero-title">Kelola Refund</h1>
                     <p class="text-orange-100 text-lg mb-6 hero-subtitle">Pantau status refund dan ajukan pengembalian baru</p>
