@@ -747,9 +747,6 @@
             <div class="relative z-10">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div>
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4 backdrop-blur-sm">
-                            <i class="fas fa-receipt text-2xl text-white"></i>
-                        </div>
                         <h1 class="text-4xl font-bold text-white mb-2">Detail Refund</h1>
                         <p class="text-orange-100 text-lg">ID: #{{ $refund->id_pengembalian }} • Pesanan: #{{ $refund->pesanan->nomor_pesanan }}</p>
                     </div>
@@ -939,10 +936,10 @@
                             $fotoBukti = is_string($refund->foto_bukti) ? json_decode($refund->foto_bukti) : $refund->foto_bukti;
                         @endphp
                         @foreach($fotoBukti as $index => $foto)
-                            <img src="{{ asset('uploads/refund_photos/' . $foto) }}"
+                            <img src="{{ asset($foto) }}"
                                  alt="Bukti {{ $index + 1 }}"
                                  class="evidence-photo"
-                                 onclick="openPhotoModal('{{ asset('uploads/refund_photos/' . $foto) }}', 'Bukti {{ $index + 1 }}')">
+                                 onclick="openPhotoModal('{{ asset($foto) }}', 'Bukti {{ $index + 1 }}')">
                         @endforeach
                     </div>
                 </div>

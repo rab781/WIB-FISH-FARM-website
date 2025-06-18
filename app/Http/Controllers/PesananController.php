@@ -70,6 +70,7 @@ class PesananController extends Controller
             foreach ($p->detailPesanan as $detail) {
                 $detail->userReviews = \App\Models\Ulasan::where('user_id', Auth::id())
                     ->where('id_Produk', $detail->id_Produk)
+                    ->where('id_pesanan', $p->id_pesanan) // Filter by specific order
                     ->where('is_verified_purchase', true)
                     ->with(['user', 'produk'])
                     ->get();

@@ -1,6 +1,10 @@
 @extends('admin.layouts.app')
 @section('title', 'Manajemen Produk')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+@endpush
+
 @section('content')
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
@@ -139,8 +143,33 @@
     </div>
 </div>
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Show alerts from session
+    @if(session('success'))
+        Swal.fire({
+            title: 'Berhasil!',
+            text: {!! json_encode(session('success')) !!},
+            icon: 'success',
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'OK',
+            timer: 5000,
+            timerProgressBar: true
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            title: 'Error!',
+            text: {!! json_encode(session('error')) !!},
+            icon: 'error',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK'
+        });
+    @endif
+
     // Delete confirmation
     document.querySelectorAll('.delete-btn').forEach(function(button) {
         button.addEventListener('click', function(e) {
@@ -237,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             Swal.fire({
                 title: 'Pulihkan Produk?',
-                text: 'Produk akan dikembalikan ke status aktif.',
+                text: 'Produk akan dikembalikan ke status aktif dan dapat dijual kembali.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#059669',
@@ -272,4 +301,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endpush
 @endsection

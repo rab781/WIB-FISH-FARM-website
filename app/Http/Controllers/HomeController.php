@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\Ulasan;
+use App\Models\User;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +31,15 @@ class HomeController extends Controller
                     ->take(3)
                     ->get();
 
-        return view('home.index', compact('produk', 'ulasan'));
+        // Mengambil statistik untuk landing page
+        $stats = [
+            'total_customers' => User::where('is_admin', false)->count(),
+            'total_products' => Produk::count(),
+            'total_orders' => Pesanan::count(),
+            'total_reviews' => Ulasan::count()
+        ];
+
+        return view('home.index', compact('produk', 'ulasan', 'stats'));
     }
 
     public function produk(Request $request)

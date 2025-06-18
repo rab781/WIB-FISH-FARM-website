@@ -3,6 +3,7 @@
 @section('title', 'Detail Pengajuan Pengembalian #' . $pengembalian->id_pengembalian)
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 <style>
     :root {
         --primary:rgb(244, 117, 39);
@@ -374,6 +375,25 @@
         transition: all 0.3s ease;
     }
 
+    .photo-item .media-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .video-item video {
+        pointer-events: none; /* Prevent video controls from interfering */
+    }
+
+    .video-badge {
+        background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+        font-size: 0.65rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
     .photo-overlay {
         position: absolute;
         top: 0;
@@ -543,28 +563,75 @@
         color: var(--gray-400);
     }
 
-    /* Modal Styles */
-    .modal-content {
-        border: none;
-        border-radius: var(--border-radius);
+    /* SweetAlert2 Custom Styles for Photo/Video Modal */
+    /* Photo gallery hover effects */
+    .photo-item {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .photo-item:hover {
+        transform: translateY(-4px) scale(1.02);
         box-shadow: var(--shadow-xl);
-        backdrop-filter: blur(20px);
     }
 
-    .modal-header {
-        background: linear-gradient(135deg, var(--gray-50), var(--white));
-        border-bottom: 1px solid var(--gray-200);
-        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    .photo-item:hover .photo-overlay {
+        opacity: 1;
+        visibility: visible;
     }
 
-    .modal-body {
-        padding: 2rem;
+    .photo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        border-radius: 12px;
     }
 
-    .modal-footer {
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    .photo-overlay i {
+        color: white;
+        font-size: 2rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .photo-number {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .video-badge {
+        background: rgba(244, 117, 39, 0.9) !important;
+    }
+
+    .media-preview {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .video-item .media-preview {
+        filter: brightness(0.9);
     }
 
     /* Responsive Design */
@@ -696,6 +763,134 @@
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+
+    /* SweetAlert2 Custom Styles */
+    .swal2-large-modal {
+        max-width: 90vw !important;
+        max-height: 90vh !important;
+        padding: 1.5rem !important;
+    }
+
+    .swal2-image-container,
+    .swal2-video-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .swal2-image-container img {
+        max-width: 100% !important;
+        max-height: 75vh !important;
+        object-fit: contain !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+
+    .swal2-video-container video {
+        max-width: 100% !important;
+        max-height: 75vh !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+
+    .swal2-popup.swal2-large-modal .swal2-title {
+        font-size: 1.5rem !important;
+        color: var(--gray-800) !important;
+        margin-bottom: 1rem !important;
+        font-weight: 600 !important;
+    }
+
+    .swal2-popup.swal2-large-modal .swal2-close {
+        font-size: 2rem !important;
+        color: var(--gray-500) !important;
+        background: rgba(0,0,0,0.05) !important;
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        right: 15px !important;
+        top: 15px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .swal2-popup.swal2-large-modal .swal2-close:hover {
+        background: rgba(0,0,0,0.1) !important;
+        color: var(--danger) !important;
+        transform: scale(1.1) !important;
+    }
+
+    /* Media action buttons */
+    .media-action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .media-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .media-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .media-action-btn.download {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+    }
+
+    .media-action-btn.open-tab {
+        background: linear-gradient(135deg, var(--info), #0284c7);
+        color: white;
+    }
+
+    .media-action-btn.fullscreen {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+    }
+
+    /* Fullscreen modal styles */
+    .swal2-fullscreen-modal {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        background: #000 !important;
+    }
+
+    .swal2-fullscreen-modal .swal2-close {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 99999 !important;
+        background: rgba(0,0,0,0.8) !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 50px !important;
+        height: 50px !important;
+        line-height: 50px !important;
+        font-size: 2rem !important;
+    }
+
+    .swal2-fullscreen-modal .swal2-close:hover {
+        background: rgba(255,0,0,0.8) !important;
+        transform: scale(1.1) !important;
     }
 </style>
 @endpush
@@ -863,31 +1058,52 @@
                             <div class="info-item">
                                 <div class="info-label">
                                     <i class="fas fa-camera"></i>
-                                    Foto Bukti
+                                    Media Bukti
                                 </div>
                                 <div class="info-value">
                                     @php
-                                        $photos = is_array($pengembalian->foto_bukti) ? $pengembalian->foto_bukti : json_decode($pengembalian->foto_bukti, true);
+                                        $media = is_array($pengembalian->foto_bukti) ? $pengembalian->foto_bukti : json_decode($pengembalian->foto_bukti, true);
                                     @endphp
-                                    @if($photos && count($photos) > 0)
+                                    @if($media && count($media) > 0)
                                         <div class="photo-gallery">
-                                            @foreach($photos as $index => $photo)
-                                                <div class="photo-item" onclick="showPhotoModal('{{ asset('storage/' . $photo) }}', 'Foto Bukti {{ $index + 1 }}')">
-                                                    <img src="{{ asset('storage/' . $photo) }}" alt="Bukti {{ $index + 1 }}">
-                                                    <div class="photo-overlay">
-                                                        <i class="fas fa-expand"></i>
+                                            @foreach($media as $index => $file)
+                                                @php
+                                                    // Jangan gunakan storage/ di path karena file disimpan di public/uploads/pengembalian
+                                                    $filePath = $file; // Path relatif dari public sudah disimpan di database
+                                                    $isVideo = in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['mp4', 'mov', 'avi']);
+                                                @endphp
+
+                                                @if($isVideo)
+                                                    <div class="photo-item video-item" onclick="showVideoModal('{{ asset($filePath) }}', 'Video Bukti {{ $index + 1 }}')">
+                                                        <video class="media-preview" preload="metadata">
+                                                            <source src="{{ asset($filePath) }}" type="video/{{ strtolower(pathinfo($file, PATHINFO_EXTENSION)) }}">
+                                                            Browser tidak mendukung video.
+                                                        </video>
+                                                        <div class="photo-overlay">
+                                                            <i class="fas fa-play"></i>
+                                                        </div>
+                                                        <div class="photo-number video-badge">
+                                                            <i class="fas fa-video mr-1"></i>{{ $index + 1 }}
+                                                        </div>
                                                     </div>
-                                                    <div class="photo-number">{{ $index + 1 }}</div>
-                                                </div>
+                                                @else
+                                                    <div class="photo-item" onclick="showPhotoModal('{{ asset($filePath) }}', 'Foto Bukti {{ $index + 1 }}')">
+                                                        <img src="{{ asset($filePath) }}" alt="Bukti {{ $index + 1 }}" class="media-preview">
+                                                        <div class="photo-overlay">
+                                                            <i class="fas fa-expand"></i>
+                                                        </div>
+                                                        <div class="photo-number">{{ $index + 1 }}</div>
+                                                    </div>
+                                                @endif
                                             @endforeach
                                         </div>
                                         <small style="color: var(--gray-500); font-size: 0.75rem; display: block; margin-top: 0.5rem;">
-                                            Klik foto untuk melihat ukuran penuh
+                                            Klik media untuk melihat ukuran penuh
                                         </small>
                                     @else
                                         <div class="empty-state">
                                             <i class="fas fa-image"></i>
-                                            <p>Tidak ada foto bukti yang dilampirkan</p>
+                                            <p>Tidak ada media bukti yang dilampirkan</p>
                                         </div>
                                     @endif
                                 </div>
@@ -1092,31 +1308,6 @@
         </div>
     </div>
 </div>
-
-<!-- Photo Modal -->
-<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="photoModalLabel">Foto Bukti</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="photoModalImage" src="" alt="Foto Bukti" class="img-fluid" style="max-height: 70vh; border-radius: 8px;">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                    Tutup
-                </button>
-                <a id="photoDownloadLink" href="" download class="btn btn-primary">
-                    <i class="fas fa-download"></i>
-                    Download
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -1155,14 +1346,211 @@ function copyToClipboard(text) {
     });
 }
 
-// Show photo modal
+// Show photo modal using SweetAlert2 with enhanced features
 function showPhotoModal(imageSrc, title) {
-    document.getElementById('photoModalLabel').textContent = title;
-    document.getElementById('photoModalImage').src = imageSrc;
-    document.getElementById('photoDownloadLink').href = imageSrc;
+    Swal.fire({
+        title: title,
+        html: `
+            <div style="text-align: center;">
+                <img src="${imageSrc}" alt="${title}" style="
+                    max-width: 100%;
+                    max-height: 75vh;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                    margin-bottom: 15px;
+                    cursor: zoom-in;
+                " onclick="openImageFullscreen('${imageSrc}')">
+                <div class="media-action-buttons">
+                    <a href="${imageSrc}" download class="media-action-btn download">
+                        <i class="fas fa-download"></i>Download
+                    </a>
+                    <button onclick="openImageInNewTab('${imageSrc}')" class="media-action-btn open-tab">
+                        <i class="fas fa-external-link-alt"></i>Buka di Tab Baru
+                    </button>
+                    <button onclick="openImageFullscreen('${imageSrc}')" class="media-action-btn fullscreen">
+                        <i class="fas fa-expand"></i>Fullscreen
+                    </button>
+                </div>
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal2-large-modal',
+            htmlContainer: 'swal2-image-container'
+        },
+        width: 'auto',
+        padding: '1.5rem',
+        background: '#fff',
+        backdrop: `
+            rgba(0,0,0,0.85)
+            left top
+            no-repeat
+        `,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        focusConfirm: false,
+        showClass: {
+            popup: 'animate__animated animate__zoomIn animate__faster'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__zoomOut animate__faster'
+        }
+    });
+}
 
-    var photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
-    photoModal.show();
+// Open image in new tab
+function openImageInNewTab(imageSrc) {
+    window.open(imageSrc, '_blank');
+}
+
+// Open image in fullscreen mode
+function openImageFullscreen(imageSrc) {
+    Swal.fire({
+        html: `
+            <img src="${imageSrc}" style="
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 0;
+            ">
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal2-fullscreen-modal'
+        },
+        width: '100vw',
+        height: '100vh',
+        padding: 0,
+        background: '#000',
+        backdrop: false,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        showClass: {
+            popup: 'animate__animated animate__fadeIn animate__faster'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut animate__faster'
+        }
+    });
+}
+
+// Show video modal using SweetAlert2 with enhanced features
+function showVideoModal(videoSrc, title) {
+    Swal.fire({
+        title: title,
+        html: `
+            <div style="text-align: center;">
+                <video controls autoplay style="
+                    max-width: 100%;
+                    max-height: 75vh;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                    margin-bottom: 15px;
+                    background: #000;
+                ">
+                    <source src="${videoSrc}" type="video/mp4">
+                    <source src="${videoSrc}" type="video/mov">
+                    <source src="${videoSrc}" type="video/avi">
+                    Browser Anda tidak mendukung video.
+                </video>
+                <div class="media-action-buttons">
+                    <a href="${videoSrc}" download class="media-action-btn download">
+                        <i class="fas fa-download"></i>Download Video
+                    </a>
+                    <button onclick="openVideoInNewTab('${videoSrc}')" class="media-action-btn open-tab">
+                        <i class="fas fa-external-link-alt"></i>Buka di Tab Baru
+                    </button>
+                    <button onclick="openVideoFullscreen('${videoSrc}')" class="media-action-btn fullscreen">
+                        <i class="fas fa-expand"></i>Fullscreen
+                    </button>
+                </div>
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal2-large-modal',
+            htmlContainer: 'swal2-video-container'
+        },
+        width: 'auto',
+        padding: '1.5rem',
+        background: '#fff',
+        backdrop: `
+            rgba(0,0,0,0.85)
+            left top
+            no-repeat
+        `,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        focusConfirm: false,
+        showClass: {
+            popup: 'animate__animated animate__zoomIn animate__faster'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__zoomOut animate__faster'
+        },
+        willClose: () => {
+            // Pause video when modal is closed
+            const videos = document.querySelectorAll('.swal2-popup video');
+            videos.forEach(video => {
+                video.pause();
+                video.currentTime = 0;
+            });
+        }
+    });
+}
+
+// Open video in new tab
+function openVideoInNewTab(videoSrc) {
+    window.open(videoSrc, '_blank');
+}
+
+// Open video in fullscreen mode
+function openVideoFullscreen(videoSrc) {
+    Swal.fire({
+        html: `
+            <video controls autoplay style="
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 0;
+                background: #000;
+            ">
+                <source src="${videoSrc}" type="video/mp4">
+                <source src="${videoSrc}" type="video/mov">
+                <source src="${videoSrc}" type="video/avi">
+                Browser Anda tidak mendukung video.
+            </video>
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal2-fullscreen-modal'
+        },
+        width: '100vw',
+        height: '100vh',
+        padding: 0,
+        background: '#000',
+        backdrop: false,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        showClass: {
+            popup: 'animate__animated animate__fadeIn animate__faster'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut animate__faster'
+        },
+        willClose: () => {
+            // Pause video when modal is closed
+            const videos = document.querySelectorAll('.swal2-popup video');
+            videos.forEach(video => {
+                video.pause();
+                video.currentTime = 0;
+            });
+        }
+    });
 }
 
 // Approve refund function
@@ -1331,7 +1719,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add keyboard shortcuts
+// Add keyboard shortcuts for better UX
 document.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + Backspace to go back
     if ((e.ctrlKey || e.metaKey) && e.key === 'Backspace') {
@@ -1339,13 +1727,58 @@ document.addEventListener('keydown', function(e) {
         window.history.back();
     }
 
-    // Escape key to close modals
-    if (e.key === 'Escape') {
-        const modal = bootstrap.Modal.getInstance(document.querySelector('.modal.show'));
-        if (modal) {
-            modal.hide();
+    // Press '1' to approve, '2' to reject (when not in input fields)
+    if (!e.target.matches('input, textarea, select')) {
+        if (e.key === '1') {
+            e.preventDefault();
+            const approveBtn = document.querySelector('button[onclick*="approveRefund"]');
+            if (approveBtn) approveBtn.click();
+        }
+        if (e.key === '2') {
+            e.preventDefault();
+            const rejectBtn = document.querySelector('button[onclick*="rejectRefund"]');
+            if (rejectBtn) rejectBtn.click();
         }
     }
+
+    // Escape key for SweetAlert2 modals is handled automatically
 });
+
+// Add smooth scroll to sections
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Add loading indicator for actions
+function showLoadingIndicator(message = 'Memproses...') {
+    Swal.fire({
+        title: message,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
+}
+
+// Success notification with auto-redirect
+function showSuccessAndRedirect(message, redirectUrl, delay = 2000) {
+    Swal.fire({
+        title: 'Berhasil!',
+        text: message,
+        icon: 'success',
+        timer: delay,
+        showConfirmButton: false,
+        willClose: () => {
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            }
+        }
+    });
+}
 </script>
 @endpush

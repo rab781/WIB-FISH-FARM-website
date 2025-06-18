@@ -55,7 +55,8 @@
                         <button @click="open = !open" class="flex items-center focus:outline-none">
                             <div class="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white overflow-hidden border-2 border-white">
                                 @if(auth()->user()->foto)
-                                    <img src="{{ asset('storage/uploads/users/' . auth()->user()->foto) }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
+                                    @php $user = auth()->user(); @endphp
+                                   <img src="{{ asset('uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="text-sm font-medium">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                 @endif

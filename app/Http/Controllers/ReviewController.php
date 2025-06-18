@@ -109,8 +109,12 @@ class ReviewController extends Controller
             $fotoReview = [];
             if (isset($reviewData['foto_review'])) {
                 foreach ($reviewData['foto_review'] as $file) {
-                    $path = $file->store('reviews', 'public');
-                    $fotoReview[] = $path;
+                    // Generate unique filename
+                    $filename = 'review_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    // Store file directly to public folder
+                    $file->move(public_path('uploads/reviews'), $filename);
+                    $fotoReview[] = 'uploads/reviews/' . $filename;
                 }
             }
 
@@ -118,6 +122,7 @@ class ReviewController extends Controller
             Ulasan::create([
                 'user_id' => Auth::id(),
                 'id_Produk' => $productId,
+                'id_pesanan' => $pesanan->id_pesanan, // Link review to specific order
                 'rating' => $reviewData['rating'],
                 'komentar' => $reviewData['komentar'],
                 'foto_review' => $fotoReview,

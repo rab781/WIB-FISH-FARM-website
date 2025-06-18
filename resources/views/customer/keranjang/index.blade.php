@@ -251,10 +251,8 @@ function handleQuantityChange(cartId, action) {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const deleteForm = row.querySelector('.delete-form');
-                    if (deleteForm) {
-                        deleteForm.submit();
-                    }
+                    // Update via AJAX with quantity 0 to delete
+                    updateQuantityAjax(cartId, 0, input, row);
                 }
             });
             return;
@@ -291,24 +289,43 @@ function updateQuantityAjax(cartId, newValue, input, row) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update row data
-            if (data.new_total) {
-                row.dataset.total = data.new_total;
-                const totalElement = row.querySelector('.item-total');
-                if (totalElement && data.formatted_total) {
-                    totalElement.textContent = `Rp ${data.formatted_total}`;
+            if (data.deleted) {
+                // Item was deleted, remove the row from DOM
+                row.remove();
+
+                showAlert({
+                    title: 'Berhasil',
+                    text: data.message || 'Produk berhasil dihapus dari keranjang',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Check if cart is now empty
+                const remainingItems = document.querySelectorAll('.cart-item-row');
+                if (remainingItems.length === 0) {
+                    location.reload(); // Reload to show empty cart state
                 }
+            } else {
+                // Update row data for quantity change
+                if (data.new_total) {
+                    row.dataset.total = data.new_total;
+                    const totalElement = row.querySelector('.item-total');
+                    if (totalElement && data.formatted_total) {
+                        totalElement.textContent = `Rp ${data.formatted_total}`;
+                    }
+                }
+
+                showAlert({
+                    title: 'Berhasil',
+                    text: 'Kuantitas berhasil diperbarui',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
 
             updateTotalAndCount();
-
-            showAlert({
-                title: 'Berhasil',
-                text: 'Kuantitas berhasil diperbarui',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
         } else {
             throw new Error(data.message || 'Gagal memperbarui kuantitas');
         }

@@ -229,7 +229,9 @@
                 <a href="{{ route('detailProduk', $p->id_Produk) }}" class="block">
                     <div class="h-48 bg-gray-200 relative overflow-hidden">
                         @if($p->gambar)
-                            @if(Str::startsWith($p->gambar, 'uploads/'))
+                            @if(Str::startsWith($p->gambar, ['http://', 'https://']))
+                                <img src="{{ $p->gambar }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
+                            @elseif(Str::startsWith($p->gambar, 'uploads/'))
                                 <img src="{{ asset($p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">
                             @else
                                 <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama_ikan }}" class="w-full h-full object-cover">

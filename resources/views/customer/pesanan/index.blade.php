@@ -246,7 +246,17 @@
                                                 <div class="flex space-x-2 mb-2">
                                                     @foreach($review->foto_review as $foto)
                                                         <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden">
-                                                            <img src="{{ asset('storage/' . $foto) }}" alt="Review Photo" class="w-full h-full object-cover">
+                                                            @php
+                                                                // Handle different path formats
+                                                                if (str_starts_with($foto, 'uploads/')) {
+                                                                    $photoUrl = asset($foto);
+                                                                } else if (str_starts_with($foto, 'reviews/')) {
+                                                                    $photoUrl = asset('uploads/' . $foto);
+                                                                } else {
+                                                                    $photoUrl = asset('uploads/' . $foto);
+                                                                }
+                                                            @endphp
+                                                            <img src="{{ $photoUrl }}" alt="Review Photo" class="w-full h-full object-cover">
                                                         </div>
                                                     @endforeach
                                                 </div>

@@ -82,13 +82,13 @@
     }
 
     @keyframes heroSlideIn {
-        0% { 
-            opacity: 0; 
-            transform: translateY(-30px) scale(0.95); 
+        0% {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
         }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
     }
 
@@ -132,34 +132,34 @@
     }
 
     @keyframes titleSlideUp {
-        0% { 
-            opacity: 0; 
-            transform: translateY(20px); 
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0); 
+        100% {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
     @keyframes subtitleFadeIn {
-        0% { 
-            opacity: 0; 
-            transform: translateY(15px); 
+        0% {
+            opacity: 0;
+            transform: translateY(15px);
         }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0); 
+        100% {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
     @keyframes dividerExpand {
-        0% { 
-            width: 0; 
+        0% {
+            width: 0;
             opacity: 0;
         }
-        100% { 
-            width: 6rem; 
+        100% {
+            width: 6rem;
             opacity: 1;
         }
     }
@@ -497,13 +497,13 @@
     }
 
     @keyframes fadeIn {
-        from { 
-            opacity: 0; 
-            transform: translateY(20px); 
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
@@ -514,13 +514,13 @@
     }
 
     @keyframes slideUp {
-        from { 
-            opacity: 0; 
-            transform: translateY(30px); 
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 </style>

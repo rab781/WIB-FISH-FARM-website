@@ -709,7 +709,7 @@ use Carbon\Carbon;
                                                         @foreach($photos as $photo)
                                                             @if($photo)
                                                                 <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden">
-                                                                    <img src="{{ asset('storage/' . $photo) }}" alt="Review photo" class="w-full h-full object-cover">
+                                                                    <img src="{{ asset('uploads/reviews' . $photo) }}" alt="Review photo" class="w-full h-full object-cover">
                                                                 </div>
                                                             @endif
                                                         @endforeach

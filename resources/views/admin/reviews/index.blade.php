@@ -205,11 +205,11 @@
         .review-card {
             @apply p-4 mx-2;
         }
-        
+
         .customer-avatar {
             @apply w-10 h-10 text-base;
         }
-        
+
         .photo-thumbnail, .photo-count-badge {
             @apply w-16 h-16;
         }
@@ -390,8 +390,8 @@
                                 Foto Ulasan ({{ count($review->photos) }})
                             </h4>
                             <div class="photo-grid">
-                                @foreach(array_slice($review->photos, 0, 4) as $index => $photo)
-                                <img src="{{ asset('storage/' . $photo) }}"
+                                @foreach(array_slice($review->photo_urls, 0, 4) as $index => $photoUrl)
+                                <img src="{{ $photoUrl }}"
                                      alt="Review photo {{ $index + 1 }}"
                                      class="photo-thumbnail"
                                      onclick="event.stopPropagation(); openPhotoGallery({{ $review->id_ulasan }}, {{ $index }})">

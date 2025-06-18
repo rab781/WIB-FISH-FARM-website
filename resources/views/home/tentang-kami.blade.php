@@ -142,7 +142,7 @@
                 <!-- Koi Kohaku -->
                 <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="0">
                     <div class="relative overflow-hidden h-64">
-                        <img src="{{ asset('Images/koi-1.jpg') }}" alt="Ikan Koi Kohaku" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <img src="https://tse2.mm.bing.net/th?id=OIP.4zxKzmne9Suf7sOaY91AYgHaE7&pid=Api&P=0&h=180" alt="Ikan Koi Kohaku" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                             <div class="p-4 w-full">
                                 <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Premium</span>
@@ -164,7 +164,7 @@
                 <!-- Koi Showa -->
                 <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
                     <div class="relative overflow-hidden h-64">
-                        <img src="{{ asset('Images/koi-2.jpg') }}" alt="Ikan Koi Showa" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <img src="https://tse4.mm.bing.net/th?id=OIP.1PyCVQIKWr0_QjfyHygx0QHaEv&pid=Api&P=0&h=180" alt="Ikan Koi Showa" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                             <div class="p-4 w-full">
                                 <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Best Seller</span>
@@ -186,7 +186,7 @@
                 <!-- Koki Oranda -->
                 <div class="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
                     <div class="relative overflow-hidden h-64">
-                        <img src="{{ asset('Images/koki-1.jpg') }}" alt="Ikan Koki Oranda" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
+                        <img src="https://tse1.mm.bing.net/th?id=OIP.akes9O3fs58PmL0wYvgXLQHaE8&pid=Api&P=0&h=180" alt="Ikan Koki Oranda" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='{{ asset('Images/Default-fish.png') }}'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                             <div class="p-4 w-full">
                                 <span class="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">Populer</span>

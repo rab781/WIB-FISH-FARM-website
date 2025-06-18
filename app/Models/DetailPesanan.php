@@ -48,6 +48,7 @@ class DetailPesanan extends Model
     public function userUlasan()
     {
         return $this->hasMany(Ulasan::class, 'id_Produk', 'id_Produk')
+                    ->where('id_pesanan', $this->id_pesanan) // Filter by specific order
                     ->whereColumn('user_id', function($query) {
                         $query->select('user_id')
                               ->from('pesanan')
@@ -72,9 +73,10 @@ class DetailPesanan extends Model
             return collect();
         }
 
-        // Mencari ulasan berdasarkan user_id dan id_Produk
+        // Mencari ulasan berdasarkan user_id, id_Produk dan id_pesanan spesifik
         return Ulasan::where('user_id', $userId)
             ->where('id_Produk', $this->id_Produk)
+            ->where('id_pesanan', $this->id_pesanan) // Filter by specific order
             ->where('is_verified_purchase', true)
             ->get();
     }

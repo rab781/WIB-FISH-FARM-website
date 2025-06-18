@@ -34,7 +34,7 @@
                 <div class="flex items-center">
                     <div class="w-24 h-24 rounded-full overflow-hidden border border-gray-300 mr-4">
                         @if($user->foto)
-                        <img src="{{ asset('storage/uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                         @else
                         <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
                             <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">

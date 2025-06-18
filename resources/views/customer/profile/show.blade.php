@@ -10,7 +10,7 @@
                 <!-- Profile Image -->
                 <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md mb-4 md:mb-0 md:mr-6 flex-shrink-0">
                     @if($user->foto)
-                        <img src="{{ asset('storage/uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('uploads/users/'.$user->foto) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600">
                             <svg class="w-14 h-14" fill="currentColor" viewBox="0 0 20 20">

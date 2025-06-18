@@ -303,11 +303,12 @@ class PesananController extends Controller
             \App\Models\Notification::create([
                 'user_id' => $pesanan->user_id,
                 'title' => 'Pesanan Dikirim',
-                'message' => 'Pesanan #' . $pesanan->nomor_pesanan . ' telah dikirim dengan nomor resi: ' . $request->resi,
+                'message' => 'Pesanan #' . $pesanan->id_pesanan . ' telah dikirim dengan nomor resi: ' . $request->resi,
                 'type' => 'order_shipped',
                 'data' => json_encode([
                     'order_id' => $pesanan->id_pesanan,
-                    'tracking_number' => $request->resi
+                    'tracking_number' => $request->resi,
+                    'url' => route('pesanan.show', $pesanan->id_pesanan)
                 ]),
                 'is_read' => false
             ]);
@@ -557,7 +558,8 @@ class PesananController extends Controller
                 'message' => "Pesanan #{$pesanan->id_pesanan} telah dikirim dengan nomor resi: {$request->no_resi}",
                 'data' => [
                     'order_id' => $pesanan->id_pesanan,
-                    'tracking_number' => $request->no_resi
+                    'tracking_number' => $request->no_resi,
+                    'url' => route('pesanan.show', $pesanan->id_pesanan)
                 ]
             ]);
 

@@ -54,7 +54,7 @@
                 <div class="flex items-center space-x-4">
                     <div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
                         @if($review->user->foto)
-                            <img src="{{ asset('storage/uploads/users/' . $review->user->foto) }}"
+                            <img src="{{ asset('uploads/users/' . $review->user->foto) }}"
                                  alt="{{ $review->user->name }}"
                                  class="h-12 w-12 rounded-full object-cover">
                         @else

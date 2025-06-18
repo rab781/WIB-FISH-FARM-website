@@ -23,6 +23,7 @@
     <!-- Preload critical CSS -->
     <link rel="preload" href="{{ asset('css/landing-animations.css') }}" as="style">
     <link href="{{ asset('css/landing-animations.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/landing-page.css') }}" rel="stylesheet">
 
     <!-- Load AOS CSS directly to prevent FOUC -->
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -128,6 +129,9 @@
 
     <!-- Lazy-load the footer content -->
     @include('partials.footer')
+
+    <!-- Landing Page JavaScript -->
+    <script src="{{ asset('js/landing-page.js') }}" defer></script>
 
     @stack('scripts')
 </body>

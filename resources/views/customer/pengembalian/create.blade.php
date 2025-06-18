@@ -3,7 +3,6 @@
 @section('title', 'Ajukan Refund')
 
 @push('styles')
-<!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
 <style>
     :root {
@@ -202,6 +201,17 @@
         transition: all 0.3s ease;
         cursor: pointer;
         overflow: hidden;
+    }
+
+    .photo-input-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0; /* Membuatnya tidak terlihat */
+        cursor: pointer;
+        z-index: 10; /* Pastikan di atas elemen lain di upload-area */
     }
 
     .refund-method-option::before {
@@ -521,24 +531,20 @@
 @endpush
 
 @section('content')
-<!-- CSRF Meta Tag -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<!-- Loading overlay removed - using SweetAlert for user feedback instead -->
-
 <div class="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-    <!-- Modern Header with Gradient -->
     <div class="gradient-header py-12 mb-8">
         <div class="container mx-auto px-4">
             <div class="text-center relative z-10">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-6 backdrop-blur-sm">
-                    <i class="fas fa-undo text-3xl text-white"></i>
+                    <i class="fas fa-undo text-3xl text-orange-400"></i>
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-4">Ajukan Refund</h1>
-                <div class="flex items-center justify-center space-x-2 text-orange-100">
-                    <span>Pesanan:</span>
-                    <span class="px-3 py-1 bg-white bg-opacity-20 rounded-full font-semibold backdrop-blur-sm">
-                        {{ $pesanan->nomor_pesanan }}
+                <div class="flex items-center justify-center space-x-2 ">
+                    <span class='text-white'>Pesanan:</span>
+                    <span class="px-3 py-1 text-orange-400 bg-white bg-opacity-20 rounded-full font-semibold backdrop-blur-sm">
+                        #{{ $pesanan->id_pesanan }}
                     </span>
                 </div>
                 <div class="mt-6 w-24 h-1 bg-white bg-opacity-50 mx-auto rounded-full"></div>
@@ -547,7 +553,6 @@
     </div>
 
     <div class="container mx-auto px-4 pb-12">
-        <!-- Order Information Card -->
         <div class="modern-card p-8 mb-8 fade-in">
             <div class="flex items-center mb-6">
                 <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mr-4">
@@ -556,13 +561,11 @@
                 <h3 class="text-2xl font-bold text-gray-900">Informasi Pesanan</h3>
             </div>
 
-            <!-- Professional Order Information Card -->
             <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-6">
-                <!-- Header with Order ID and Status -->
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h4 class="text-lg font-bold">Pesanan #{{ $pesanan->id_pesanan }}</h4>
+                            <h4 class="text-lg font-bold">Pesanan #{{ $pesanan->nomor_pesanan }}</h4>
                             <p class="text-orange-100 text-sm">{{ $pesanan->created_at->format('d M Y, H:i') }} WIB</p>
                         </div>
                         <div class="text-right">
@@ -583,11 +586,9 @@
                     </div>
                 </div>
 
-                <!-- Product Details -->
                 <div class="p-6">
                     @foreach($pesanan->detailPesanan as $detail)
                         <div class="flex items-start space-x-4 {{ !$loop->last ? 'border-b border-gray-100 pb-4 mb-4' : '' }}">
-                            <!-- Product Image -->
                             <div class="flex-shrink-0">
                                 @if($detail->produk && $detail->produk->gambar)
                                     <img src="{{ asset($detail->produk->gambar) }}"
@@ -600,7 +601,6 @@
                                 @endif
                             </div>
 
-                            <!-- Product Info -->
                             <div class="flex-grow">
                                 <h5 class="font-semibold text-gray-900 mb-1">{{ $detail->produk->nama_ikan ?? 'Produk' }}</h5>
                                 <p class="text-sm text-gray-600 mb-2">{{ $detail->produk->deskripsi ?? '' }}</p>
@@ -624,7 +624,6 @@
                         </div>
                     @endforeach
 
-                    <!-- Order Summary -->
                     <div class="mt-6 pt-4 border-t border-gray-200">
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
@@ -645,7 +644,6 @@
             </div>
         </div>
 
-        <!-- Refund Form -->
         <div class="modern-card p-8 fade-in">
             <div class="flex items-center mb-8">
                 <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mr-4">
@@ -658,7 +656,6 @@
                 @csrf
                 <input type="hidden" name="id_pesanan" value="{{ $pesanan->id_pesanan }}">
 
-                <!-- Reason Selection -->
                 <div class="form-group">
                     <label class="form-label">
                         <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
@@ -715,7 +712,6 @@
                 @enderror
             </div>
 
-            <!-- Amount -->
             <div class="mb-6">
                 <label for="jumlah_klaim" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
                 <div class="relative">
@@ -735,7 +731,6 @@
                 @enderror
             </div>
 
-            <!-- Description -->
             <div class="mb-6">
                 <label for="deskripsi_masalah" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Masalah <span class="text-red-500">*</span></label>
                 <textarea id="description" name="deskripsi_masalah" rows="4" required
@@ -750,25 +745,25 @@
                 @enderror
             </div>
 
-            <!-- Evidence Photos with Working Upload -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-camera text-orange-500 mr-2"></i>
-                    Bukti Foto (Opsional)
-                </label>                <!-- Upload Area -->
-                <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50"
-                     id="uploadArea">
-                    <input type="file" id="photoInput" name="foto_bukti[]" multiple accept="image/jpeg,image/png,image/jpg" class="hidden">
-                    <div class="upload-content" id="uploadContent">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-lg font-medium text-gray-700 mb-2">Klik untuk upload foto bukti</p>
-                        <p class="text-sm text-gray-500 mb-1">Atau seret dan letakkan foto di sini</p>
-                        <p class="text-xs text-gray-400">Maksimal 5 foto, masing-masing maksimal 2MB</p>
-                        <p class="text-xs text-gray-400">Format: JPG, PNG, JPEG</p>
-                    </div>
-                </div>
+                    Bukti Foto/Video (Opsional)
+                </label>
 
-                <!-- Photo Previews -->
+                <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50" id="uploadArea">
+                <input type="file" id="photoInput" name="foto_bukti[]" multiple
+                    accept="image/jpeg,image/png,image/jpg,video/mp4,video/mov,video/avi"
+                    class="photo-input-overlay">
+                <div class="upload-content" id="uploadContent">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-lg font-medium text-gray-700 mb-2">Klik untuk upload foto/video bukti</p>
+                    <p class="text-sm text-gray-500 mb-1">Atau seret dan letakkan file di sini</p>
+                    <p class="text-xs text-gray-400">Maksimal 5 file, masing-masing maksimal 10MB</p>
+                    <p class="text-xs text-gray-400">Format: JPG, PNG, JPEG, MP4, MOV, AVI</p>
+                </div>
+            </div>
+
                 <div id="photoPreview" class="mt-4" style="display: none;">
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
@@ -791,7 +786,6 @@
                 @enderror
             </div>
 
-            <!-- Refund Method -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">Metode Refund Pilihan <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -826,7 +820,6 @@
                 @enderror
             </div>
 
-            <!-- Bank Account Information -->
             <div class="form-group" id="bankForm" style="display: none;">
                 <label class="form-label">
                     <i class="fas fa-university text-orange-500 mr-2"></i>
@@ -869,7 +862,6 @@
                 </div>
             </div>
 
-            <!-- E-Wallet Information -->
             <div class="form-group" id="ewalletForm" style="display: none;">
                 <label class="form-label">
                     <i class="fas fa-mobile-alt text-orange-500 mr-2"></i>
@@ -917,7 +909,6 @@
                 </div>
             </div>
 
-            <!-- Syarat dan Ketentuan -->
             <div class="mb-6">
                 <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
                     <h3 class="text-lg font-bold text-orange-800 mb-4 flex items-center">
@@ -941,7 +932,6 @@
                 </div>
             </div>
 
-            <!-- Terms Agreement -->
             <div class="mb-6">
                 <label class="flex items-start">
                     <input type="checkbox" name="agree_terms" required class="mt-1 mr-3 accent-orange-500">
@@ -957,7 +947,6 @@
 
 
 
-            <!-- Submit Buttons -->
             <div class="flex flex-wrap gap-4 justify-end mt-8 pt-4 border-t border-gray-200">
                 <a href="{{ route('pesanan.show', $pesanan) }}"
                    class="inline-flex items-center px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-sm hover:shadow">
@@ -976,7 +965,6 @@
     </div>
 </div>
 
-<!-- Terms and Conditions Modal -->
 <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4" style="display: none;">
     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
         <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6">
@@ -992,7 +980,6 @@
         </div>
         <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
             <div class="space-y-6">
-                <!-- Ketentuan Umum -->
                 <section>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
                         <i class="fas fa-list-ul text-orange-500 mr-2"></i>
@@ -1026,7 +1013,6 @@
                     </div>
                 </section>
 
-                <!-- Proses Komunikasi -->
                 <section>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
                         <i class="fas fa-phone text-orange-500 mr-2"></i>
@@ -1059,7 +1045,6 @@
                     </div>
                 </section>
 
-                <!-- Bukti Pendukung -->
                 <section>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
                         <i class="fas fa-camera text-orange-500 mr-2"></i>
@@ -1092,7 +1077,6 @@
                     </div>
                 </section>
 
-                <!-- Hak dan Kewajiban -->
                 <section>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
                         <i class="fas fa-balance-scale text-orange-500 mr-2"></i>
@@ -1153,789 +1137,855 @@
 </div>
 
 @push('scripts')
-<!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Refund form script initialized');
+    console.log('Refund form script initialized');
 
-    const uploadArea = document.getElementById('uploadArea');
-    const photoInput = document.getElementById('photoInput');
-    const photoPreview = document.getElementById('photoPreview');
-    const photoGrid = document.getElementById('photoGrid');
-    const refundForm = document.getElementById('refundForm');
-    const submitBtn = document.getElementById('submitRefund');
-    let selectedFiles = [];
+    let selectedFiles = [];
 
-    // Initialize all handlers
-    initializeRefundReasonHandlers();
-    initializeRefundMethodHandlers();
-    initializePhotoUpload();
-    initializeFormSubmission();
-    initializeAmountValidation();
+    // Initialize all handlers
+    initializeRefundReasonHandlers();
+    initializeRefundMethodHandlers();
+    initializePhotoUpload();
+    initializeFormSubmission();
+    initializeAmountValidation();
 
-    // Additional fallback initialization with delay
-    setTimeout(function() {
-        console.log('Fallback upload initialization...');
-        const fallbackUploadArea = document.getElementById('uploadArea');
-        const fallbackPhotoInput = document.getElementById('photoInput');
+    // Photo upload functionality
+    function initializePhotoUpload() {
+        console.log('Initializing photo upload...');
 
-        if (fallbackUploadArea && fallbackPhotoInput) {
-            console.log('Setting up fallback click handler');
+        const uploadArea = document.getElementById('uploadArea');
+        const photoInput = document.getElementById('photoInput');
 
-            // Remove any existing listeners and add fresh one
-            const newUploadArea = fallbackUploadArea.cloneNode(true);
-            fallbackUploadArea.parentNode.replaceChild(newUploadArea, fallbackUploadArea);
+        if (!uploadArea || !photoInput) {
+            console.error('Upload elements not found');
+            return;
+        }
 
-            newUploadArea.addEventListener('click', function(e) {
-                console.log('FALLBACK: Upload area clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                fallbackPhotoInput.click();
-            });
-
-            // Also add to the content div
-            const contentDiv = newUploadArea.querySelector('#uploadContent');
-            if (contentDiv) {
-                contentDiv.addEventListener('click', function(e) {
-                    console.log('FALLBACK: Content div clicked');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    fallbackPhotoInput.click();
-                });
-            }
-        }
-    }, 1000);
-
-    // Initialize refund reason selection handlers
-    function initializeRefundReasonHandlers() {
-        const reasonOptions = document.querySelectorAll('.radio-option');
-        console.log('Found reason options:', reasonOptions.length);
-
-        reasonOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                console.log('Reason option clicked');
-
-                // Reset all options
-                reasonOptions.forEach(opt => {
-                    opt.style.borderColor = '#e2e8f0';
-                    opt.style.backgroundColor = '';
-                    const radio = opt.querySelector('input[type="radio"]');
-                    if (radio) radio.checked = false;
-                });
-
-                // Select current option
-                this.style.borderColor = '#f97316';
-                this.style.backgroundColor = '#fff7ed';
-                const radio = this.querySelector('input[type="radio"]');
-                if (radio) {
-                    radio.checked = true;
-                    console.log('Selected reason:', radio.value);
-                }
-            });
-        });
-    }
-
-    // Initialize refund method selection handlers
-    function initializeRefundMethodHandlers() {
-        const refundMethodOptions = document.querySelectorAll('.refund-method-option');
-        console.log('Found refund method options:', refundMethodOptions.length);
-
-        refundMethodOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                console.log('Refund method clicked');
-
-                const radio = this.querySelector('input[type="radio"]');
-                if (!radio) return;
-
-                // Reset all options
-                refundMethodOptions.forEach(opt => {
-                    const r = opt.querySelector('input[type="radio"]');
-                    const indicator = opt.querySelector('.radio-indicator div');
-
-                    if (r) r.checked = false;
-                    if (indicator) indicator.style.opacity = '0';
-                    opt.style.borderColor = '#d1d5db';
-                    opt.style.backgroundColor = '';
-                });
-
-                // Select current option
-                radio.checked = true;
-                const indicator = this.querySelector('.radio-indicator div');
-                if (indicator) indicator.style.opacity = '1';
-                this.style.borderColor = '#f97316';
-                this.style.backgroundColor = '#fff7ed';
-
-                console.log('Selected refund method:', radio.value);
-                toggleRefundForms(radio.value);
-            });
-        });
-    }
-
-    function toggleRefundForms(selectedMethod) {
-        const bankForm = document.getElementById('bankForm');
-        const ewalletForm = document.getElementById('ewalletForm');
-
-        console.log('Toggling forms for method:', selectedMethod);
-
-        if (!bankForm || !ewalletForm) {
-            console.error('Bank or e-wallet form not found');
-            return;
-        }
-
-        // Reset both forms
-        bankForm.style.display = 'none';
-        ewalletForm.style.display = 'none';
-
-        // Clear required attributes
-        ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
-            const element = document.getElementById(field);
-            if (element) element.required = false;
+        // Click handler for upload area
+        // Tidak perlu lagi memanggil photoInput.click() secara manual
+        // karena input file sekarang melayang di atas uploadArea
+        uploadArea.addEventListener('click', function(e) {
+        // Log ini mungkin masih berguna untuk debugging
+        console.log('Upload area clicked');
         });
 
-        ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
-            const element = document.getElementById(field);
-            if (element) element.required = false;
-        });
+        // File selection handler
+        photoInput.addEventListener('change', function(e) {
+            console.log('Files selected from dialog:', this.files.length);
+            console.log('Files:', this.files);
 
-        if (selectedMethod === 'bank_transfer') {
-            bankForm.style.display = 'block';
+            if (this.files && this.files.length > 0) {
+                // Log setiap file yang dipilih
+                for (let i = 0; i < this.files.length; i++) {
+                    console.log(`File ${i + 1}:`, this.files[i].name, this.files[i].type, this.files[i].size);
+                }
+                handleFileSelection(this.files);
+            } else {
+                console.log('No files selected or files cleared');
+            }
+        });
 
-            // Set required attributes for bank fields
-            ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = true;
-            });
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('dragover');
+            console.log('Drag over upload area');
+        });
 
-            console.log('Bank form shown');
-        } else if (selectedMethod === 'e_wallet') {
-            ewalletForm.style.display = 'block';
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
+            console.log('Drag leave upload area');
+        });
 
-            // Set required attributes for e-wallet fields
-            ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
-                const element = document.getElementById(field);
-                if (element) element.required = true;
-            });
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
 
-            console.log('E-wallet form shown');
-        }
-    }    // Initialize photo upload functionality
-    function initializePhotoUpload() {
-        console.log('Initializing photo upload...');
+            const files = e.dataTransfer.files;
+            console.log('Files dropped:', files.length);
 
-        if (!uploadArea || !photoInput) {
-            console.error('Photo upload elements not found');
-            return;
-        }
+            if (files.length > 0) {
+                // Update the input element
+                const dataTransfer = new DataTransfer();
+                for (let file of files) {
+                    dataTransfer.items.add(file);
+                }
+                photoInput.files = dataTransfer.files;
 
-        console.log('Photo upload elements found - setting up handlers');
+                // Process dropped files
+                handleFileSelection(files);
+            }
+        });
 
-        // Simple, direct click handler - this should work
-        function handleUploadClick(e) {
-            console.log('Upload area clicked!');
-            e.preventDefault();
-            e.stopPropagation();
+        console.log('Photo upload initialized successfully');
+    }
 
-            try {
-                photoInput.click();
-                console.log('File input triggered successfully');
-            } catch (error) {
-                console.error('Error triggering file input:', error);
-            }
-        }
+    function handleFileSelection(files) {
+        console.log('=== PROCESSING FILE SELECTION ===');
+        console.log('Total files received:', files.length);
 
-        // Remove any existing event listeners by cloning the element
-        const newUploadArea = uploadArea.cloneNode(true);
-        uploadArea.parentNode.replaceChild(newUploadArea, uploadArea);
+        selectedFiles = []; // Reset array
 
-        // Update reference to the new element
-        const freshUploadArea = document.getElementById('uploadArea');
-        const freshPhotoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoGrid = document.getElementById('photoGrid');
+        const photoCount = document.getElementById('photoCount');
 
-        // Add event listeners to the fresh element
-        freshUploadArea.addEventListener('click', handleUploadClick);
+        console.log('Elements found:', {
+            photoPreview: !!photoPreview,
+            photoGrid: !!photoGrid,
+            photoCount: !!photoCount
+        });
 
-        // Also add to all child elements to ensure click is captured
-        const allElements = freshUploadArea.querySelectorAll('*');
-        allElements.forEach(element => {
-            element.addEventListener('click', handleUploadClick);
-        });
+        // Clear previous previews
+        if (photoGrid) {
+            photoGrid.innerHTML = '';
+            console.log('Photo grid cleared');
+        }
 
-        // Make sure the photo input change handler is also attached to fresh element
-        freshPhotoInput.addEventListener('change', function() {
-            console.log('Files selected:', this.files.length);
-            handleFiles(this.files);
-        });
+        for (let i = 0; i < files.length && i < 5; i++) {
+            const file = files[i];
+            console.log(`Processing file ${i + 1}:`, {
+                name: file.name,
+                type: file.type,
+                size: file.size
+            });
 
-        // Drag and drop events for fresh element
-        freshUploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.classList.add('dragover');
-            console.log('Drag over detected');
-        });
+            // Validate file type
+            const isImage = file.type.startsWith('image/');
+            const isVideo = file.type.startsWith('video/');
 
-        freshUploadArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.classList.remove('dragover');
-            console.log('Drag leave detected');
-        });
+            if (!isImage && !isVideo) {
+                console.warn('File type not supported:', file.type);
+                Swal.fire({
+                    title: 'Format File Tidak Valid',
+                    text: 'Hanya file gambar (JPG, PNG, JPEG) dan video (MP4, MOV, AVI) yang diperbolehkan',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                continue;
+            }
 
-        freshUploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.classList.remove('dragover');
-            console.log('Files dropped:', e.dataTransfer.files.length);
-            const files = e.dataTransfer.files;
-            handleFiles(files);
-        });
+            // Validate file size
+            const maxSize = isVideo ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+            if (file.size > maxSize) {
+                const sizeType = isVideo ? '10MB' : '2MB';
+                console.warn('File too large:', file.size, 'bytes');
+                Swal.fire({
+                    title: 'Ukuran File Terlalu Besar',
+                    text: `Ukuran file maksimal ${sizeType}`,
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                continue;
+            }
 
-        console.log('Upload functionality initialized with fresh elements');
-    }
+            selectedFiles.push(file);
+            console.log(`File ${i + 1}: added to selectedFiles. Total:`, selectedFiles.length);
+            createFilePreview(file, i);
+        }
 
-    function handleFiles(files) {
-        console.log('Handling files:', files.length);
+        // Update file input with valid files
+        updateFileInput();
 
-        for (let file of files) {
-            if (selectedFiles.length >= 5) {
-                Swal.fire({
-                    title: 'Perhatian',
-                    text: 'Maksimal 5 foto yang dapat diunggah',
-                    icon: 'warning',
-                    confirmButtonColor: '#f97316'
-                });
-                break;
-            }
+        // Update counters and show preview
+        if (photoCount) {
+            photoCount.textContent = selectedFiles.length;
+            console.log('Photo count updated to:', selectedFiles.length);
+        }
 
-            if (!file.type.startsWith('image/')) {
-                Swal.fire({
-                    title: 'Format File Tidak Valid',
-                    text: 'Hanya file gambar yang diperbolehkan (JPG, PNG, JPEG)',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                continue;
-            }
+        if (photoPreview && selectedFiles.length > 0) {
+            photoPreview.style.display = 'block';
+            console.log('Photo preview shown');
+        } else if (photoPreview) {
+            photoPreview.style.display = 'none';
+            console.log('Photo preview hidden');
+        }
 
-            if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                Swal.fire({
-                    title: 'Ukuran File Terlalu Besar',
-                    text: 'Ukuran file maksimal 2MB',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                continue;
-            }
+        console.log('=== FILE SELECTION COMPLETED ===');
+        console.log('Final selectedFiles count:', selectedFiles.length);
+    }
 
-            selectedFiles.push(file);
-            displayPreview(file, selectedFiles.length - 1);
-            console.log('File added. Total files:', selectedFiles.length);
-        }
-        updateFileInput();
-    }
+    function createFilePreview(file, index) {
+        console.log(`Creating preview for file ${index + 1}:`, file.name);
 
-    function displayPreview(file, index) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const previewDiv = document.createElement('div');
-            previewDiv.className = 'preview-image relative group';
-            previewDiv.innerHTML = `
-                <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 hover:border-orange-400 transition-all duration-300">
-                    <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-20 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                        <button type="button"
-                                onclick="removePhoto(${index})"
-                                class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold transition-all duration-300 transform scale-90 group-hover:scale-100">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-red-600 text-xs shadow-lg" onclick="removePhoto(${index})">
-                    <i class="fas fa-times"></i>
-                </div>
-            `;
+        const photoGrid = document.getElementById('photoGrid');
+        if (!photoGrid) {
+            console.error('Photo grid not found!');
+            return;
+        }
 
-            const photoGrid = document.getElementById('photoGrid');
-            photoGrid.appendChild(previewDiv);
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'preview-image relative';
+        previewDiv.dataset.index = index;
 
-            const photoPreview = document.getElementById('photoPreview');
-            const photoCount = document.getElementById('photoCount');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            console.log(`File reader loaded for ${file.name}`);
 
-            photoPreview.style.display = 'block';
-            photoCount.textContent = selectedFiles.length;
-        };
-        reader.readAsDataURL(file);
-    }
+            const isVideo = file.type.startsWith('video/');
 
-    // Global function for removing photos
-    window.removePhoto = function(index) {
-        console.log('Removing photo at index:', index);
-        selectedFiles.splice(index, 1);
-        updateFileInput();
-        refreshPreviews();
-    };
+            if (isVideo) {
+                previewDiv.innerHTML = `
+                    <div class="relative bg-gray-100 rounded-lg overflow-hidden">
+                        <video class="w-full h-24 object-cover" src="${e.target.result}" muted controls></video>
+                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                            <i class="fas fa-play-circle text-white text-2xl"></i>
+                        </div>
+                        <div class="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">
+                            VIDEO
+                        </div>
+                        <button type="button" class="remove-btn absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold" onclick="removeFile(${index})">
+                            ×
+                        </button>
+                    </div>
+                `;
+            } else {
+                previewDiv.innerHTML = `
+                    <div class="relative">
+                        <img src="${e.target.result}" alt="Preview" class="w-full h-24 object-cover rounded-lg border border-gray-300">
+                        <button type="button" class="remove-btn absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold" onclick="removeFile(${index})">
+                            ×
+                        </button>
+                    </div>
+                `;
+            }
 
-    function updateFileInput() {
-        const dt = new DataTransfer();
-        selectedFiles.forEach(file => dt.items.add(file));
-        photoInput.files = dt.files;
-        console.log('Updated file input with', selectedFiles.length, 'files');
-    }
+            console.log(`Preview created and added to grid for ${file.name}`);
+        };
 
-    function refreshPreviews() {
-        const photoGrid = document.getElementById('photoGrid');
-        const photoPreview = document.getElementById('photoPreview');
-        const photoCount = document.getElementById('photoCount');
+        reader.onerror = function(e) {
+            console.error('FileReader error for', file.name, e);
+        };
 
-        photoGrid.innerHTML = '';
+        reader.readAsDataURL(file);
+        photoGrid.appendChild(previewDiv);
 
-        if (selectedFiles.length === 0) {
-            photoPreview.style.display = 'none';
-            return;
-        }
+        console.log(`Preview div added to grid for ${file.name}`);
+    }
 
-        selectedFiles.forEach((file, index) => {
-            displayPreview(file, index);
-        });
+    function updateFileInput() {
+        const photoInput = document.getElementById('photoInput');
+        if (!photoInput) return;
 
-        photoCount.textContent = selectedFiles.length;
-    }
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        photoInput.files = dataTransfer.files;
 
-    // Form submission handler
-    function initializeFormSubmission() {
-        if (!refundForm || !submitBtn) {
-            console.error('Form or submit button not found');
-            return;
-        }
+        console.log('File input updated with', selectedFiles.length, 'files');
+    }
 
-        refundForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            console.log('Form submission attempted');
+    // Make removeFile function global
+    window.removeFile = function(index) {
+        console.log('Removing file at index:', index);
+        selectedFiles.splice(index, 1);
 
-            // Validate form
-            if (!validateForm()) {
-                return;
-            }
+        // Update file input
+        updateFileInput();
 
-            // Show confirmation dialog
-            const confirmed = await showConfirmationDialog();
-            if (!confirmed) {
-                return;
-            }
+        // Recreate previews
+        const photoGrid = document.getElementById('photoGrid');
+        const photoCount = document.getElementById('photoCount');
+        const photoPreview = document.getElementById('photoPreview');
 
-            // Submit form
-            await submitFormData();
-        });
-    }
+        if (photoGrid) photoGrid.innerHTML = '';
 
-    function validateForm() {
-        // Check reason selection
-        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
-        if (!reason) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Silakan pilih alasan refund',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return false;
-        }
+        selectedFiles.forEach((file, i) => createFilePreview(file, i));
 
-        // Check description
-        const description = document.getElementById('description');
-        if (!description || description.value.trim().length < 20) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Deskripsi masalah harus minimal 20 karakter',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return false;
-        }
+        if (photoCount) photoCount.textContent = selectedFiles.length;
+        if (photoPreview) {
+            photoPreview.style.display = selectedFiles.length > 0 ? 'block' : 'none';
+        }
 
-        // Check amount
-        const amount = document.getElementById('amount');
-        if (!amount || !amount.value || parseFloat(amount.value) <= 0) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Jumlah refund harus lebih dari 0',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return false;
-        }
+        console.log('File removed. Remaining files:', selectedFiles.length);
+    };
 
-        // Check refund method
-        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
-        if (!refundMethod) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Silakan pilih metode refund',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return false;
-        }
+    // Initialize refund reason selection handlers
+    function initializeRefundReasonHandlers() {
+        const reasonOptions = document.querySelectorAll('.radio-option');
+        console.log('Found reason options:', reasonOptions.length);
 
-        // Validate method-specific fields
-        if (refundMethod.value === 'bank_transfer') {
-            const namaBank = document.getElementById('nama_bank');
-            const nomorRekening = document.getElementById('nomor_rekening');
-            const namaPemilik = document.getElementById('nama_pemilik_rekening');
+        reasonOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                console.log('Reason option clicked');
 
-            if (!namaBank || namaBank.value.trim().length < 3) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Nama bank harus diisi dengan benar',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
+                // Reset all options
+                reasonOptions.forEach(opt => {
+                    opt.style.borderColor = '#e2e8f0';
+                    opt.style.backgroundColor = '';
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = false; // Ensure radio button is deselected visually
+                });
 
-            if (!nomorRekening || nomorRekening.value.trim().length < 5) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Nomor rekening harus diisi dengan benar',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
+                // Select current option
+                this.style.borderColor = '#f97316';
+                this.style.backgroundColor = '#fff7ed';
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    console.log('Selected reason:', radio.value);
+                }
+            });
+        });
+    }
 
-            if (!namaPemilik || namaPemilik.value.trim().length < 3) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Nama pemilik rekening harus diisi dengan benar',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
-        } else if (refundMethod.value === 'e_wallet') {
-            const namaEwallet = document.getElementById('nama_ewallet');
-            const nomorEwallet = document.getElementById('nomor_ewallet');
-            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
+    // Initialize refund method selection handlers
+    function initializeRefundMethodHandlers() {
+        const refundMethodOptions = document.querySelectorAll('.refund-method-option');
+        console.log('Found refund method options:', refundMethodOptions.length);
 
-            if (!namaEwallet || !namaEwallet.value) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Silakan pilih jenis e-wallet',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
+        refundMethodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                console.log('Refund method clicked');
 
-            if (!nomorEwallet || nomorEwallet.value.trim().length < 5) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Nomor e-wallet harus diisi dengan benar',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
+                const radio = this.querySelector('input[type="radio"]');
+                if (!radio) return;
 
-            if (!namaPemilikEwallet || namaPemilikEwallet.value.trim().length < 3) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Nama pemilik e-wallet harus diisi dengan benar',
-                    icon: 'error',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
-        }
+                // Reset all options
+                refundMethodOptions.forEach(opt => {
+                    const r = opt.querySelector('input[type="radio"]');
+                    const indicator = opt.querySelector('.radio-indicator div');
 
-        // Check terms agreement
-        const agreeTerms = document.querySelector('input[name="agree_terms"]:checked');
-        if (!agreeTerms) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Anda harus menyetujui syarat dan ketentuan',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-            return false;
-        }
+                    if (r) r.checked = false;
+                    if (indicator) indicator.style.opacity = '0';
+                    opt.style.borderColor = '#d1d5db';
+                    opt.style.backgroundColor = '';
+                });
 
-        console.log('Form validation passed');
-        return true;
-    }
+                // Select current option
+                radio.checked = true;
+                const indicator = this.querySelector('.radio-indicator div');
+                if (indicator) indicator.style.opacity = '1';
+                this.style.borderColor = '#f97316';
+                this.style.backgroundColor = '#fff7ed';
 
-    async function showConfirmationDialog() {
-        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
-        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
-        const description = document.getElementById('description');
-        const amount = document.getElementById('amount');
+                console.log('Selected refund method:', radio.value);
+                toggleRefundForms(radio.value);
+            });
+        });
+    }
 
-        let paymentDetails = '';
-        if (refundMethod.value === 'bank_transfer') {
-            const bankName = document.getElementById('nama_bank').value;
-            const accountNumber = document.getElementById('nomor_rekening').value;
-            const accountHolder = document.getElementById('nama_pemilik_rekening').value;
-            paymentDetails = `
-                <div class="text-left bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                    <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                        <i class="fas fa-university mr-2"></i>Transfer Bank
-                    </h4>
-                    <div class="space-y-1 text-sm text-blue-700">
-                        <p><span class="font-medium">Bank:</span> ${bankName}</p>
-                        <p><span class="font-medium">Rekening:</span> ${accountNumber}</p>
-                        <p><span class="font-medium">Atas Nama:</span> ${accountHolder}</p>
-                    </div>
-                </div>
-            `;
-        } else if (refundMethod.value === 'e_wallet') {
-            const walletName = document.getElementById('nama_ewallet').value;
-            const walletNumber = document.getElementById('nomor_ewallet').value;
-            const walletHolder = document.getElementById('nama_pemilik_ewallet').value;
-            paymentDetails = `
-                <div class="text-left bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                    <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                        <i class="fas fa-mobile-alt mr-2"></i>E-Wallet
-                    </h4>
-                    <div class="space-y-1 text-sm text-green-700">
-                        <p><span class="font-medium">Platform:</span> ${walletName}</p>
-                        <p><span class="font-medium">Nomor:</span> ${walletNumber}</p>
-                        <p><span class="font-medium">Atas Nama:</span> ${walletHolder}</p>
-                    </div>
-                </div>
-            `;
-        }
+    function toggleRefundForms(selectedMethod) {
+        const bankForm = document.getElementById('bankForm');
+        const ewalletForm = document.getElementById('ewalletForm');
 
-        // Generate photo preview HTML for SweetAlert
-        let photoPreviewHtml = '';
-        if (selectedFiles.length > 0) {
-            const photoThumbnails = await Promise.all(
-                selectedFiles.map((file, index) => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            resolve(`
-                                <div class="inline-block m-1">
-                                    <img src="${e.target.result}" alt="Foto ${index + 1}" class="w-16 h-16 object-cover rounded-lg border border-gray-300 shadow-sm">
-                                </div>
-                            `);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                })
-            );
+        console.log('Toggling forms for method:', selectedMethod);
 
-            photoPreviewHtml = `
-                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
-                    <h4 class="font-semibold text-orange-800 mb-2 flex items-center">
-                        <i class="fas fa-camera mr-2"></i>Foto Bukti (${selectedFiles.length})
-                    </h4>
-                    <div class="flex flex-wrap justify-start">
-                        ${photoThumbnails.join('')}
-                    </div>
-                </div>
-            `;
-        }
+        if (!bankForm || !ewalletForm) {
+            console.error('Bank or e-wallet form not found');
+            return;
+        }
 
-        const result = await Swal.fire({
-            title: 'Konfirmasi Pengajuan Refund',
-            html: `
-                <div class="text-left space-y-4">
-                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-orange-800 mb-3 flex items-center">
-                            <i class="fas fa-file-alt mr-2"></i>Detail Pengajuan
-                        </h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between py-1 border-b border-orange-100">
+        // Reset both forms
+        bankForm.style.display = 'none';
+        ewalletForm.style.display = 'none';
+
+        // Clear required attributes
+        ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
+            const element = document.getElementById(field);
+            if (element) element.required = false;
+        });
+
+        ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
+            const element = document.getElementById(field);
+            if (element) element.required = false;
+        });
+
+        if (selectedMethod === 'bank_transfer') {
+            bankForm.style.display = 'block';
+
+            // Set required attributes for bank fields
+            ['nama_bank', 'nomor_rekening', 'nama_pemilik_rekening'].forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            console.log('Bank form shown');
+        } else if (selectedMethod === 'e_wallet') {
+            ewalletForm.style.display = 'block';
+
+            // Set required attributes for e-wallet fields
+            ['nama_ewallet', 'nomor_ewallet', 'nama_pemilik_ewallet'].forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.required = true;
+            });
+
+            console.log('E-wallet form shown');
+        }
+    }
+
+    // Form submission handler
+    function initializeFormSubmission() {
+        const refundForm = document.getElementById('refundForm');
+        const submitBtn = document.getElementById('submitRefund');
+
+        if (!refundForm || !submitBtn) {
+            console.error('Form or submit button not found');
+            return;
+        }
+
+        refundForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submission attempted');
+
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+
+            // Show confirmation dialog
+            const confirmed = await showConfirmationDialog();
+            if (!confirmed) {
+                return;
+            }
+
+            // Submit form
+            await submitFormData();
+        });
+    }
+
+    function validateForm() {
+        // Check reason selection
+        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
+        if (!reason) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Silakan pilih alasan refund',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+
+        // Check description
+        const description = document.getElementById('description');
+        if (!description || description.value.trim().length < 20) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Deskripsi masalah harus minimal 20 karakter',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+
+        // Check amount
+        const amount = document.getElementById('amount');
+        if (!amount || !amount.value || parseFloat(amount.value) <= 0) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Jumlah refund harus lebih dari 0',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+
+        // Check refund method
+        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
+        if (!refundMethod) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Silakan pilih metode refund',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+
+        // Validate method-specific fields
+        if (refundMethod.value === 'bank_transfer') {
+            const namaBank = document.getElementById('nama_bank');
+            const nomorRekening = document.getElementById('nomor_rekening');
+            const namaPemilik = document.getElementById('nama_pemilik_rekening');
+
+            if (!namaBank || namaBank.value.trim().length < 3) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nama bank harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return false;
+            }
+
+            if (!nomorRekening || nomorRekening.value.trim().length < 5) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nomor rekening harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return false;
+            }
+
+            if (!namaPemilik || namaPemilik.value.trim().length < 3) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nama pemilik rekening harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return false;
+            }
+        } else if (refundMethod.value === 'e_wallet') {
+            const namaEwallet = document.getElementById('nama_ewallet');
+            const nomorEwallet = document.getElementById('nomor_ewallet');
+            const namaPemilikEwallet = document.getElementById('nama_pemilik_ewallet');
+
+            if (!namaEwallet || !namaEwallet.value) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Silakan pilih jenis e-wallet',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+                return false;
+            }
+
+            if (!nomorEwallet || nomorEwallet.value.trim().length < 5) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Nomor e-wallet harus diisi dengan benar',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+
+        if (!namaPemilikEwallet || namaPemilikEwallet.value.trim().length < 3) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Nama pemilik e-wallet harus diisi dengan benar',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+            return false;
+        }
+    }
+
+    // Check terms agreement
+    const agreeTerms = document.querySelector('input[name="agree_terms"]:checked');
+    if (!agreeTerms) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Anda harus menyetujui syarat dan ketentuan',
+            icon: 'error',
+            confirmButtonColor: '#f97316'
+        });
+        return false;
+    }
+
+    console.log('Form validation passed');
+    return true;
+    }
+
+    async function showConfirmationDialog() {
+        const refundMethod = document.querySelector('input[name="metode_refund"]:checked');
+        const reason = document.querySelector('input[name="jenis_keluhan"]:checked');
+        const description = document.getElementById('description');
+        const amount = document.getElementById('amount');
+
+        let paymentDetails = '';
+        if (refundMethod.value === 'bank_transfer') {
+            const bankName = document.getElementById('nama_bank').value;
+            const accountNumber = document.getElementById('nomor_rekening').value;
+            const accountHolder = document.getElementById('nama_pemilik_rekening').value;
+            paymentDetails = `
+                <div class="text-left bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                        <i class="fas fa-university mr-2"></i>Transfer Bank
+                    </h4>
+                    <div class="space-y-1 text-sm text-blue-700">
+                        <p><span class="font-medium">Bank:</span> ${bankName}</p>
+                        <p><span class="font-medium">Rekening:</span> ${accountNumber}</p>
+                        <p><span class="font-medium">Atas Nama:</span> ${accountHolder}</p>
+                    </div>
+                </div>
+            `;
+        } else if (refundMethod.value === 'e_wallet') {
+            const walletName = document.getElementById('nama_ewallet').value;
+            const walletNumber = document.getElementById('nomor_ewallet').value;
+            const walletHolder = document.getElementById('nama_pemilik_ewallet').value;
+            paymentDetails = `
+                <div class="text-left bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                        <i class="fas fa-mobile-alt mr-2"></i>E-Wallet
+                    </h4>
+                    <div class="space-y-1 text-sm text-green-700">
+                        <p><span class="font-medium">Platform:</span> ${walletName}</p>
+                        <p><span class="font-medium">Nomor:</span> ${walletNumber}</p>
+                        <p><span class="font-medium">Atas Nama:</span> ${walletHolder}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate photo preview HTML for SweetAlert
+        let photoPreviewHtml = '';
+        if (selectedFiles.length > 0) {
+            const photoThumbnails = await Promise.all(
+                selectedFiles.map((file, index) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            resolve(`
+                                <div class="inline-block m-1">
+                                    <img src="${e.target.result}" alt="Foto ${index + 1}" class="w-16 h-16 object-cover rounded-lg border border-gray-300 shadow-sm">
+                                </div>
+                            `);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                })
+            );
+
+            photoPreviewHtml = `
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-orange-800 mb-2 flex items-center">
+                        <i class="fas fa-camera mr-2"></i>Foto Bukti (${selectedFiles.length})
+                    </h4>
+                    <div class="flex flex-wrap justify-start">
+                        ${photoThumbnails.join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        const result = await Swal.fire({
+            title: 'Konfirmasi Pengajuan Refund',
+            html: `
+                <div class="text-left space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-orange-800 mb-3 flex items-center">
+                            <i class="fas fa-file-alt mr-2"></i>Detail Pengajuan
+                        </h4>
+                        <div class="space-y-2 text-sm">                            <div class="flex justify-between py-1 border-b border-orange-100">
                                 <span class="text-gray-600">Pesanan:</span>
                                 <span class="font-medium">#{{ $pesanan->nomor_pesanan }}</span>
                             </div>
-                            <div class="flex justify-between py-1 border-b border-orange-100">
-                                <span class="text-gray-600">Alasan:</span>
-                                <span class="font-medium">${reason.value}</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-orange-100">
-                                <span class="text-gray-600">Jumlah Refund:</span>
-                                <span class="font-medium text-orange-600">Rp ${parseInt(amount.value).toLocaleString('id-ID')}</span>
-                            </div>
-                        </div>
-                    </div>
+                            <div class="flex justify-between py-1 border-b border-orange-100">
+                                <span class="text-gray-600">Alasan:</span>
+                                <span class="font-medium">${reason.value}</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-orange-100">
+                                <span class="text-gray-600">Jumlah Refund:</span>
+                                <span class="font-medium text-orange-600">Rp ${parseInt(amount.value).toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                    ${photoPreviewHtml}
+                    ${photoPreviewHtml}
 
-                    ${paymentDetails}
+                    ${paymentDetails}
 
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
-                            <i class="fas fa-comment-alt mr-2"></i>Deskripsi Masalah
-                        </h4>
-                        <p class="text-sm text-gray-700 italic bg-white p-2 rounded border">"${description.value}"</p>
-                    </div>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-comment-alt mr-2"></i>Deskripsi Masalah
+                        </h4>
+                        <p class="text-sm text-gray-700 italic bg-white p-2 rounded border">"${description.value}"</p>
+                    </div>
 
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3">
-                        <div class="flex">
-                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-0.5 mr-2"></i>
-                            <div>
-                                <p class="text-sm font-medium text-yellow-800">Perhatian</p>
-                                <p class="text-xs text-yellow-700 mt-1">
-                                    Pastikan semua informasi sudah benar. Pengajuan yang sudah dikirim tidak dapat diubah.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#f97316',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: '<i class="fas fa-paper-plane mr-2"></i>Ya, Ajukan Refund',
-            cancelButtonText: '<i class="fas fa-times mr-2"></i>Batalkan',
-            width: '650px',
-            customClass: {
-                popup: 'rounded-xl shadow-2xl',
-                title: 'text-lg font-bold text-gray-800',
-                content: 'text-left'
-            }
-        });
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 mt-0.5 mr-2"></i>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800">Perhatian</p>
+                                <p class="text-xs text-yellow-700 mt-1">
+                                    Pastikan semua informasi sudah benar. Pengajuan yang sudah dikirim tidak dapat diubah.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f97316',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-paper-plane mr-2"></i>Ya, Ajukan Refund',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Batalkan',
+            width: '650px',
+            customClass: {
+                popup: 'rounded-xl shadow-2xl',
+                title: 'text-lg font-bold text-gray-800',
+                content: 'text-left'
+            }
+        });
 
-        return result.isConfirmed;
-    }
+        return result.isConfirmed;
+    }
 
-    async function submitFormData() {
-        // Show loading state on button only
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+    async function submitFormData() {
+        const refundForm = document.getElementById('refundForm');
+        const submitBtn = document.getElementById('submitRefund');
 
-        try {
-            const formData = new FormData(refundForm);
-            const token = document.querySelector('meta[name="csrf-token"]').content;
+        // Show loading state on button only
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
 
-            const response = await fetch(refundForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': token,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
+        try {
+            const formData = new FormData(refundForm);
 
-            let result;
-            try {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    result = await response.json();
-                } else {
-                    const text = await response.text();
-                    try {
-                        result = JSON.parse(text);
-                    } catch (e) {
-                        console.error("Response is not JSON:", text);
-                        result = { message: 'Server returned an invalid response format' };
-                    }
-                }
-            } catch (parseError) {
-                console.error("Error parsing response:", parseError);
-                throw new Error('Terjadi kesalahan saat memproses respons dari server');
-            }
+            // Debug: Log form data contents
+            console.log('Form data being submitted:');
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: File - ${value.name} (${value.size} bytes, ${value.type})`);
+                } else {
+                    console.log(`${key}: ${value}`);
+                }
+            }
 
-            if (response.ok) {
-                await Swal.fire({
-                    title: 'Sukses',
-                    html: `
-                        <div class="text-center">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
-                                <i class="fas fa-check-circle text-green-600 text-4xl"></i>
-                            </div>
-                            <p class="mb-4">Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.</p>
-                            <p class="text-sm text-gray-600">Pengajuan akan diproses dalam 1-3 hari kerja.</p>
-                        </div>
-                    `,
-                    icon: 'success',
-                    confirmButtonColor: '#f97316'
-                });
-                // Use redirect_url from response if available, otherwise fallback to pesanan show
-                if (result && result.redirect_url) {
-                    window.location.href = result.redirect_url;
-                } else {
-                    window.location.href = '{{ route("pesanan.show", $pesanan) }}';
-                }
-            } else {
-                console.error("Response error:", result);
-                if (result && result.errors) {
-                    const errorMessages = Object.values(result.errors).flat().join('<br>');
-                    throw new Error(errorMessages);
-                }
-                throw new Error((result && result.message) ? result.message : 'Terjadi kesalahan saat memproses pengajuan refund');
-            }
-        } catch (error) {
-            console.error("Form submission error:", error);
-            let errorMsg = error.message || 'Terjadi kesalahan saat mengirim pengajuan refund';
+            // Check if files are attached
+            const fileInputs = formData.getAll('foto_bukti[]');
+            console.log(`Files attached: ${fileInputs.length}`);
 
-            Swal.fire({
-                title: 'Error',
-                text: errorMsg,
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
+            const token = document.querySelector('meta[name="csrf-token"]').content;
 
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
-        }
-    }
+            console.log('Submitting form to:', refundForm.action);
 
-    // Initialize amount validation
-    function initializeAmountValidation() {
-        const amountField = document.getElementById('amount');
-        if (amountField) {
-            amountField.addEventListener('input', function() {
-                const amount = parseInt(this.value) || 0;
-                const maxAmount = {{ $pesanan->total_harga }};
+            const response = await fetch(refundForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
 
-                if (amount > maxAmount) {
-                    this.value = maxAmount;
-                    this.classList.add('form-field-invalid');
-                    setTimeout(() => {
-                        this.classList.remove('form-field-invalid');
-                    }, 800);
-                }
-            });
-        }
-    }
-    // Terms Modal Functions
-    function showTermsModal(event) {
-        event.preventDefault();
-        const modal = document.getElementById('termsModal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
 
-    function closeTermsModal() {
-        const modal = document.getElementById('termsModal');
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-    }
+            let result;
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.log('Non-JSON response:', text);
+                    try {
+                        result = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Response is not JSON:", text);
+                        result = {
+                            success: false,
+                            message: 'Server returned an invalid response format',
+                            debug_response: text.substring(0, 500) + '...'
+                        };
+                    }
+                }
+            } catch (parseError) {
+                console.error("Error parsing response:", parseError);
+                throw new Error('Terjadi kesalahan saat memproses respons dari server');
+            }
 
-    // Close modal when clicking outside
-    document.getElementById('termsModal')?.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeTermsModal();
-        }
-    });
+            console.log('Parsed result:', result);
 
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        const modal = document.getElementById('termsModal');
-        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
-            closeTermsModal();
-        }
-    });
+            if (response.ok && result.success !== false) {
+                await Swal.fire({
+                    title: 'Sukses',
+                    html: `
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
+                                <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+                            </div>
+                            <p class="mb-4">Pengajuan refund berhasil dikirim. Tim kami akan segera memprosesnya.</p>
+                            <p class="text-sm text-gray-600">Pengajuan akan diproses dalam 1-3 hari kerja.</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+                // Use redirect_url from response if available, otherwise fallback to pesanan show
+                if (result && result.redirect_url) {
+                    window.location.href = result.redirect_url;
+                } else {
+                    window.location.href = '{{ route("pesanan.show", $pesanan) }}';
+                }
+            } else {
+                console.error("Response error:", result);
+                if (result && result.errors) {
+                    const errorMessages = Object.values(result.errors).flat().join('<br>');
+                    throw new Error(errorMessages);
+                }
+                throw new Error((result && result.message) ? result.message : 'Terjadi kesalahan saat memproses pengajuan refund');
+            }
+        } catch (error) {
+            console.error("Form submission error:", error);
+            let errorMsg = error.message || 'Terjadi kesalahan saat mengirim pengajuan refund';
 
-    // Make functions globally available
-    window.showTermsModal = showTermsModal;
-    window.closeTermsModal = closeTermsModal;
+            Swal.fire({
+                title: 'Error',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Ajukan Refund';
+        }
+    }
+
+    // Initialize amount validation
+    function initializeAmountValidation() {
+        const amountField = document.getElementById('amount');
+        if (amountField) {
+            amountField.addEventListener('input', function() {
+                const amount = parseInt(this.value) || 0;
+                const maxAmount = {{ $pesanan->total_harga }};
+
+                if (amount > maxAmount) {
+                    this.value = maxAmount;
+                    this.classList.add('form-field-invalid');
+                    setTimeout(() => {
+                        this.classList.remove('form-field-invalid');
+                    }, 800);
+                }
+            });
+        }
+    }
+    // Terms Modal Functions
+    function showTermsModal(event) {
+        event.preventDefault();
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('termsModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeTermsModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('termsModal');
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeTermsModal();
+        }
+    });
+
+    // Make functions globally available
+    window.showTermsModal = showTermsModal;
+    window.closeTermsModal = closeTermsModal;
+
 });
 </script>
 @endpush

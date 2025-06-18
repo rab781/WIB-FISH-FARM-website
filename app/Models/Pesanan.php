@@ -103,6 +103,12 @@ class Pesanan extends Model
         return $this->hasMany(Pengembalian::class, 'id_pesanan', 'id_pesanan');
     }
 
+    // Relasi ke ulasan/reviews
+    public function ulasanPesanan()
+    {
+        return $this->hasMany(Ulasan::class, 'id_pesanan', 'id_pesanan');
+    }
+
     public function timeline()
     {
         return $this->hasMany(OrderTimeline::class, 'id_pesanan', 'id_pesanan')
@@ -179,6 +185,12 @@ class Pesanan extends Model
         return $this->no_resi;
     }
 
+    // Accessor for nomor_pesanan to provide consistent order number format
+    public function getNomorPesananAttribute()
+    {
+        return 'ORD' . str_pad($this->id_pesanan, 6, '0', STR_PAD_LEFT);
+    }
+
     public function getIsTrackableAttribute(): bool
     {
         return !empty($this->no_resi) && in_array($this->status_pesanan, ['Dikirim']);
@@ -203,10 +215,10 @@ class Pesanan extends Model
 
     public function getUlasanAttribute()
     {
-        // Get all reviews for products in this order
-        $productIds = $this->detailPesanan->pluck('id_Produk');
-        return \App\Models\Ulasan::where('user_id', $this->user_id)
-            ->whereIn('id_Produk', $productIds)
+        // Get reviews specifically for this order
+        return \App\Models\Ulasan::where('id_pesanan', $this->id_pesanan)
+            ->where('user_id', $this->user_id)
+            ->with(['produk', 'user'])
             ->get();
     }
 
@@ -218,11 +230,12 @@ class Pesanan extends Model
 
     public function getReviewableProductsAttribute()
     {
-        // Get all product IDs from this order that haven't been reviewed yet
+        // Get all product IDs from this order that haven't been reviewed yet for THIS specific order
         $productIds = $this->detailPesanan->pluck('id_Produk')->toArray();
 
-        // Get already reviewed product IDs
+        // Get already reviewed product IDs for THIS specific order
         $reviewedProductIds = \App\Models\Ulasan::where('user_id', $this->user_id)
+            ->where('id_pesanan', $this->id_pesanan) // Only check reviews for this specific order
             ->whereIn('id_Produk', $productIds)
             ->pluck('id_Produk')
             ->toArray();

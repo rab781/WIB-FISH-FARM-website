@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+
 
 class PengembalianController extends Controller
 {
@@ -92,7 +91,7 @@ class PengembalianController extends Controller
                 'deskripsi_masalah' => 'required|string|min:10|max:1000',
                 'jumlah_klaim' => 'required|numeric|min:1000',
                 'metode_refund' => 'required|in:bank_transfer,e_wallet',
-                'foto_bukti.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+                'foto_bukti.*' => 'nullable|file|mimes:jpeg,png,jpg,mp4,mov,avi|max:10240' // 10MB max for videos, images usually smaller
             ];
 
             // Add conditional validation based on refund method
@@ -139,13 +138,40 @@ class PengembalianController extends Controller
                 return redirect()->back()->with('error', 'Pengembalian untuk pesanan ini sudah pernah diajukan.');
             }
 
-            // Handle photo uploads
+            // Handle photo/video uploads
             $fotoPaths = [];
             if ($request->hasFile('foto_bukti')) {
-                foreach ($request->file('foto_bukti') as $foto) {
-                    $filename = 'pengembalian_' . time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                    $path = $foto->storeAs('pengembalian', $filename, 'public');
-                    $fotoPaths[] = $path;
+                foreach ($request->file('foto_bukti') as $file) {
+                    // Validate file
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    $isVideo = in_array($extension, ['mp4', 'mov', 'avi']);
+                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png']);
+
+                    if (!$isVideo && !$isImage) {
+                        throw new \Exception('File format tidak didukung: ' . $extension);
+                    }
+
+                    // Check file size (10MB for video, 2MB for image)
+                    $maxSize = $isVideo ? 10240 : 2048; // KB
+                    if ($file->getSize() > ($maxSize * 1024)) {
+                        $sizeType = $isVideo ? '10MB' : '2MB';
+                        throw new \Exception("Ukuran file terlalu besar. Maksimal {$sizeType}");
+                    }
+
+                    // Generate unique filename
+                    $filename = 'pengembalian_' . time() . '_' . Str::random(10) . '.' . $extension;
+
+                    // Store file directly to public folder instead of using storage facade
+                    $file->move(public_path('uploads/pengembalian'), $filename);
+                    $path = 'uploads/pengembalian/' . $filename;
+
+                    if ($path) {
+                        $fotoPaths[] = $path;
+                        Log::info('File uploaded successfully: ' . $path);
+                    } else {
+                        Log::error('Failed to upload file: ' . $file->getClientOriginalName());
+                        throw new \Exception('Gagal mengupload file: ' . $file->getClientOriginalName());
+                    }
                 }
             }
 

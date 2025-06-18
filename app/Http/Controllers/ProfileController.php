@@ -99,30 +99,22 @@ class ProfileController extends Controller
                 // Validate file is uploaded successfully
                 if ($file->isValid()) {
                     // Delete old photo if exists
-                    if ($user->foto && Storage::exists('public/uploads/users/' . $user->foto)) {
-                        Storage::delete('public/uploads/users/' . $user->foto);
+                    if ($user->foto && file_exists(public_path('uploads/users/' . $user->foto))) {
+                        unlink(public_path('uploads/users/' . $user->foto));
                     }
 
                     // Make sure the directory exists
-                    if (!Storage::exists('public/uploads/users')) {
-                        Storage::makeDirectory('public/uploads/users');
+                    if (!file_exists(public_path('uploads/users'))) {
+                        mkdir(public_path('uploads/users'), 0755, true);
                     }
 
                     // Generate unique filename
                     $fileName = time() . '_' . $user->id . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-                    // Store the file and save the path
-                    $path = $file->storeAs('public/uploads/users', $fileName);
-
-                    if ($path) {
-                        $user->foto = $fileName;
-                        Log::info('Profile photo uploaded successfully: ' . $fileName);
-                    } else {
-                        Log::error('Failed to store profile photo');
-                        return redirect()->back()
-                            ->with('error', 'Gagal mengupload foto profil. Silakan coba lagi.')
-                            ->withInput();
-                    }
+                    // Store the file directly to public folder
+                    $file->move(public_path('uploads/users'), $fileName);
+                    $user->foto = $fileName;
+                    Log::info('Profile photo uploaded successfully: ' . $fileName);
                 } else {
                     Log::error('Invalid file upload: ' . $file->getErrorMessage());
                     return redirect()->back()

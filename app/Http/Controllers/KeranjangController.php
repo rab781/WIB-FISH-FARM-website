@@ -345,7 +345,7 @@ class KeranjangController extends Controller
     public function updateViaPost(Request $request, string $id)
     {
         $request->validate([
-            'jumlah' => 'required|integer|min:1|max:999',
+            'jumlah' => 'required|integer|min:0|max:999', // Allow 0 for deletion
         ]);
 
         $keranjang = Keranjang::findOrFail($id);
@@ -353,6 +353,18 @@ class KeranjangController extends Controller
         // Cek kepemilikan
         if ($keranjang->user_id != Auth::id()) {
             return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk mengubah item ini'], 403);
+        }
+
+        // If quantity is 0, delete the item
+        if ($request->jumlah == 0) {
+            $keranjang->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil dihapus dari keranjang',
+                'deleted' => true,
+                'count' => $this->getCartCount()->original['count']
+            ]);
         }
 
         // Ambil data produk

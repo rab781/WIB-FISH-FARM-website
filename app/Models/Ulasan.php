@@ -19,6 +19,7 @@ class Ulasan extends Model
     protected $fillable = [
         'user_id',
         'id_Produk',
+        'id_pesanan',
         'rating',
         'komentar',
         'balasan_admin',
@@ -51,26 +52,10 @@ class Ulasan extends Model
         return $this->belongsTo(Produk::class, 'id_Produk', 'id_Produk');
     }
 
-    // Relasi ke detail pesanan - untuk mendapatkan info order
-    public function detailPesanan()
-    {
-        return $this->hasMany(DetailPesanan::class, 'id_Produk', 'id_Produk')
-                    ->whereHas('pesanan', function($query) {
-                        $query->where('user_id', $this->user_id);
-                    });
-    }
-
-    // Relasi ke pesanan - melalui detail pesanan
+    // Relasi ke pesanan (direct relationship)
     public function pesanan()
     {
-        return $this->hasOneThrough(
-            Pesanan::class,
-            DetailPesanan::class,
-            'id_Produk', // Foreign key on detail_pesanan table
-            'id_pesanan', // Foreign key on pesanan table
-            'id_Produk', // Local key on ulasan table
-            'id_pesanan' // Local key on detail_pesanan table
-        )->where('pesanan.user_id', $this->user_id);
+        return $this->belongsTo(Pesanan::class, 'id_pesanan', 'id_pesanan');
     }
 
     // Enhanced relationships
@@ -220,16 +205,68 @@ class Ulasan extends Model
                 return false;
             }
 
-            // Check if file exists
-            $filePath = storage_path('app/public/' . $photo);
-            return file_exists($filePath);
+            // Check if file exists in different possible locations
+            $possiblePaths = [];
+
+            if (str_starts_with($photo, 'uploads/')) {
+                // New format: uploads/reviews/filename
+                $possiblePaths[] = public_path($photo);
+            } else if (str_starts_with($photo, 'reviews/')) {
+                // Old format: reviews/filename
+                $possiblePaths[] = public_path('uploads/' . $photo);
+                $possiblePaths[] = storage_path('app/public/' . $photo);
+            } else {
+                // Other formats
+                $possiblePaths[] = storage_path('app/public/' . $photo);
+                $possiblePaths[] = public_path('uploads/' . $photo);
+            }
+
+            // Check if any of the possible paths exist
+            foreach ($possiblePaths as $path) {
+                if (file_exists($path)) {
+                    return true;
+                }
+            }
+
+            return false;
         });
     }
 
     public function getPhotoUrlsAttribute(): array
     {
         return array_map(function($photo) {
-            return asset('storage/' . $photo);
+            // Handle different path formats and check file existence
+            $possibleUrls = [];
+
+            if (str_starts_with($photo, 'uploads/')) {
+                // New format: uploads/reviews/filename
+                $possibleUrls[] = asset($photo);
+            } else if (str_starts_with($photo, 'reviews/')) {
+                // Old format: reviews/filename - convert to new format
+                $possibleUrls[] = asset('uploads/' . $photo);
+                $possibleUrls[] = asset('storage/' . $photo);
+            } else {
+                // Other formats
+                $possibleUrls[] = asset('storage/' . $photo);
+                $possibleUrls[] = asset('uploads/' . $photo);
+            }
+
+            // Return the first URL that corresponds to an existing file
+            foreach ($possibleUrls as $url) {
+                $filePath = public_path(str_replace(url('/'), '', $url));
+                if (file_exists($filePath)) {
+                    return $url;
+                }
+
+                // Also check storage path for legacy files
+                $storagePath = storage_path('app/public/' . $photo);
+                if (file_exists($storagePath)) {
+                    return asset('storage/' . $photo);
+                }
+            }
+
+            // If no file exists, return the first URL (which should be the correct new format)
+            return $possibleUrls[0] ?? asset('uploads/' . $photo);
         }, $this->photos);
     }
 }

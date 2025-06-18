@@ -1007,7 +1007,7 @@
                 </div>
             </div>
 
-            {{-- Review Section --}}
+            {{-- Review Section
             @if($pesanan->status_pesanan == 'Selesai')
                 @php
                     $reviews = $pesanan->getOrderReviews();
@@ -1101,7 +1101,7 @@
                         </div>
                     </div>
                 @endif
-            @endif
+            @endif --}}
         </div>
 
         <div class="lg:col-span-1">

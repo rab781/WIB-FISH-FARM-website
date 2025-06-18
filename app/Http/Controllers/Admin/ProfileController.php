@@ -83,18 +83,20 @@ class ProfileController extends Controller
         // Handle profile photo upload
         if ($request->hasFile('foto')) {
             // Delete old photo if exists
-            if ($user->foto && Storage::exists('public/uploads/users/' . $user->foto)) {
-                Storage::delete('public/uploads/users/' . $user->foto);
+            if ($user->foto && file_exists(public_path('uploads/users/' . $user->foto))) {
+                unlink(public_path('uploads/users/' . $user->foto));
             }
 
             // Make sure the directory exists
-            Storage::makeDirectory('public/uploads/users');
+            if (!file_exists(public_path('uploads/users'))) {
+                mkdir(public_path('uploads/users'), 0755, true);
+            }
 
             $file = $request->file('foto');
             $fileName = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
 
-            // Store the file and save the path
-            $file->storeAs('public/uploads/users', $fileName);
+            // Store the file directly to public folder
+            $file->move(public_path('uploads/users'), $fileName);
             $user->foto = $fileName;
         }
 
