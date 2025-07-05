@@ -266,10 +266,13 @@ php artisan optimize:clear
 ## 📱 Screenshots
 
 <div align="center">
-  <img src="docs/screenshots/homepage.png" alt="Homepage" width="45%">
-  <img src="docs/screenshots/product-catalog.png" alt="Product Catalog" width="45%">
-  <img src="docs/screenshots/admin-dashboard.png" alt="Admin Dashboard" width="45%">
-  <img src="docs/screenshots/order-tracking.png" alt="Order Tracking" width="45%">
+  <img src="docs/screenshots/landingpage" alt="Homepage" width="45%">
+  <img src="docs/screenshots/katalog.png" alt="Product Catalog" width="45%">
+  <img src="docs/screenshots/dashboard-admin.png" alt="Admin Dashboard" width="45%">
+  <img src="docs/screenshots/trackorder-admin.png" alt="Order Tracking" width="45%">
+  <img src="docs/screenshots/Screenshot 2025-07-05 085233.png" alt="Pengembalian Admin" width="45%">
+  <img src="docs/screenshots/pesanan saya.png" al="Pesanan Customer" width="45%">
+
 </div>
 
 ---
