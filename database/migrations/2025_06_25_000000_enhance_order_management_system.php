@@ -99,25 +99,27 @@ return new class extends Migration
         });
 
         // Create refund_requests table for detailed refund tracking
-        Schema::create('refund_requests', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_pesanan');
-            $table->enum('jenis_refund', ['kerusakan', 'keterlambatan', 'tidak_sesuai', 'kematian_ikan', 'lainnya']);
-            $table->text('deskripsi_masalah');
-            $table->json('bukti_pendukung')->nullable()->comment('Array path file bukti');
-            $table->enum('status', ['pending', 'reviewing', 'approved', 'rejected', 'processed'])->default('pending');
-            $table->text('catatan_admin')->nullable();
-            $table->decimal('jumlah_diminta', 10, 2);
-            $table->decimal('jumlah_disetujui', 10, 2)->nullable();
-            $table->string('metode_refund')->nullable()->comment('Bank transfer, etc');
-            $table->text('detail_refund')->nullable()->comment('Detail rekening atau metode refund');
-            $table->timestamp('reviewed_at')->nullable();
-            $table->timestamp('processed_at')->nullable();
-            $table->foreignId('reviewed_by')->nullable()->constrained('users');
-            $table->timestamps();
+        if (!Schema::hasTable('refund_requests')) {
+            Schema::create('refund_requests', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_pesanan');
+                $table->enum('jenis_refund', ['kerusakan', 'keterlambatan', 'tidak_sesuai', 'kematian_ikan', 'lainnya']);
+                $table->text('deskripsi_masalah');
+                $table->json('bukti_pendukung')->nullable()->comment('Array path file bukti');
+                $table->enum('status', ['pending', 'reviewing', 'approved', 'rejected', 'processed'])->default('pending');
+                $table->text('catatan_admin')->nullable();
+                $table->decimal('jumlah_diminta', 10, 2);
+                $table->decimal('jumlah_disetujui', 10, 2)->nullable();
+                $table->string('metode_refund')->nullable()->comment('Bank transfer, etc');
+                $table->text('detail_refund')->nullable()->comment('Detail rekening atau metode refund');
+                $table->timestamp('reviewed_at')->nullable();
+                $table->timestamp('processed_at')->nullable();
+                $table->foreignId('reviewed_by')->nullable()->constrained('users');
+                $table->timestamps();
 
-            $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
-        });
+                $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
+            });
+        }
 
         // Enhance ulasan table for admin replies
         Schema::table('ulasan', function (Blueprint $table) {
@@ -148,30 +150,34 @@ return new class extends Migration
         });
 
         // Create review_interactions table for like/helpful tracking
-        Schema::create('review_interactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('ulasan_id')->constrained('ulasan', 'id_ulasan')->onDelete('cascade');
-            $table->enum('interaction_type', ['helpful', 'not_helpful']);
-            $table->timestamps();
+        if (!Schema::hasTable('review_interactions')) {
+            Schema::create('review_interactions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained('users');
+                $table->foreignId('ulasan_id')->constrained('ulasan', 'id_ulasan')->onDelete('cascade');
+                $table->enum('interaction_type', ['helpful', 'not_helpful']);
+                $table->timestamps();
 
-            $table->unique(['user_id', 'ulasan_id']);
-        });
+                $table->unique(['user_id', 'ulasan_id']);
+            });
+        }
 
         // Create order_timeline table for detailed tracking
-        Schema::create('order_timeline', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_pesanan');
-            $table->string('status');
-            $table->string('title');
-            $table->text('description');
-            $table->json('metadata')->nullable()->comment('Additional data like tracking info');
-            $table->boolean('is_customer_visible')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('users');
-            $table->timestamps();
+        if (!Schema::hasTable('order_timeline')) {
+            Schema::create('order_timeline', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_pesanan');
+                $table->string('status');
+                $table->string('title');
+                $table->text('description');
+                $table->json('metadata')->nullable()->comment('Additional data like tracking info');
+                $table->boolean('is_customer_visible')->default(true);
+                $table->foreignId('created_by')->nullable()->constrained('users');
+                $table->timestamps();
 
-            $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
-        });
+                $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
+            });
+        }
     }
 
     /**
