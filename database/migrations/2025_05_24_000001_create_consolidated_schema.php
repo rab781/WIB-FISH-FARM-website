@@ -111,7 +111,6 @@ return new class extends Migration
             Schema::create('detail_pesanan', function (Blueprint $table) {
                 $table->unsignedBigInteger('id_pesanan');
                 $table->foreignId('id_Produk')->constrained('produk', 'id_Produk');
-                $table->foreignId('ukuran_id')->nullable()->constrained('produk_ukuran')->nullOnDelete();
                 $table->integer('kuantitas');
                 $table->decimal('harga', 10, 2);
                 $table->decimal('subtotal', 10, 2);
@@ -127,7 +126,6 @@ return new class extends Migration
                 $table->id('id_keranjang');
                 $table->foreignId('user_id')->constrained('users');
                 $table->foreignId('id_Produk')->constrained('produk', 'id_Produk');
-                $table->foreignId('ukuran_id')->nullable()->constrained('produk_ukuran')->nullOnDelete();
                 $table->integer('jumlah');
                 $table->decimal('total_harga', 10, 2);
                 $table->timestamps();
