@@ -20,6 +20,9 @@ rm -rf database/schema/*.sql 2>/dev/null || true
 php artisan config:clear
 php artisan migrate --force --isolated
 
+# Seed admin user if not exists (only first deploy)
+php artisan db:seed --class=AdminUserSeeder --force || true
+
 # Create storage link for file uploads
 php artisan storage:link
 
