@@ -13,9 +13,12 @@ if [ -n "$MYSQL_URL" ]; then
     export DB_CONNECTION=mysql
 fi
 
+# Disable schema loading in production
+export DB_LOAD_SCHEMA=false
+
 # Clear config cache and run migrations
 php artisan config:clear
-php artisan migrate --force
+php artisan migrate --force --isolated
 
 # Start the server
 php artisan serve --host=0.0.0.0 --port=$PORT

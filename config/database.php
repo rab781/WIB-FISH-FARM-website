@@ -128,6 +128,7 @@ return [
     'migrations' => [
         'table' => 'migrations',
         'update_date_on_publish' => true,
+        'load_schema' => env('DB_LOAD_SCHEMA', true),
     ],
 
     /*
