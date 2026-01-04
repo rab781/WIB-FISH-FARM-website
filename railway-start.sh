@@ -13,8 +13,8 @@ if [ -n "$MYSQL_URL" ]; then
     export DB_CONNECTION=mysql
 fi
 
-# Disable schema loading in production
-export DB_LOAD_SCHEMA=false
+# Remove schema files to prevent mysql client requirement
+rm -rf database/schema/*.sql 2>/dev/null || true
 
 # Clear config cache and run migrations
 php artisan config:clear
