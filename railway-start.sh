@@ -20,5 +20,13 @@ rm -rf database/schema/*.sql 2>/dev/null || true
 php artisan config:clear
 php artisan migrate --force --isolated
 
+# Create storage link for file uploads
+php artisan storage:link
+
+# Cache config and routes for better performance
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
 # Start the server
 php artisan serve --host=0.0.0.0 --port=$PORT
