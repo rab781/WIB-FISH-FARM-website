@@ -23,7 +23,7 @@ class AdminUserSeeder extends Seeder
                 'is_admin' => true,
                 'email_verified_at' => now(),
             ]);
-            
+
             $this->command->info('Admin user created successfully!');
         } else {
             $this->command->info('Admin user already exists.');
